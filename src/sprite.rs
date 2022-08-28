@@ -71,6 +71,7 @@ impl Sprite {
         )
     }
 
+    #[allow(dead_code)]
     pub fn draw(&self, x: f32, y: f32, frame_number: u32) {
         self.draw_ex(x, y, frame_number, Default::default())
     }

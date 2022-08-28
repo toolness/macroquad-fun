@@ -35,6 +35,7 @@ async fn main() {
     let mut x = screen_width() / 2. - sprites.idle.frame_width() / 2.0;
     let y = screen_height() / 2. - sprites.idle.frame_height() / 2.;
     let mut last_frame_time = get_time();
+    let mut is_facing_left = false;
 
     loop {
         let now = get_time();
@@ -48,27 +49,33 @@ async fn main() {
         if is_key_released(KeyCode::Escape) {
             break;
         }
-        if is_key_down(KeyCode::D) {
-            sprites
-                .run
-                .draw(x, y, absolute_frame_number % sprites.run.num_frames());
-            x += (time_since_last_frame * RUN_SPEED) as f32;
-        } else if is_key_down(KeyCode::A) {
-            sprites.run.draw_ex(
-                x,
-                y,
-                absolute_frame_number % sprites.run.num_frames(),
-                SpriteDrawParams {
-                    flip_x: true,
-                    ..Default::default()
-                },
-            );
-            x -= (time_since_last_frame * RUN_SPEED) as f32;
+
+        let sprite: &Sprite;
+
+        if is_key_down(KeyCode::D) || is_key_down(KeyCode::A) {
+            sprite = &sprites.run;
+            let run_amount = (time_since_last_frame * RUN_SPEED) as f32;
+            if is_key_down(KeyCode::D) {
+                is_facing_left = false;
+                x += run_amount;
+            } else {
+                is_facing_left = true;
+                x -= run_amount;
+            }
         } else {
-            sprites
-                .idle
-                .draw(x, y, absolute_frame_number % sprites.idle.num_frames());
+            sprite = &sprites.idle;
         }
+
+        sprite.draw_ex(
+            x,
+            y,
+            absolute_frame_number % sprite.num_frames(),
+            SpriteDrawParams {
+                flip_x: is_facing_left,
+                ..Default::default()
+            },
+        );
+
         next_frame().await;
     }
 }
