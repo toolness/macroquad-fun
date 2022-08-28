@@ -83,24 +83,31 @@ async fn main() {
 
         let is_pressing_right = is_key_down(KeyCode::D);
         let is_pressing_left = is_key_down(KeyCode::A);
+        let run_velocity = if is_pressing_left {
+            -RUN_SPEED
+        } else if is_pressing_right {
+            RUN_SPEED
+        } else {
+            0.
+        } as f32;
 
-        if is_key_pressed(KeyCode::Space) && !is_in_air {
-            let x_velocity = if is_pressing_left {
-                -RUN_SPEED as f32
-            } else if is_pressing_right {
-                RUN_SPEED as f32
-            } else {
-                0.
-            };
-            velocity = Vec2::new(x_velocity, -JUMP_VELOCITY);
-            is_in_air = true
-        } else if is_in_air {
+        if is_in_air {
             if y >= sprite_ground_y {
                 is_in_air = false;
                 velocity = Vec2::new(0., 0.);
                 y = sprite_ground_y;
             } else {
                 velocity.y += GRAVITY * time_since_last_frame as f32;
+                if run_velocity != 0. {
+                    velocity.x = run_velocity;
+                }
+            }
+        } else {
+            if is_key_pressed(KeyCode::Space) {
+                velocity = Vec2::new(run_velocity, -JUMP_VELOCITY);
+                is_in_air = true
+            } else {
+                x += run_velocity * time_since_last_frame as f32;
             }
         }
 
@@ -118,14 +125,7 @@ async fn main() {
         } else {
             if is_pressing_left || is_pressing_right {
                 sprite = &sprites.run;
-                let run_amount = (time_since_last_frame * RUN_SPEED) as f32;
-                if is_pressing_right {
-                    is_facing_left = false;
-                    x += run_amount;
-                } else {
-                    is_facing_left = true;
-                    x -= run_amount;
-                }
+                is_facing_left = is_pressing_left;
             } else {
                 sprite = &sprites.idle;
             }
