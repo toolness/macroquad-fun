@@ -30,6 +30,10 @@ async fn main() {
     loop {
         let absolute_frame_number = (get_time() * 1000.0 / MS_PER_ANIMATION_FRAME) as u32;
 
+        if is_key_released(KeyCode::Escape) {
+            break;
+        }
+
         clear_background(GRAY);
 
         sprites.idle.draw(
