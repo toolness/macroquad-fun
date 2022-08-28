@@ -7,6 +7,26 @@ pub struct Sprite {
     num_frames: u32,
 }
 
+pub struct SpriteDrawParams {
+    /// Mirror on the X axis
+    pub flip_x: bool,
+
+    /// Mirror on the Y axis
+    pub flip_y: bool,
+
+    pub color: Color,
+}
+
+impl Default for SpriteDrawParams {
+    fn default() -> Self {
+        Self {
+            flip_x: false,
+            flip_y: false,
+            color: WHITE,
+        }
+    }
+}
+
 impl Sprite {
     pub fn new(texture: Texture2D, num_frames: u32, scale: f32) -> Self {
         texture.set_filter(FilterMode::Nearest);
@@ -30,13 +50,15 @@ impl Sprite {
         self.num_frames
     }
 
-    pub fn draw(&self, x: f32, y: f32, color: Color, frame_number: u32) {
+    pub fn draw_ex(&self, x: f32, y: f32, frame_number: u32, params: SpriteDrawParams) {
         draw_texture_ex(
             self.texture,
             x,
             y,
-            color,
+            params.color,
             DrawTextureParams {
+                flip_x: params.flip_x,
+                flip_y: params.flip_y,
                 dest_size: Some(self.frame_size * self.scale),
                 source: Some(Rect {
                     x: self.frame_size.x * frame_number as f32,
@@ -47,5 +69,9 @@ impl Sprite {
                 ..Default::default()
             },
         )
+    }
+
+    pub fn draw(&self, x: f32, y: f32, frame_number: u32) {
+        self.draw_ex(x, y, frame_number, Default::default())
     }
 }

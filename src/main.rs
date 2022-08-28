@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use sprite::Sprite;
+use sprite::{Sprite, SpriteDrawParams};
 
 mod sprite;
 
@@ -42,19 +42,23 @@ async fn main() {
             break;
         }
         if is_key_down(KeyCode::D) {
-            sprites.run.draw(
+            sprites
+                .run
+                .draw(x, y, absolute_frame_number % sprites.run.num_frames());
+        } else if is_key_down(KeyCode::A) {
+            sprites.run.draw_ex(
                 x,
                 y,
-                WHITE,
                 absolute_frame_number % sprites.run.num_frames(),
+                SpriteDrawParams {
+                    flip_x: true,
+                    ..Default::default()
+                },
             );
         } else {
-            sprites.idle.draw(
-                x,
-                y,
-                WHITE,
-                absolute_frame_number % sprites.idle.num_frames(),
-            );
+            sprites
+                .idle
+                .draw(x, y, absolute_frame_number % sprites.idle.num_frames());
         }
         next_frame().await;
     }
