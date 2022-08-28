@@ -67,19 +67,19 @@ async fn main() {
     let mut debug_mode = false;
 
     loop {
+        // Keep track of time.
         let now = get_time();
         let absolute_frame_number = (now * 1000.0 / MS_PER_ANIMATION_FRAME) as u32;
         let time_since_last_frame = now - last_frame_time;
 
         last_frame_time = now;
 
+        // Draw environment.
+
         clear_background(GRAY);
-
-        if is_key_released(KeyCode::Escape) {
-            break;
-        }
-
         draw_rectangle(0., ground_y, screen_width(), GROUND_HEIGHT, DARKGRAY);
+
+        // Process input/physics.
 
         let is_pressing_right = is_key_down(KeyCode::D);
         let is_pressing_left = is_key_down(KeyCode::A);
@@ -114,6 +114,8 @@ async fn main() {
         x += velocity.x * time_since_last_frame as f32;
         y += velocity.y * time_since_last_frame as f32;
 
+        // Draw player.
+
         let sprite: &Sprite;
 
         if is_in_air {
@@ -141,7 +143,11 @@ async fn main() {
             },
         );
 
-        if is_key_pressed(KeyCode::GraveAccent) {
+        // Process miscellaneous system input.
+
+        if is_key_released(KeyCode::Escape) {
+            break;
+        } else if is_key_pressed(KeyCode::GraveAccent) {
             debug_mode = !debug_mode;
         }
         if debug_mode {
@@ -149,6 +155,8 @@ async fn main() {
             let text = format!("fps: {}", get_fps());
             draw_text(&text, 32., 32., 32.0, WHITE);
         }
+
+        // Wait for the next frame.
 
         next_frame().await;
     }
