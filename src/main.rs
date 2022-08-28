@@ -12,6 +12,8 @@ const RUN_SPEED: f64 = 300.0;
 struct GameSprites {
     idle: Sprite,
     run: Sprite,
+    jump: Sprite,
+    fall: Sprite,
 }
 
 #[macroquad::main("Fun")]
@@ -29,6 +31,20 @@ async fn main() {
                 .await
                 .unwrap(),
             8,
+            SCALE,
+        ),
+        jump: Sprite::new(
+            load_texture("media/Huntress/Sprites/Jump.png")
+                .await
+                .unwrap(),
+            2,
+            SCALE,
+        ),
+        fall: Sprite::new(
+            load_texture("media/Huntress/Sprites/Fall.png")
+                .await
+                .unwrap(),
+            2,
             SCALE,
         ),
     };
@@ -62,6 +78,10 @@ async fn main() {
                 is_facing_left = true;
                 x -= run_amount;
             }
+        } else if is_key_down(KeyCode::W) {
+            sprite = &sprites.jump;
+        } else if is_key_down(KeyCode::S) {
+            sprite = &sprites.fall;
         } else {
             sprite = &sprites.idle;
         }
