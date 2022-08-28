@@ -9,6 +9,10 @@ const MS_PER_ANIMATION_FRAME: f64 = 100.0;
 
 const RUN_SPEED: f64 = 300.0;
 
+const IDLE_FRAME_FEET_Y: f32 = 96.0;
+
+const GROUND_HEIGHT: f32 = 8.0 * SCALE;
+
 struct GameSprites {
     idle: Sprite,
     run: Sprite,
@@ -49,7 +53,9 @@ async fn main() {
         ),
     };
     let mut x = screen_width() / 2. - sprites.idle.frame_width() / 2.0;
-    let y = screen_height() / 2. - sprites.idle.frame_height() / 2.;
+    let ground_y = screen_height() - GROUND_HEIGHT;
+    let sprite_ground_y = ground_y - IDLE_FRAME_FEET_Y * SCALE;
+    let y = sprite_ground_y;
     let mut last_frame_time = get_time();
     let mut is_facing_left = false;
     let mut debug_mode = false;
@@ -66,6 +72,8 @@ async fn main() {
         if is_key_released(KeyCode::Escape) {
             break;
         }
+
+        draw_rectangle(0., ground_y, screen_width(), GROUND_HEIGHT, DARKGRAY);
 
         let sprite: &Sprite;
 
