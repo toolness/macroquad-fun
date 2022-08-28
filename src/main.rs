@@ -17,16 +17,13 @@ async fn main() {
     );
     let mut idle_frame_num = 0;
     let mut frame_number = 0;
+    let x = screen_width() / 2. - idle_sprite.frame_width() / 2.0;
+    let y = screen_height() / 2. - idle_sprite.frame_height() / 2.;
 
     loop {
         clear_background(GRAY);
 
-        idle_sprite.draw(
-            screen_width() / 2. - idle_sprite.frame_width() / 2.0,
-            screen_height() / 2. - idle_sprite.frame_height() / 2.,
-            WHITE,
-            idle_frame_num,
-        );
+        idle_sprite.draw(x, y, WHITE, idle_frame_num);
         next_frame().await;
 
         frame_number += 1;
