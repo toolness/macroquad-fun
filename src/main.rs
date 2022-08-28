@@ -98,6 +98,7 @@ async fn main() {
             if y >= sprite_ground_y {
                 is_in_air = false;
                 velocity = Vec2::new(0., 0.);
+                y = sprite_ground_y;
             } else {
                 velocity.y += GRAVITY * time_since_last_frame as f32;
             }
