@@ -3,7 +3,7 @@ use sprite::{Sprite, SpriteDrawParams};
 
 mod sprite;
 
-const SCALE: f32 = 3.;
+const SPRITE_SCALE: f32 = 3.;
 
 const MS_PER_ANIMATION_FRAME: f64 = 100.0;
 
@@ -11,7 +11,7 @@ const RUN_SPEED: f64 = 300.0;
 
 const IDLE_FRAME_FEET_Y: f32 = 96.0;
 
-const GROUND_HEIGHT: f32 = 8.0 * SCALE;
+const GROUND_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
 
 const GRAVITY: f32 = 1500.0;
 
@@ -32,33 +32,33 @@ async fn main() {
                 .await
                 .unwrap(),
             8,
-            SCALE,
+            SPRITE_SCALE,
         ),
         run: Sprite::new(
             load_texture("media/Huntress/Sprites/Run.png")
                 .await
                 .unwrap(),
             8,
-            SCALE,
+            SPRITE_SCALE,
         ),
         jump: Sprite::new(
             load_texture("media/Huntress/Sprites/Jump.png")
                 .await
                 .unwrap(),
             2,
-            SCALE,
+            SPRITE_SCALE,
         ),
         fall: Sprite::new(
             load_texture("media/Huntress/Sprites/Fall.png")
                 .await
                 .unwrap(),
             2,
-            SCALE,
+            SPRITE_SCALE,
         ),
     };
     let mut x = screen_width() / 2. - sprites.idle.frame_width() / 2.0;
     let ground_y = screen_height() - GROUND_HEIGHT;
-    let sprite_ground_y = ground_y - IDLE_FRAME_FEET_Y * SCALE;
+    let sprite_ground_y = ground_y - IDLE_FRAME_FEET_Y * SPRITE_SCALE;
     let mut y = sprite_ground_y;
     let mut is_in_air = false;
     let mut velocity = Vec2::new(0., 0.);
