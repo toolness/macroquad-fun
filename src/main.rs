@@ -145,6 +145,8 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
+            let text = format!("fps: {}", get_fps());
+            draw_text(&text, 32., 32., 32.0, WHITE);
         }
 
         next_frame().await;
