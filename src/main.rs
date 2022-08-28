@@ -52,6 +52,7 @@ async fn main() {
     let y = screen_height() / 2. - sprites.idle.frame_height() / 2.;
     let mut last_frame_time = get_time();
     let mut is_facing_left = false;
+    let mut debug_mode = false;
 
     loop {
         let now = get_time();
@@ -95,6 +96,13 @@ async fn main() {
                 ..Default::default()
             },
         );
+
+        if is_key_pressed(KeyCode::GraveAccent) {
+            debug_mode = !debug_mode;
+        }
+        if debug_mode {
+            sprite.draw_debug_rect(x, y, GREEN);
+        }
 
         next_frame().await;
     }
