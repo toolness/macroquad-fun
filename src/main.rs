@@ -114,15 +114,9 @@ async fn main() {
         } as f32;
 
         if is_in_air {
-            if y >= sprite_ground_y {
-                is_in_air = false;
-                velocity = Vec2::new(0., 0.);
-                y = sprite_ground_y;
-            } else {
-                velocity.y += GRAVITY * time_since_last_frame as f32;
-                if run_velocity != 0. {
-                    velocity.x = run_velocity;
-                }
+            velocity.y += GRAVITY * time_since_last_frame as f32;
+            if run_velocity != 0. {
+                velocity.x = run_velocity;
             }
         } else {
             if is_key_pressed(KeyCode::Space) {
@@ -135,6 +129,20 @@ async fn main() {
 
         x += velocity.x * time_since_last_frame as f32;
         y += velocity.y * time_since_last_frame as f32;
+
+        let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
+        for collider in environment.iter() {
+            if collider.overlaps(&player_bbox) {
+                // TODO: This assumes the player is landing on ground, but
+                // there are lots of other cases we need to consider.
+                if is_in_air {
+                    is_in_air = false;
+                    velocity = Vec2::new(0., 0.);
+                    let y_diff = player_bbox.bottom() - collider.top();
+                    y -= y_diff;
+                }
+            }
+        }
 
         // Draw player.
 
@@ -174,7 +182,6 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
-            let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
             draw_debug_collision_rect(&player_bbox);
             for collider in environment.iter() {
                 draw_debug_collision_rect(&collider);
