@@ -19,6 +19,8 @@ const IDLE_FRAME_RIGHT_X: f32 = 83.0;
 
 const GROUND_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
 
+const WALL_WIDTH: f32 = 8.0 * SPRITE_SCALE;
+
 const GRAVITY: f32 = 1500.0;
 
 const JUMP_VELOCITY: f32 = 600.0;
@@ -62,12 +64,19 @@ async fn main() {
             SPRITE_SCALE,
         ),
     };
-    let environment: Vec<Rect> = vec![Rect::new(
-        0.,
-        screen_height() - GROUND_HEIGHT,
-        screen_width(),
-        GROUND_HEIGHT,
-    )];
+    let environment: Vec<Rect> = vec![
+        // Ground
+        Rect::new(
+            0.,
+            screen_height() - GROUND_HEIGHT,
+            screen_width(),
+            GROUND_HEIGHT,
+        ),
+        // Left wall
+        Rect::new(0., 0., WALL_WIDTH, screen_height()),
+        // Right wall
+        Rect::new(screen_width() - WALL_WIDTH, 0., WALL_WIDTH, screen_height()),
+    ];
     let player_relative_bbox = Rect::new(
         IDLE_FRAME_LEFT_X * SPRITE_SCALE,
         IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
