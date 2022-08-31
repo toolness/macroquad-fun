@@ -9,7 +9,13 @@ const MS_PER_ANIMATION_FRAME: f64 = 100.0;
 
 const RUN_SPEED: f64 = 300.0;
 
+const IDLE_FRAME_HEAD_Y: f32 = 58.0;
+
 const IDLE_FRAME_FEET_Y: f32 = 96.0;
+
+const IDLE_FRAME_LEFT_X: f32 = 64.0;
+
+const IDLE_FRAME_RIGHT_X: f32 = 83.0;
 
 const GROUND_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
 
@@ -65,6 +71,14 @@ async fn main() {
     let mut last_frame_time = get_time();
     let mut is_facing_left = false;
     let mut debug_mode = false;
+    let environment: Vec<Rect> = vec![Rect::new(0., ground_y, screen_width(), GROUND_HEIGHT)];
+    let mut player_relative_bbox = Rect::new(
+        IDLE_FRAME_LEFT_X * SPRITE_SCALE,
+        IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
+        IDLE_FRAME_RIGHT_X - IDLE_FRAME_LEFT_X,
+        IDLE_FRAME_FEET_Y - IDLE_FRAME_HEAD_Y,
+    );
+    player_relative_bbox.scale(SPRITE_SCALE, SPRITE_SCALE);
 
     loop {
         // Keep track of time.
@@ -152,6 +166,11 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
+            let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
+            draw_debug_collision_rect(&player_bbox);
+            for collider in environment.iter() {
+                draw_debug_collision_rect(&collider);
+            }
             let text = format!("fps: {}", get_fps());
             draw_text(&text, 32., 32., 32.0, WHITE);
         }
@@ -160,4 +179,15 @@ async fn main() {
 
         next_frame().await;
     }
+}
+
+fn draw_debug_collision_rect(collider: &Rect) {
+    draw_rectangle_lines(
+        collider.left(),
+        collider.top(),
+        collider.size().x,
+        collider.size().y,
+        2.,
+        PURPLE,
+    );
 }
