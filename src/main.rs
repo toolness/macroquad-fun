@@ -123,6 +123,7 @@ async fn main() {
         } else {
             0.
         } as f32;
+        let mut x_impulse: f32 = 0.;
 
         if is_in_air {
             velocity.y += GRAVITY * time_since_last_frame as f32;
@@ -134,12 +135,13 @@ async fn main() {
                 velocity = Vec2::new(run_velocity, -JUMP_VELOCITY);
                 is_in_air = true
             } else {
-                x += run_velocity * time_since_last_frame as f32;
+                x_impulse = run_velocity;
             }
         }
 
-        x += velocity.x * time_since_last_frame as f32;
-        y += velocity.y * time_since_last_frame as f32;
+        let velocity_this_frame = Vec2::new(velocity.x + x_impulse, velocity.y);
+        x += velocity_this_frame.x * time_since_last_frame as f32;
+        y += velocity_this_frame.y * time_since_last_frame as f32;
 
         let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
         for collider in environment.iter() {
