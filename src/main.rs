@@ -62,22 +62,25 @@ async fn main() {
             SPRITE_SCALE,
         ),
     };
-    let mut x = screen_width() / 2. - sprites.idle.frame_width() / 2.0;
-    let ground_y = screen_height() - GROUND_HEIGHT;
-    let sprite_ground_y = ground_y - IDLE_FRAME_FEET_Y * SPRITE_SCALE;
-    let mut y = sprite_ground_y;
-    let mut is_in_air = false;
-    let mut velocity = Vec2::new(0., 0.);
-    let mut last_frame_time = get_time();
-    let mut is_facing_left = false;
-    let mut debug_mode = false;
-    let environment: Vec<Rect> = vec![Rect::new(0., ground_y, screen_width(), GROUND_HEIGHT)];
+    let environment: Vec<Rect> = vec![Rect::new(
+        0.,
+        screen_height() - GROUND_HEIGHT,
+        screen_width(),
+        GROUND_HEIGHT,
+    )];
     let player_relative_bbox = Rect::new(
         IDLE_FRAME_LEFT_X * SPRITE_SCALE,
         IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
         (IDLE_FRAME_RIGHT_X - IDLE_FRAME_LEFT_X) * SPRITE_SCALE,
         (IDLE_FRAME_FEET_Y - IDLE_FRAME_HEAD_Y) * SPRITE_SCALE,
     );
+    let mut x = screen_width() / 2. - sprites.idle.frame_width() / 2.0;
+    let mut y = environment[0].top() - player_relative_bbox.bottom();
+    let mut is_in_air = false;
+    let mut velocity = Vec2::new(0., 0.);
+    let mut last_frame_time = get_time();
+    let mut is_facing_left = false;
+    let mut debug_mode = false;
 
     loop {
         // Keep track of time.
