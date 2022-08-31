@@ -91,7 +91,15 @@ async fn main() {
         // Draw environment.
 
         clear_background(GRAY);
-        draw_rectangle(0., ground_y, screen_width(), GROUND_HEIGHT, DARKGRAY);
+        for collider in environment.iter() {
+            draw_rectangle(
+                collider.left(),
+                collider.top(),
+                collider.size().x,
+                collider.size().y,
+                DARKGRAY,
+            );
+        }
 
         // Process input/physics.
 
