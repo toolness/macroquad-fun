@@ -145,14 +145,21 @@ async fn main() {
 
         let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
         for collider in environment.iter() {
-            if collider.overlaps(&player_bbox) {
-                // TODO: This assumes the player is landing on ground, but
-                // there are lots of other cases we need to consider.
-                if is_in_air {
+            if let Some(intersection) = collider.intersect(player_bbox) {
+                if intersection.top() <= collider.top() {
+                    // The top of the collider is being intersected with.
                     is_in_air = false;
                     velocity = Vec2::new(0., 0.);
                     let y_diff = player_bbox.bottom() - collider.top();
                     y -= y_diff;
+                } else if intersection.left() <= collider.left() {
+                    // The left side of the collider is being intersected with.
+                    let x_diff = player_bbox.right() - collider.left();
+                    x -= x_diff;
+                } else if intersection.right() >= collider.right() {
+                    // The right side of the collider is being intersected with.
+                    let x_diff = collider.right() - player_bbox.left();
+                    x += x_diff;
                 }
             }
         }
