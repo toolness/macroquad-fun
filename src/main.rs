@@ -72,13 +72,12 @@ async fn main() {
     let mut is_facing_left = false;
     let mut debug_mode = false;
     let environment: Vec<Rect> = vec![Rect::new(0., ground_y, screen_width(), GROUND_HEIGHT)];
-    let mut player_relative_bbox = Rect::new(
+    let player_relative_bbox = Rect::new(
         IDLE_FRAME_LEFT_X * SPRITE_SCALE,
         IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
-        IDLE_FRAME_RIGHT_X - IDLE_FRAME_LEFT_X,
-        IDLE_FRAME_FEET_Y - IDLE_FRAME_HEAD_Y,
+        (IDLE_FRAME_RIGHT_X - IDLE_FRAME_LEFT_X) * SPRITE_SCALE,
+        (IDLE_FRAME_FEET_Y - IDLE_FRAME_HEAD_Y) * SPRITE_SCALE,
     );
-    player_relative_bbox.scale(SPRITE_SCALE, SPRITE_SCALE);
 
     loop {
         // Keep track of time.
