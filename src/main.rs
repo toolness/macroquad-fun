@@ -19,11 +19,17 @@ const IDLE_FRAME_RIGHT_X: f32 = 83.0;
 
 const GROUND_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
 
+const PLATFORM_WIDTH: f32 = 64.0 * SPRITE_SCALE;
+
+const PLATFORM_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
+
+const PLATFORM_DISTANCE_FROM_GROUND: f32 = 64.0 * SPRITE_SCALE;
+
 const WALL_WIDTH: f32 = 8.0 * SPRITE_SCALE;
 
 const GRAVITY: f32 = 1500.0;
 
-const JUMP_VELOCITY: f32 = 600.0;
+const JUMP_VELOCITY: f32 = 900.0;
 
 struct GameSprites {
     idle: Sprite,
@@ -76,6 +82,13 @@ async fn main() {
         Rect::new(0., 0., WALL_WIDTH, screen_height()),
         // Right wall
         Rect::new(screen_width() - WALL_WIDTH, 0., WALL_WIDTH, screen_height()),
+        // Platform
+        Rect::new(
+            0.,
+            screen_height() - GROUND_HEIGHT - PLATFORM_DISTANCE_FROM_GROUND,
+            PLATFORM_WIDTH,
+            PLATFORM_HEIGHT,
+        ),
     ];
     let player_relative_bbox = Rect::new(
         IDLE_FRAME_LEFT_X * SPRITE_SCALE,
@@ -152,6 +165,11 @@ async fn main() {
                     velocity = Vec2::new(0., 0.);
                     let y_diff = player_bbox.bottom() - collider.top();
                     y -= y_diff;
+                } else if intersection.bottom() >= collider.bottom() {
+                    // The bottom side of the collider is being intersected with.
+                    velocity.y = 0.;
+                    let y_diff = collider.bottom() - player_bbox.top();
+                    y += y_diff;
                 } else if intersection.left() <= collider.left() {
                     // The left side of the collider is being intersected with.
                     let x_diff = player_bbox.right() - collider.left();
