@@ -152,6 +152,8 @@ async fn main() {
             }
         }
 
+        let player_prev_bbox = player_relative_bbox.offset(Vec2::new(x, y));
+
         let velocity_this_frame = Vec2::new(velocity.x + x_impulse, velocity.y);
         x += velocity_this_frame.x * time_since_last_frame as f32;
         y += velocity_this_frame.y * time_since_last_frame as f32;
@@ -160,14 +162,18 @@ async fn main() {
         let mut is_on_surface_this_frame = false;
         for collider in environment.iter() {
             if let Some(intersection) = collider.intersect(player_bbox) {
-                if intersection.top() <= collider.top() {
+                if intersection.top() <= collider.top()
+                    && player_prev_bbox.bottom() <= collider.top()
+                {
                     // The top of the collider is being intersected with.
                     is_in_air = false;
                     velocity = Vec2::new(0., 0.);
                     let y_diff = player_bbox.bottom() - collider.top();
                     y -= y_diff;
                     is_on_surface_this_frame = true;
-                } else if intersection.bottom() >= collider.bottom() {
+                } else if intersection.bottom() >= collider.bottom()
+                    && player_prev_bbox.top() >= collider.bottom()
+                {
                     // The bottom side of the collider is being intersected with.
                     velocity.y = 0.;
                     let y_diff = collider.bottom() - player_bbox.top();
