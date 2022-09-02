@@ -1,13 +1,8 @@
 extern crate serde;
-#[macro_use]
-extern crate serde_derive;
 extern crate serde_json;
 
 use macroquad::prelude::*;
 use sprite::{Sprite, SpriteDrawParams};
-
-// https://github.com/estivate/ldtk_rust#how-to-not-use-this-library
-mod ldtk;
 
 mod sprite;
 
@@ -49,9 +44,9 @@ struct GameSprites {
 #[macroquad::main("Fun")]
 async fn main() {
     let level_json = std::fs::read_to_string("media/world.ldtk").unwrap();
-    let level: ldtk::Coordinate = serde_json::from_str(level_json.as_str()).unwrap();
+    let level: serde_json::Value = serde_json::from_str(level_json.as_str()).unwrap();
 
-    println!("Loaded level with JSON version {}.", level.json_version);
+    println!("Loaded level with JSON version {}.", level["jsonVersion"]);
 
     let sprites = GameSprites {
         idle: Sprite::new(
