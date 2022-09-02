@@ -6,7 +6,9 @@ extern crate serde_json;
 use macroquad::prelude::*;
 use sprite::{Sprite, SpriteDrawParams};
 
+// https://github.com/estivate/ldtk_rust#how-to-not-use-this-library
 mod ldtk;
+
 mod sprite;
 
 const SPRITE_SCALE: f32 = 3.;
