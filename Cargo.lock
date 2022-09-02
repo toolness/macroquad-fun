@@ -198,7 +198,6 @@ name = "macroquad-fun"
 version = "0.1.0"
 dependencies = [
  "macroquad",
- "serde",
  "serde_json",
 ]
 
