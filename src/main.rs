@@ -206,10 +206,12 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
-            draw_rect_lines(&player_relative_bbox.offset(Vec2::new(x, y)), 2., PURPLE);
+            let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
+            draw_rect_lines(&player_bbox, 2., PURPLE);
             for collider in environment.iter() {
                 collider.draw_debug_rect(PURPLE);
             }
+            draw_rect_lines(&level.get_bounding_cell_rect(&player_bbox), 1., WHITE);
             let text = format!("fps: {}", get_fps());
             draw_text(&text, 32., 32., 32.0, WHITE);
         }

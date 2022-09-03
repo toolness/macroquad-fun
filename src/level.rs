@@ -99,6 +99,16 @@ impl Level {
         self.colliders[(y * self.height + x) as usize] == 1
     }
 
+    pub fn get_bounding_cell_rect(&self, rect: &Rect) -> Rect {
+        let grid_scale = self.grid_size as f32 * self.scale;
+        let left = (rect.left() / grid_scale).floor() * grid_scale;
+        let top = (rect.top() / grid_scale).floor() * grid_scale;
+        let right = (rect.right() / grid_scale).ceil() * grid_scale;
+        let bottom = (rect.bottom() / grid_scale).ceil() * grid_scale;
+
+        Rect::new(left, top, right - left, bottom - top)
+    }
+
     pub fn get_all_colliders(&self) -> Vec<Collider> {
         let mut result = Vec::new();
 
