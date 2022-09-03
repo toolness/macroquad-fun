@@ -3,6 +3,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use aseprite::load_aseprite_slices;
 use drawing::draw_rect_lines;
 use level::Level;
 use macroquad::prelude::*;
@@ -10,6 +11,7 @@ use sprite::{Sprite, SpriteDrawParams};
 
 use crate::collision::{process_collision, Actor};
 
+mod aseprite;
 mod collision;
 mod drawing;
 mod ldtk;
@@ -21,14 +23,6 @@ const SPRITE_SCALE: f32 = 3.;
 const MS_PER_ANIMATION_FRAME: f64 = 100.0;
 
 const RUN_SPEED: f64 = 300.0;
-
-const IDLE_FRAME_HEAD_Y: f32 = 58.0;
-
-const IDLE_FRAME_FEET_Y: f32 = 96.0;
-
-const IDLE_FRAME_LEFT_X: f32 = 64.0;
-
-const IDLE_FRAME_RIGHT_X: f32 = 83.0;
 
 const GRAVITY: f32 = 1500.0;
 
@@ -43,6 +37,10 @@ struct GameSprites {
 
 #[macroquad::main("Fun")]
 async fn main() {
+    let idle_slices = load_aseprite_slices("media/Huntress/Sprites/Idle.json", SPRITE_SCALE)
+        .await
+        .unwrap();
+    let player_relative_bbox = idle_slices.get("idle_bounding_box").unwrap();
     let level = Level::load("media/world.ldtk", SPRITE_SCALE).await.unwrap();
 
     request_new_screen_size(level.width_in_pixels(), level.height_in_pixels());
@@ -78,12 +76,6 @@ async fn main() {
             SPRITE_SCALE,
         ),
     };
-    let player_relative_bbox = Rect::new(
-        IDLE_FRAME_LEFT_X * SPRITE_SCALE,
-        IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
-        (IDLE_FRAME_RIGHT_X - IDLE_FRAME_LEFT_X) * SPRITE_SCALE,
-        (IDLE_FRAME_FEET_Y - IDLE_FRAME_HEAD_Y) * SPRITE_SCALE,
-    );
     let player_start_bottom_left = level.player_start_bottom_left_in_pixels();
     let mut x = player_start_bottom_left.x - player_relative_bbox.x;
     let mut y = player_start_bottom_left.y - player_relative_bbox.bottom();
