@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Result};
+use macroquad::prelude::*;
 use std::path::Path;
 
 use crate::ldtk;
@@ -6,11 +7,11 @@ use crate::ldtk;
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
 
 pub struct Level {
-    pub width: i64,
-    pub height: i64,
-    pub grid_size: i64,
-    pub colliders: Vec<i64>,
-    pub player_start: (i64, i64),
+    width: i64,
+    height: i64,
+    grid_size: i64,
+    colliders: Vec<i64>,
+    player_start: (i64, i64),
     scale: f32,
 }
 
@@ -63,5 +64,24 @@ impl Level {
 
     pub fn height_in_pixels(&self) -> f32 {
         (self.height * self.grid_size) as f32 * self.scale
+    }
+
+    pub fn draw(&self) {
+        let mut i = 0;
+        let scaled_size = self.grid_size as f32 * self.scale;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if self.colliders[i] == 1 {
+                    draw_rectangle(
+                        (x * self.grid_size) as f32 * self.scale,
+                        (y * self.grid_size) as f32 * self.scale,
+                        scaled_size,
+                        scaled_size,
+                        BLACK,
+                    )
+                }
+                i += 1;
+            }
+        }
     }
 }

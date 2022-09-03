@@ -52,7 +52,6 @@ struct GameSprites {
 #[macroquad::main("Fun")]
 async fn main() {
     let level = Level::load("media/world.ldtk", SPRITE_SCALE).unwrap();
-    println!("Loaded level with player start {:?}.", level.player_start);
 
     request_new_screen_size(level.width_in_pixels(), level.height_in_pixels());
     next_frame().await;
@@ -132,6 +131,7 @@ async fn main() {
         // Draw environment.
 
         clear_background(GRAY);
+        level.draw();
         for collider in environment.iter() {
             draw_rectangle(
                 collider.left(),
