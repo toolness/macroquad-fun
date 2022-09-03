@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use macroquad::prelude::*;
 use std::path::Path;
 
-use crate::ldtk;
+use crate::{collision::Collider, ldtk};
 
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
 
@@ -92,7 +92,14 @@ impl Level {
         }
     }
 
-    pub fn get_all_rects(&self) -> Vec<Rect> {
+    fn is_occupied_at(&self, x: i64, y: i64) -> bool {
+        if x < 0 || x >= self.width || y < 0 || y >= self.height {
+            return false;
+        }
+        self.colliders[(y * self.height + x) as usize] == 1
+    }
+
+    pub fn get_all_colliders(&self) -> Vec<Collider> {
         let mut result = Vec::new();
 
         let mut i = 0;
@@ -100,12 +107,18 @@ impl Level {
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.colliders[i] == 1 {
-                    result.push(Rect::new(
-                        (x * self.grid_size) as f32 * self.scale,
-                        (y * self.grid_size) as f32 * self.scale,
-                        scaled_size,
-                        scaled_size,
-                    ));
+                    result.push(Collider {
+                        enable_top: !self.is_occupied_at(x, y - 1),
+                        enable_bottom: !self.is_occupied_at(x, y + 1),
+                        enable_left: !self.is_occupied_at(x - 1, y),
+                        enable_right: !self.is_occupied_at(x + 1, y),
+                        rect: Rect::new(
+                            (x * self.grid_size) as f32 * self.scale,
+                            (y * self.grid_size) as f32 * self.scale,
+                            scaled_size,
+                            scaled_size,
+                        ),
+                    });
                 }
                 i += 1;
             }
