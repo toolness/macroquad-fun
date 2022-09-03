@@ -3,6 +3,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use drawing::draw_rect_lines;
 use level::Level;
 use macroquad::prelude::*;
 use sprite::{Sprite, SpriteDrawParams};
@@ -10,6 +11,7 @@ use sprite::{Sprite, SpriteDrawParams};
 use crate::collision::{process_collision, Actor};
 
 mod collision;
+mod drawing;
 mod ldtk;
 mod level;
 mod sprite;
@@ -203,9 +205,9 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
-            draw_debug_collision_rect(&player_relative_bbox.offset(Vec2::new(x, y)));
+            draw_rect_lines(&player_relative_bbox.offset(Vec2::new(x, y)), 2., PURPLE);
             for collider in environment.iter() {
-                draw_debug_collision_rect(&collider);
+                draw_rect_lines(&collider, 2., PURPLE);
             }
             let text = format!("fps: {}", get_fps());
             draw_text(&text, 32., 32., 32.0, WHITE);
@@ -215,15 +217,4 @@ async fn main() {
 
         next_frame().await;
     }
-}
-
-fn draw_debug_collision_rect(collider: &Rect) {
-    draw_rectangle_lines(
-        collider.left(),
-        collider.top(),
-        collider.size().x,
-        collider.size().y,
-        2.,
-        PURPLE,
-    );
 }
