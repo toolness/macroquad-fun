@@ -66,6 +66,13 @@ impl Level {
         (self.height * self.grid_size) as f32 * self.scale
     }
 
+    pub fn player_start_bottom_left_in_pixels(&self) -> Vec2 {
+        Vec2::new(
+            self.player_start.0 as f32 * self.scale,
+            self.player_start.1 as f32 * self.scale,
+        )
+    }
+
     pub fn draw(&self) {
         let mut i = 0;
         let scaled_size = self.grid_size as f32 * self.scale;

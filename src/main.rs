@@ -112,8 +112,9 @@ async fn main() {
         (IDLE_FRAME_RIGHT_X - IDLE_FRAME_LEFT_X) * SPRITE_SCALE,
         (IDLE_FRAME_FEET_Y - IDLE_FRAME_HEAD_Y) * SPRITE_SCALE,
     );
-    let mut x = screen_width() / 2. - sprites.idle.frame_width() / 2.0;
-    let mut y = environment[0].top() - player_relative_bbox.bottom();
+    let player_start_bottom_left = level.player_start_bottom_left_in_pixels();
+    let mut x = player_start_bottom_left.x - player_relative_bbox.x;
+    let mut y = player_start_bottom_left.y - player_relative_bbox.bottom();
     let mut is_in_air = false;
     let mut velocity = Vec2::new(0., 0.);
     let mut last_frame_time = get_time();
