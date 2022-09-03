@@ -3,10 +3,12 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use level::Level;
 use macroquad::prelude::*;
 use sprite::{Sprite, SpriteDrawParams};
 
 mod ldtk;
+mod level;
 mod sprite;
 
 const SPRITE_SCALE: f32 = 3.;
@@ -46,10 +48,8 @@ struct GameSprites {
 
 #[macroquad::main("Fun")]
 async fn main() {
-    let level_json = std::fs::read_to_string("media/world.ldtk").unwrap();
-    let level: ldtk::Coordinate = serde_json::from_str(level_json.as_str()).unwrap();
-
-    println!("Loaded level with JSON version {}.", level.json_version);
+    let level = Level::load("media/world.ldtk").unwrap();
+    println!("Loaded level with player start {:?}.", level.player_start);
 
     let sprites = GameSprites {
         idle: Sprite::new(

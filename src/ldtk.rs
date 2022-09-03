@@ -23,6 +23,10 @@ pub struct Level {
 
 #[derive(Deserialize)]
 pub struct LayerInstance {
+    /// Layer definition identifier
+    #[serde(rename = "__identifier")]
+    pub identifier: String,
+
     /// Grid-based height
     #[serde(rename = "__cHei")]
     pub c_hei: i64,
