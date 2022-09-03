@@ -4,6 +4,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use aseprite::load_aseprite_slices;
+use config::load_config;
 use drawing::draw_rect_lines;
 use level::Level;
 use macroquad::prelude::*;
@@ -13,20 +14,11 @@ use crate::collision::{process_collision, Actor};
 
 mod aseprite;
 mod collision;
+mod config;
 mod drawing;
 mod ldtk;
 mod level;
 mod sprite;
-
-const SPRITE_SCALE: f32 = 3.;
-
-const MS_PER_ANIMATION_FRAME: f64 = 100.0;
-
-const RUN_SPEED: f64 = 300.0;
-
-const GRAVITY: f32 = 1500.0;
-
-const JUMP_VELOCITY: f32 = 900.0;
 
 struct GameSprites {
     idle: Sprite,
@@ -37,11 +29,13 @@ struct GameSprites {
 
 #[macroquad::main("Fun")]
 async fn main() {
-    let idle_slices = load_aseprite_slices("media/Huntress/Sprites/Idle.json", SPRITE_SCALE)
+    let config = load_config("media/config.json").await.unwrap();
+    let sprite_scale = config.sprite_scale;
+    let idle_slices = load_aseprite_slices("media/Huntress/Sprites/Idle.json", sprite_scale)
         .await
         .unwrap();
     let player_relative_bbox = idle_slices.get("idle_bounding_box").unwrap();
-    let level = Level::load("media/world.ldtk", SPRITE_SCALE).await.unwrap();
+    let level = Level::load("media/world.ldtk", sprite_scale).await.unwrap();
 
     request_new_screen_size(level.width_in_pixels(), level.height_in_pixels());
     next_frame().await;
@@ -52,28 +46,28 @@ async fn main() {
                 .await
                 .unwrap(),
             8,
-            SPRITE_SCALE,
+            sprite_scale,
         ),
         run: Sprite::new(
             load_texture("media/Huntress/Sprites/Run.png")
                 .await
                 .unwrap(),
             8,
-            SPRITE_SCALE,
+            sprite_scale,
         ),
         jump: Sprite::new(
             load_texture("media/Huntress/Sprites/Jump.png")
                 .await
                 .unwrap(),
             2,
-            SPRITE_SCALE,
+            sprite_scale,
         ),
         fall: Sprite::new(
             load_texture("media/Huntress/Sprites/Fall.png")
                 .await
                 .unwrap(),
             2,
-            SPRITE_SCALE,
+            sprite_scale,
         ),
     };
     let player_start_bottom_left = level.player_start_bottom_left_in_pixels();
@@ -88,7 +82,7 @@ async fn main() {
     loop {
         // Keep track of time.
         let now = get_time();
-        let absolute_frame_number = (now * 1000.0 / MS_PER_ANIMATION_FRAME) as u32;
+        let absolute_frame_number = (now * 1000.0 / config.ms_per_animation_frame) as u32;
         let time_since_last_frame = now - last_frame_time;
 
         last_frame_time = now;
@@ -103,22 +97,22 @@ async fn main() {
         let is_pressing_right = is_key_down(KeyCode::D);
         let is_pressing_left = is_key_down(KeyCode::A);
         let run_velocity = if is_pressing_left {
-            -RUN_SPEED
+            -config.run_speed
         } else if is_pressing_right {
-            RUN_SPEED
+            config.run_speed
         } else {
             0.
         } as f32;
         let mut x_impulse: f32 = 0.;
 
         if is_in_air {
-            velocity.y += GRAVITY * time_since_last_frame as f32;
+            velocity.y += config.gravity * time_since_last_frame as f32;
             if run_velocity != 0. {
                 velocity.x = run_velocity;
             }
         } else {
             if is_key_pressed(KeyCode::Space) {
-                velocity = Vec2::new(run_velocity, -JUMP_VELOCITY);
+                velocity = Vec2::new(run_velocity, -config.jump_velocity);
                 is_in_air = true
             } else {
                 x_impulse = run_velocity;
