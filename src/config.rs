@@ -13,6 +13,9 @@ pub struct Config {
 }
 
 pub async fn load_config(path: &str) -> Result<Config> {
-    let config: Config = serde_json::from_str(&load_string(path).await?)?;
+    let mut config: Config = serde_json::from_str(&load_string(path).await?)?;
+    config.run_speed *= config.sprite_scale as f64;
+    config.gravity *= config.sprite_scale;
+    config.jump_velocity *= config.sprite_scale;
     Ok(config)
 }
