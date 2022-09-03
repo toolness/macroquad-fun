@@ -167,10 +167,8 @@ async fn main() {
         }
 
         let player_prev_bbox = player_relative_bbox.offset(Vec2::new(x, y));
-
-        let velocity_this_frame = Vec2::new(velocity.x + x_impulse, velocity.y);
-        x += velocity_this_frame.x * time_since_last_frame as f32;
-        y += velocity_this_frame.y * time_since_last_frame as f32;
+        x += (velocity.x + x_impulse) * time_since_last_frame as f32;
+        y += velocity.y * time_since_last_frame as f32;
 
         let mut is_on_any_surface_this_frame = false;
 
@@ -212,9 +210,9 @@ async fn main() {
                 sprite = &sprites.jump;
             }
         } else {
-            if is_pressing_left || is_pressing_right {
+            if x_impulse != 0. {
                 sprite = &sprites.run;
-                is_facing_left = is_pressing_left;
+                is_facing_left = x_impulse < 0.;
             } else {
                 sprite = &sprites.idle;
             }
