@@ -1,9 +1,5 @@
 use macroquad::prelude::*;
 
-pub trait Collider {
-    fn rect(&self) -> Rect;
-}
-
 pub struct Actor {
     pub prev_bbox: Rect,
     pub bbox: Rect,
