@@ -37,6 +37,30 @@ pub struct LayerInstance {
     /// start at 1.<br/>  The array size is `__cWid` x `__cHei` cells.
     #[serde(rename = "intGridCsv")]
     pub int_grid_csv: Vec<i64>,
+
+    #[serde(rename = "entityInstances")]
+    pub entity_instances: Vec<EntityInstance>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct EntityInstance {
+    /// Grid-based coordinates (`[x,y]` format)
+    #[serde(rename = "__grid")]
+    pub grid: Vec<i64>,
+    /// Entity definition identifier
+    #[serde(rename = "__identifier")]
+    pub identifier: String,
+    /// Entity height in pixels. For non-resizable entities, it will be the same as Entity
+    /// definition.
+    pub height: i64,
+    /// Unique instance identifier
+    pub iid: String,
+    /// Pixel coordinates (`[x,y]` format) in current level coordinate space. Don't forget
+    /// optional layer offsets, if they exist!
+    pub px: Vec<i64>,
+    /// Entity width in pixels. For non-resizable entities, it will be the same as Entity
+    /// definition.
+    pub width: i64,
 }
 
 // The following was generated via https://quicktype.io/ but I'm not using it
