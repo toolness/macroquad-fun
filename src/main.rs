@@ -28,16 +28,6 @@ const IDLE_FRAME_LEFT_X: f32 = 64.0;
 
 const IDLE_FRAME_RIGHT_X: f32 = 83.0;
 
-const GROUND_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
-
-const PLATFORM_WIDTH: f32 = 64.0 * SPRITE_SCALE;
-
-const PLATFORM_HEIGHT: f32 = 8.0 * SPRITE_SCALE;
-
-const PLATFORM_DISTANCE_FROM_GROUND: f32 = 64.0 * SPRITE_SCALE;
-
-const WALL_WIDTH: f32 = 8.0 * SPRITE_SCALE;
-
 const GRAVITY: f32 = 1500.0;
 
 const JUMP_VELOCITY: f32 = 900.0;
@@ -86,26 +76,7 @@ async fn main() {
             SPRITE_SCALE,
         ),
     };
-    let environment: Vec<Rect> = vec![
-        // Ground
-        Rect::new(
-            0.,
-            screen_height() - GROUND_HEIGHT,
-            screen_width(),
-            GROUND_HEIGHT,
-        ),
-        // Left wall
-        Rect::new(0., 0., WALL_WIDTH, screen_height()),
-        // Right wall
-        Rect::new(screen_width() - WALL_WIDTH, 0., WALL_WIDTH, screen_height()),
-        // Platform
-        Rect::new(
-            0.,
-            screen_height() - GROUND_HEIGHT - PLATFORM_DISTANCE_FROM_GROUND,
-            PLATFORM_WIDTH,
-            PLATFORM_HEIGHT,
-        ),
-    ];
+    let environment: Vec<Rect> = level.get_all_rects();
     let player_relative_bbox = Rect::new(
         IDLE_FRAME_LEFT_X * SPRITE_SCALE,
         IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
@@ -133,15 +104,6 @@ async fn main() {
 
         clear_background(GRAY);
         level.draw();
-        for collider in environment.iter() {
-            draw_rectangle(
-                collider.left(),
-                collider.top(),
-                collider.size().x,
-                collider.size().y,
-                DARKGRAY,
-            );
-        }
 
         // Process input/physics.
 

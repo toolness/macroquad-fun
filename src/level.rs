@@ -84,11 +84,33 @@ impl Level {
                         (y * self.grid_size) as f32 * self.scale,
                         scaled_size,
                         scaled_size,
-                        BLACK,
+                        DARKGRAY,
                     )
                 }
                 i += 1;
             }
         }
+    }
+
+    pub fn get_all_rects(&self) -> Vec<Rect> {
+        let mut result = Vec::new();
+
+        let mut i = 0;
+        let scaled_size = self.grid_size as f32 * self.scale;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if self.colliders[i] == 1 {
+                    result.push(Rect::new(
+                        (x * self.grid_size) as f32 * self.scale,
+                        (y * self.grid_size) as f32 * self.scale,
+                        scaled_size,
+                        scaled_size,
+                    ));
+                }
+                i += 1;
+            }
+        }
+
+        result
     }
 }
