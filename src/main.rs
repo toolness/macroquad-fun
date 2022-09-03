@@ -3,7 +3,6 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use collision::Collider;
 use drawing::draw_rect_lines;
 use level::Level;
 use macroquad::prelude::*;
@@ -79,7 +78,6 @@ async fn main() {
             SPRITE_SCALE,
         ),
     };
-    let environment: Vec<Collider> = level.get_all_colliders();
     let player_relative_bbox = Rect::new(
         IDLE_FRAME_LEFT_X * SPRITE_SCALE,
         IDLE_FRAME_HEAD_Y * SPRITE_SCALE,
@@ -141,22 +139,32 @@ async fn main() {
 
         let mut is_on_any_surface_this_frame = false;
 
-        for collider in environment.iter() {
+        loop {
             let player_actor = Actor {
                 prev_bbox: player_prev_bbox,
                 bbox: player_relative_bbox.offset(Vec2::new(x, y)),
                 velocity,
             };
-            if let Some(collision) = process_collision(&collider, &player_actor) {
-                if collision.is_on_surface {
-                    is_on_any_surface_this_frame = true;
-                }
-                if let Some(new_velocity) = collision.new_velocity {
-                    velocity = new_velocity;
-                }
+            let mut displacement_occurred = false;
+            for collider in level.iter_colliders(&player_actor.bbox) {
+                if let Some(collision) = process_collision(&collider, &player_actor) {
+                    if collision.is_on_surface {
+                        is_on_any_surface_this_frame = true;
+                    }
+                    if let Some(new_velocity) = collision.new_velocity {
+                        velocity = new_velocity;
+                    }
 
-                x += collision.displacement.x;
-                y += collision.displacement.y;
+                    if collision.displacement.x != 0. || collision.displacement.y != 0. {
+                        x += collision.displacement.x;
+                        y += collision.displacement.y;
+                        displacement_occurred = true;
+                        break;
+                    }
+                }
+            }
+            if !displacement_occurred {
+                break;
             }
         }
 
@@ -208,7 +216,12 @@ async fn main() {
             sprite.draw_debug_rect(x, y, GREEN);
             let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
             draw_rect_lines(&player_bbox, 2., PURPLE);
-            for collider in environment.iter() {
+            for collider in level.iter_colliders(&Rect::new(
+                0.,
+                0.,
+                level.width_in_pixels(),
+                level.height_in_pixels(),
+            )) {
                 collider.draw_debug_rect(PURPLE);
             }
             draw_rect_lines(&level.get_bounding_cell_rect(&player_bbox), 1., WHITE);

@@ -99,41 +99,89 @@ impl Level {
         self.colliders[(y * self.height + x) as usize] == 1
     }
 
-    pub fn get_bounding_cell_rect(&self, rect: &Rect) -> Rect {
+    fn get_bounding_cell_rect_in_grid(&self, rect: &Rect) -> Rect {
         let grid_scale = self.grid_size as f32 * self.scale;
-        let left = (rect.left() / grid_scale).floor() * grid_scale;
-        let top = (rect.top() / grid_scale).floor() * grid_scale;
-        let right = (rect.right() / grid_scale).ceil() * grid_scale;
-        let bottom = (rect.bottom() / grid_scale).ceil() * grid_scale;
-
+        let left = (rect.left() / grid_scale).floor();
+        let top = (rect.top() / grid_scale).floor();
+        let right = (rect.right() / grid_scale).ceil();
+        let bottom = (rect.bottom() / grid_scale).ceil();
         Rect::new(left, top, right - left, bottom - top)
     }
 
-    pub fn get_all_colliders(&self) -> Vec<Collider> {
-        let mut result = Vec::new();
-
-        let mut i = 0;
-        let scaled_size = self.grid_size as f32 * self.scale;
-        for y in 0..self.height {
-            for x in 0..self.width {
-                if self.colliders[i] == 1 {
-                    result.push(Collider {
-                        enable_top: !self.is_occupied_at(x, y - 1),
-                        enable_bottom: !self.is_occupied_at(x, y + 1),
-                        enable_left: !self.is_occupied_at(x - 1, y),
-                        enable_right: !self.is_occupied_at(x + 1, y),
-                        rect: Rect::new(
-                            (x * self.grid_size) as f32 * self.scale,
-                            (y * self.grid_size) as f32 * self.scale,
-                            scaled_size,
-                            scaled_size,
-                        ),
-                    });
-                }
-                i += 1;
-            }
-        }
-
+    pub fn get_bounding_cell_rect(&self, rect: &Rect) -> Rect {
+        let grid_scale = self.grid_size as f32 * self.scale;
+        let mut result = self.get_bounding_cell_rect_in_grid(&rect);
+        result.x *= grid_scale;
+        result.y *= grid_scale;
+        result.scale(grid_scale, grid_scale);
         result
+    }
+
+    pub fn iter_colliders(&self, bounding_rect: &Rect) -> GridColliderIterator {
+        let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
+        let x_start = extents.left() as i64;
+        let x_end = extents.right() as i64;
+        let y_start = extents.top() as i64;
+        let y_end = extents.bottom() as i64;
+        GridColliderIterator {
+            level: &self,
+            x_start,
+            x_end,
+            y_end,
+            x: x_start,
+            y: y_start,
+        }
+    }
+}
+
+pub struct GridColliderIterator<'a> {
+    level: &'a Level,
+    x_start: i64,
+    x_end: i64,
+    y_end: i64,
+    x: i64,
+    y: i64,
+}
+
+impl<'a> Iterator for GridColliderIterator<'a> {
+    type Item = Collider;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.y > self.y_end {
+                return None;
+            }
+            if self.level.is_occupied_at(self.x, self.y) {
+                let x = self.x;
+                let y = self.y;
+                let scaled_size = self.level.grid_size as f32 * self.level.scale;
+                let collider = Collider {
+                    enable_top: !self.level.is_occupied_at(x, y - 1),
+                    enable_bottom: !self.level.is_occupied_at(x, y + 1),
+                    enable_left: !self.level.is_occupied_at(x - 1, y),
+                    enable_right: !self.level.is_occupied_at(x + 1, y),
+                    rect: Rect::new(
+                        (x * self.level.grid_size) as f32 * self.level.scale,
+                        (y * self.level.grid_size) as f32 * self.level.scale,
+                        scaled_size,
+                        scaled_size,
+                    ),
+                };
+                self.advance();
+                return Some(collider);
+            }
+            self.advance();
+        }
+    }
+}
+
+impl<'a> GridColliderIterator<'a> {
+    fn advance(&mut self) {
+        if self.x < self.x_end {
+            self.x += 1;
+        } else {
+            self.x = self.x_start;
+            self.y += 1;
+        }
     }
 }
