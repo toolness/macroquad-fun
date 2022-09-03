@@ -31,6 +31,10 @@ pub struct LayerInstance {
     #[serde(rename = "__cWid")]
     pub c_wid: i64,
 
+    /// Grid size
+    #[serde(rename = "__gridSize")]
+    pub grid_size: i64,
+
     /// A list of all values in the IntGrid layer, stored in CSV format (Comma Separated
     /// Values).<br/>  Order is from left to right, and top to bottom (ie. first row from left to
     /// right, followed by second row, etc).<br/>  `0` means "empty cell" and IntGrid values
