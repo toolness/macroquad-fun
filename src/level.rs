@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Result};
 use macroquad::prelude::*;
-use std::path::Path;
 
 use crate::{collision::Collider, ldtk};
 
@@ -16,8 +15,8 @@ pub struct Level {
 }
 
 impl Level {
-    pub fn load<P: AsRef<Path>>(path: P, scale: f32) -> Result<Self> {
-        let level_json = std::fs::read_to_string(path.as_ref())?;
+    pub async fn load(path: &str, scale: f32) -> Result<Self> {
+        let level_json = load_string(&path).await?;
         let level: ldtk::Coordinate = serde_json::from_str(level_json.as_str())?;
         if level.json_version != EXPECTED_JSON_VERSION {
             return Err(anyhow!(
