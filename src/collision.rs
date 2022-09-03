@@ -100,7 +100,7 @@ pub fn process_collision(collider: &Collider, actor: &Actor) -> Option<Collision
             return Some(Collision {
                 is_on_surface: false,
                 displacement: Vec2::new(-x_diff, 0.),
-                new_velocity: None,
+                new_velocity: Some(Vec2::new(0., actor.velocity.y)),
             });
         } else if collider.enable_right && intersection.right() >= collider_rect.right() {
             // The right side of the collider is being intersected with.
@@ -108,7 +108,7 @@ pub fn process_collision(collider: &Collider, actor: &Actor) -> Option<Collision
             return Some(Collision {
                 is_on_surface: false,
                 displacement: Vec2::new(x_diff, 0.),
-                new_velocity: None,
+                new_velocity: Some(Vec2::new(0., actor.velocity.y)),
             });
         }
     }
