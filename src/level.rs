@@ -11,10 +11,11 @@ pub struct Level {
     pub grid_size: i64,
     pub colliders: Vec<i64>,
     pub player_start: (i64, i64),
+    scale: f32,
 }
 
 impl Level {
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
+    pub fn load<P: AsRef<Path>>(path: P, scale: f32) -> Result<Self> {
         let level_json = std::fs::read_to_string(path.as_ref())?;
         let level: ldtk::Coordinate = serde_json::from_str(level_json.as_str())?;
         if level.json_version != EXPECTED_JSON_VERSION {
@@ -52,6 +53,15 @@ impl Level {
             grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
             player_start: player_start.ok_or(anyhow!("Couldn't find PlayerStart"))?,
+            scale,
         })
+    }
+
+    pub fn width_in_pixels(&self) -> f32 {
+        (self.width * self.grid_size) as f32 * self.scale
+    }
+
+    pub fn height_in_pixels(&self) -> f32 {
+        (self.height * self.grid_size) as f32 * self.scale
     }
 }
