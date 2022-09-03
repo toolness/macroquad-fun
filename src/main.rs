@@ -7,6 +7,9 @@ use level::Level;
 use macroquad::prelude::*;
 use sprite::{Sprite, SpriteDrawParams};
 
+use crate::collision::{process_collision, Actor};
+
+mod collision;
 mod ldtk;
 mod level;
 mod sprite;
@@ -169,39 +172,32 @@ async fn main() {
         x += velocity_this_frame.x * time_since_last_frame as f32;
         y += velocity_this_frame.y * time_since_last_frame as f32;
 
-        let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
-        let mut is_on_surface_this_frame = false;
+        let mut is_on_any_surface_this_frame = false;
+
         for collider in environment.iter() {
-            if let Some(intersection) = collider.intersect(player_bbox) {
-                if intersection.top() <= collider.top()
-                    && player_prev_bbox.bottom() <= collider.top()
-                {
-                    // The top of the collider is being intersected with.
-                    is_in_air = false;
-                    velocity = Vec2::new(0., 0.);
-                    let y_diff = player_bbox.bottom() - collider.top();
-                    y -= y_diff;
-                    is_on_surface_this_frame = true;
-                } else if intersection.bottom() >= collider.bottom()
-                    && player_prev_bbox.top() >= collider.bottom()
-                {
-                    // The bottom side of the collider is being intersected with.
-                    velocity.y = 0.;
-                    let y_diff = collider.bottom() - player_bbox.top();
-                    y += y_diff;
-                } else if intersection.left() <= collider.left() {
-                    // The left side of the collider is being intersected with.
-                    let x_diff = player_bbox.right() - collider.left();
-                    x -= x_diff;
-                } else if intersection.right() >= collider.right() {
-                    // The right side of the collider is being intersected with.
-                    let x_diff = collider.right() - player_bbox.left();
-                    x += x_diff;
+            let player_actor = Actor {
+                prev_bbox: player_prev_bbox,
+                bbox: player_relative_bbox.offset(Vec2::new(x, y)),
+                velocity,
+            };
+            if let Some(collision) = process_collision(&collider, &player_actor) {
+                if collision.is_on_surface {
+                    is_on_any_surface_this_frame = true;
                 }
+                if let Some(new_velocity) = collision.new_velocity {
+                    velocity = new_velocity;
+                }
+
+                x += collision.displacement.x;
+                y += collision.displacement.y;
             }
         }
 
-        if !is_on_surface_this_frame && !is_in_air {
+        if is_on_any_surface_this_frame {
+            // The player just landed (or remains on the ground).
+            is_in_air = false;
+        } else if !is_in_air {
+            // The player just fell off a ledge.
             is_in_air = true;
         }
 
@@ -243,7 +239,7 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
-            draw_debug_collision_rect(&player_bbox);
+            draw_debug_collision_rect(&player_relative_bbox.offset(Vec2::new(x, y)));
             for collider in environment.iter() {
                 draw_debug_collision_rect(&collider);
             }
