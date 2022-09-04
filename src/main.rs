@@ -27,6 +27,14 @@ struct GameSprites {
     fall: Sprite,
 }
 
+fn clamp(value: f64, max: f64) -> f64 {
+    if value > max {
+        max
+    } else {
+        value
+    }
+}
+
 #[macroquad::main("Fun")]
 async fn main() {
     let config = load_config("media/config.json").await.unwrap();
@@ -78,6 +86,8 @@ async fn main() {
     let mut last_frame_time = get_time();
     let mut is_facing_left = false;
     let mut debug_mode = false;
+    let mut run_duration: f64 = 0.;
+    let mut prev_x_direction: f32 = 0.;
 
     loop {
         // Keep track of time.
@@ -103,19 +113,30 @@ async fn main() {
         } else {
             0.
         } as f32;
+        if x_direction == prev_x_direction {
+            run_duration += time_since_last_frame;
+        } else {
+            run_duration = time_since_last_frame;
+        }
+        prev_x_direction = x_direction;
+        let run_speed = (clamp(run_duration * 1000.0, config.ms_to_max_run_speed)
+            / config.ms_to_max_run_speed)
+            .powi(2) as f32
+            * config.run_speed;
+
         let mut x_impulse: f32 = 0.;
 
         if is_in_air {
             velocity.y += config.gravity * time_since_last_frame as f32;
             if x_direction != 0. {
-                velocity.x = config.run_speed * x_direction;
+                velocity.x = run_speed * x_direction;
             }
         } else {
             if is_key_pressed(KeyCode::Space) {
-                velocity = Vec2::new(config.run_speed * x_direction, -config.jump_velocity);
+                velocity = Vec2::new(run_speed * x_direction, -config.jump_velocity);
                 is_in_air = true
             } else {
-                x_impulse = config.run_speed * x_direction;
+                x_impulse = run_speed * x_direction;
             }
         }
 

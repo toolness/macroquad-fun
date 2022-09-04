@@ -1,6 +1,7 @@
 {
     "sprite_scale": 3.0,
     "ms_per_animation_frame": 100.0,
+    "ms_to_max_run_speed": 200.0,
     "run_speed": 100.0,
     "gravity": 400.0,
     "jump_velocity": 200.0
