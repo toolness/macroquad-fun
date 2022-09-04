@@ -1,5 +1,7 @@
 {
     "sprite_scale": 3.0,
+    "screen_width": 256,
+    "screen_height": 224,
     "ms_per_animation_frame": 100.0,
     "ms_to_max_run_speed": 200.0,
     "run_speed": 150.0,

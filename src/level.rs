@@ -169,6 +169,10 @@ impl Level {
         })
     }
 
+    pub fn pixel_bounds(&self) -> Rect {
+        Rect::new(0., 0., self.width_in_pixels(), self.height_in_pixels())
+    }
+
     pub fn width_in_pixels(&self) -> f32 {
         (self.width * self.grid_size) as f32 * self.scale
     }

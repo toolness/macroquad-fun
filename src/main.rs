@@ -4,6 +4,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use aseprite::load_aseprite_slices;
+use camera::calculate_camera_rect;
 use config::load_config;
 use drawing::draw_rect_lines;
 use level::World;
@@ -14,6 +15,7 @@ use sprite::{Sprite, SpriteDrawParams};
 use crate::collision::{process_collision, Actor};
 
 mod aseprite;
+mod camera;
 mod collision;
 mod config;
 mod drawing;
@@ -42,7 +44,7 @@ async fn main() {
         .player_start_bottom_left_in_pixels()
         .expect("World must define a player start position");
 
-    request_new_screen_size(level.width_in_pixels(), level.height_in_pixels());
+    request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
 
     let sprites = GameSprites {
@@ -106,6 +108,15 @@ async fn main() {
                     y = new_pos.y;
                 }
             }
+        }
+
+        // Position the camera.
+        let camera_rect: Rect;
+        {
+            let bbox = player_relative_bbox.offset(Vec2::new(x, y));
+            let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
+            camera_rect = calculate_camera_rect(&config, &bbox_center, &level.pixel_bounds());
+            set_camera(&Camera2D::from_display_rect(camera_rect));
         }
 
         // Draw environment.
@@ -223,17 +234,12 @@ async fn main() {
             sprite.draw_debug_rect(x, y, GREEN);
             let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
             draw_rect_lines(&player_bbox, 2., PURPLE);
-            for collider in level.iter_colliders(&Rect::new(
-                0.,
-                0.,
-                level.width_in_pixels(),
-                level.height_in_pixels(),
-            )) {
+            for collider in level.iter_colliders(&level.pixel_bounds()) {
                 collider.draw_debug_rect(PURPLE);
             }
             draw_rect_lines(&level.get_bounding_cell_rect(&player_bbox), 1., WHITE);
             let text = format!("fps: {}", get_fps());
-            draw_text(&text, 32., 32., 32.0, WHITE);
+            draw_text(&text, camera_rect.x + 32., camera_rect.y + 32., 32.0, WHITE);
         }
 
         // Wait for the next frame.
