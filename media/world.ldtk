@@ -189,7 +189,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "PlayerStart",
-							"__grid": [7,12],
+							"__grid": [15,3],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -198,7 +198,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 3,
-							"px": [112,192],
+							"px": [240,48],
 							"fieldInstances": []
 						}
 					]

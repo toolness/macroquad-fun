@@ -78,6 +78,25 @@ impl World {
 
         None
     }
+
+    /// Attempt to find the level that contains the majority of the given
+    /// rect. If we find one, return a reference to the level and the new
+    /// top-left corner of the rect in the level's coordinate system.
+    pub fn find_level_containing_majority_of(
+        &self,
+        world_pos: &Vec2,
+        relative_rect: &Rect,
+    ) -> Option<(&Level, Vec2)> {
+        for level in self.levels.values() {
+            let local_pos = level.from_world_coords(&world_pos);
+            let local_rect = relative_rect.offset(local_pos);
+            if level.contains_majority_of(&local_rect) {
+                return Some((level, local_pos));
+            }
+        }
+
+        None
+    }
 }
 
 pub struct Level {
@@ -92,6 +111,9 @@ pub struct Level {
 
     /// Width/height of each grid cell in pixels.
     grid_size: i64,
+
+    /// Where the level exists in world coordinates.
+    world_rect: Rect,
 
     /// Colliders for each grid cell, in row-major order. Corresponds to
     /// an IntGrid layer in LDtk.
@@ -112,6 +134,12 @@ impl Level {
         let mut width: i64 = 0;
         let mut height: i64 = 0;
         let mut grid_size: i64 = 0;
+        let world_rect = Rect::new(
+            level.world_x as f32,
+            level.world_y as f32,
+            level.px_wid as f32,
+            level.px_hei as f32,
+        );
         let layers = level.layer_instances.as_ref().unwrap();
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
@@ -131,6 +159,7 @@ impl Level {
         }
         Ok(Level {
             identifier: level.identifier.clone(),
+            world_rect,
             width,
             height,
             grid_size,
@@ -146,6 +175,31 @@ impl Level {
 
     pub fn height_in_pixels(&self) -> f32 {
         (self.height * self.grid_size) as f32 * self.scale
+    }
+
+    pub fn contains_majority_of(&self, rect: &Rect) -> bool {
+        let level_rect = Rect::new(0., 0., self.width_in_pixels(), self.height_in_pixels());
+        if let Some(overlap) = level_rect.intersect(*rect) {
+            let total_area = rect.w * rect.h;
+            let area_in_our_level = overlap.w * overlap.h;
+            return area_in_our_level / total_area >= 0.5;
+        }
+        false
+    }
+
+    fn world_offset(&self) -> Vec2 {
+        Vec2::new(
+            self.world_rect.x * self.scale,
+            self.world_rect.y * self.scale,
+        )
+    }
+
+    pub fn from_world_coords(&self, coords: &Vec2) -> Vec2 {
+        *coords - self.world_offset()
+    }
+
+    pub fn to_world_coords(&self, coords: &Vec2) -> Vec2 {
+        *coords + self.world_offset()
     }
 
     pub fn draw(&self) {

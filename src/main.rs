@@ -38,7 +38,7 @@ async fn main() {
         .unwrap();
     let player_relative_bbox = idle_slices.get("idle_bounding_box").unwrap();
     let world = World::load("media/world.ldtk", sprite_scale).await.unwrap();
-    let (level, player_start_bottom_left) = world
+    let (mut level, player_start_bottom_left) = world
         .player_start_bottom_left_in_pixels()
         .expect("World must define a player start position");
 
@@ -91,6 +91,22 @@ async fn main() {
         let time_since_last_frame = now - last_frame_time;
 
         last_frame_time = now;
+
+        // If the player isn't mostly inside the current level, change levels.
+        {
+            let pos = Vec2::new(x, y);
+            let bbox = player_relative_bbox.offset(pos);
+            if !level.contains_majority_of(&bbox) {
+                let world_pos = level.to_world_coords(&pos);
+                if let Some((new_level, new_pos)) =
+                    world.find_level_containing_majority_of(&world_pos, &player_relative_bbox)
+                {
+                    level = new_level;
+                    x = new_pos.x;
+                    y = new_pos.y;
+                }
+            }
+        }
 
         // Draw environment.
 
