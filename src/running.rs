@@ -50,6 +50,6 @@ impl RunManager {
     }
 
     pub fn is_running(&self) -> bool {
-        self.run_speed != 0.
+        self.x_direction != 0.
     }
 }
