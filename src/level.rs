@@ -3,14 +3,27 @@ use macroquad::prelude::*;
 
 use crate::{collision::Collider, ldtk};
 
+/// The LDtk version we're using.
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
 
 pub struct Level {
+    /// Width in grid cells.
     width: i64,
+
+    /// Height in grid cells.
     height: i64,
+
+    /// Width/height of each grid cell in pixels.
     grid_size: i64,
+
+    /// Colliders for each grid cell, in row-major order. Corresponds to
+    /// an IntGrid layer in LDtk.
     colliders: Vec<i64>,
+
+    /// The bottom-left of corner of where the player starts, in pixels.
     player_start: (i64, i64),
+
+    /// How much we're scaling each pixel by.
     scale: f32,
 }
 
