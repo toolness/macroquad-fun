@@ -206,12 +206,12 @@ impl Level {
         *coords + self.world_offset()
     }
 
-    pub fn draw(&self) {
-        let mut i = 0;
+    pub fn draw(&self, bounding_rect: &Rect) {
+        let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
         let scaled_size = self.grid_size as f32 * self.scale;
-        for y in 0..self.height {
-            for x in 0..self.width {
-                if self.colliders[i] == ColliderType::Solid {
+        for y in extents.top() as i64..extents.bottom() as i64 {
+            for x in extents.left() as i64..extents.right() as i64 {
+                if self.colliders[self.get_index(x, y)] == ColliderType::Solid {
                     draw_rectangle(
                         (x * self.grid_size) as f32 * self.scale,
                         (y * self.grid_size) as f32 * self.scale,
@@ -220,24 +220,29 @@ impl Level {
                         DARKGRAY,
                     )
                 }
-                i += 1;
             }
         }
+    }
+
+    fn get_index(&self, x: i64, y: i64) -> usize {
+        (y * self.width + x) as usize
     }
 
     fn is_occupied_at(&self, x: i64, y: i64) -> bool {
         if x < 0 || x >= self.width || y < 0 || y >= self.height {
             return false;
         }
-        self.colliders[(y * self.width + x) as usize] != ColliderType::Empty
+        self.colliders[self.get_index(x, y)] != ColliderType::Empty
     }
 
     fn get_bounding_cell_rect_in_grid(&self, rect: &Rect) -> Rect {
         let grid_scale = self.grid_size as f32 * self.scale;
-        let left = (rect.left() / grid_scale).floor();
-        let top = (rect.top() / grid_scale).floor();
-        let right = (rect.right() / grid_scale).ceil();
-        let bottom = (rect.bottom() / grid_scale).ceil();
+        let max_x = (self.width) as f32;
+        let max_y = (self.height) as f32;
+        let left = clamp((rect.left() / grid_scale).floor(), 0., max_x);
+        let top = clamp((rect.top() / grid_scale).floor(), 0., max_y);
+        let right = clamp((rect.right() / grid_scale).ceil(), 0., max_x);
+        let bottom = clamp((rect.bottom() / grid_scale).ceil(), 0., max_y);
         Rect::new(left, top, right - left, bottom - top)
     }
 

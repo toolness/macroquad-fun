@@ -122,7 +122,7 @@ async fn main() {
         // Draw environment.
 
         clear_background(GRAY);
-        level.draw();
+        level.draw(&camera_rect);
 
         // Process input/physics.
 
