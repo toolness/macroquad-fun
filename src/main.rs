@@ -96,10 +96,10 @@ async fn main() {
 
         let is_pressing_right = is_key_down(KeyCode::D);
         let is_pressing_left = is_key_down(KeyCode::A);
-        let run_velocity = if is_pressing_left {
-            -config.run_speed
+        let x_direction = if is_pressing_left {
+            -1.
         } else if is_pressing_right {
-            config.run_speed
+            1.
         } else {
             0.
         } as f32;
@@ -107,15 +107,15 @@ async fn main() {
 
         if is_in_air {
             velocity.y += config.gravity * time_since_last_frame as f32;
-            if run_velocity != 0. {
-                velocity.x = run_velocity;
+            if x_direction != 0. {
+                velocity.x = config.run_speed * x_direction;
             }
         } else {
             if is_key_pressed(KeyCode::Space) {
-                velocity = Vec2::new(run_velocity, -config.jump_velocity);
+                velocity = Vec2::new(config.run_speed * x_direction, -config.jump_velocity);
                 is_in_air = true
             } else {
-                x_impulse = run_velocity;
+                x_impulse = config.run_speed * x_direction;
             }
         }
 
