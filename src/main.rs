@@ -127,6 +127,9 @@ async fn main() {
         let mut x_impulse: f32 = 0.;
 
         if is_in_air {
+            if is_key_down(KeyCode::Space) && velocity.y < 0. {
+                velocity.y -= config.long_jump_keypress_extra_force * time_since_last_frame as f32;
+            }
             velocity.y += config.gravity * time_since_last_frame as f32;
             if x_direction != 0. {
                 velocity.x = run_speed * x_direction;

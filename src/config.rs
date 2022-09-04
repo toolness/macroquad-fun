@@ -10,6 +10,7 @@ pub struct Config {
     pub ms_to_max_run_speed: f64,
     pub run_speed: f32,
     pub gravity: f32,
+    pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
 }
 
@@ -18,5 +19,6 @@ pub async fn load_config(path: &str) -> Result<Config> {
     config.run_speed *= config.sprite_scale;
     config.gravity *= config.sprite_scale;
     config.jump_velocity *= config.sprite_scale;
+    config.long_jump_keypress_extra_force *= config.sprite_scale;
     Ok(config)
 }
