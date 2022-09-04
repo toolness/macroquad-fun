@@ -1,10 +1,40 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
 use crate::{collision::Collider, ldtk};
 
 /// The LDtk version we're using.
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
+
+#[derive(Eq, PartialEq)]
+pub enum ColliderType {
+    Empty,
+    Solid,
+}
+
+impl ColliderType {
+    pub fn from_vec(numbers: &Vec<i64>) -> Result<Vec<ColliderType>> {
+        let mut result = Vec::with_capacity(numbers.len());
+
+        for &number in numbers.iter() {
+            result.push(number.try_into()?);
+        }
+
+        Ok(result)
+    }
+}
+
+impl TryFrom<i64> for ColliderType {
+    type Error = Error;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(ColliderType::Empty),
+            1 => Ok(ColliderType::Solid),
+            _ => Err(anyhow!("Unknown IntGrid value: {}", value)),
+        }
+    }
+}
 
 pub struct Level {
     /// Width in grid cells.
@@ -18,7 +48,7 @@ pub struct Level {
 
     /// Colliders for each grid cell, in row-major order. Corresponds to
     /// an IntGrid layer in LDtk.
-    colliders: Vec<i64>,
+    colliders: Vec<ColliderType>,
 
     /// The bottom-left of corner of where the player starts, in pixels.
     player_start: (i64, i64),
@@ -38,7 +68,7 @@ impl Level {
                 level.json_version
             ));
         }
-        let mut colliders: Option<Vec<i64>> = None;
+        let mut colliders: Option<Vec<ColliderType>> = None;
         let mut player_start: Option<(i64, i64)> = None;
         let mut width: i64 = 0;
         let mut height: i64 = 0;
@@ -49,7 +79,7 @@ impl Level {
                 width = layer.c_wid;
                 height = layer.c_hei;
                 grid_size = layer.grid_size;
-                colliders = Some(layer.int_grid_csv.clone());
+                colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
             } else if layer.identifier == "Entities" {
                 for entity in layer.entity_instances.iter() {
                     if entity.identifier == "PlayerStart" {
@@ -90,7 +120,7 @@ impl Level {
         let scaled_size = self.grid_size as f32 * self.scale;
         for y in 0..self.height {
             for x in 0..self.width {
-                if self.colliders[i] == 1 {
+                if self.colliders[i] == ColliderType::Solid {
                     draw_rectangle(
                         (x * self.grid_size) as f32 * self.scale,
                         (y * self.grid_size) as f32 * self.scale,
@@ -108,7 +138,7 @@ impl Level {
         if x < 0 || x >= self.width || y < 0 || y >= self.height {
             return false;
         }
-        self.colliders[(y * self.width + x) as usize] == 1
+        self.colliders[(y * self.width + x) as usize] != ColliderType::Empty
     }
 
     fn get_bounding_cell_rect_in_grid(&self, rect: &Rect) -> Rect {
