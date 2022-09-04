@@ -18,6 +18,26 @@ pub struct Level {
     /// User defined unique identifier
     pub identifier: String,
 
+    /// Height of the level in pixels
+    #[serde(rename = "pxHei")]
+    pub px_hei: i64,
+
+    /// Width of the level in pixels
+    #[serde(rename = "pxWid")]
+    pub px_wid: i64,
+
+    /// World X coordinate in pixels.<br/>  Only relevant for world layouts where level spatial
+    /// positioning is manual (ie. GridVania, Free). For Horizontal and Vertical layouts, the
+    /// value is always -1 here.
+    #[serde(rename = "worldX")]
+    pub world_x: i64,
+
+    /// World Y coordinate in pixels.<br/>  Only relevant for world layouts where level spatial
+    /// positioning is manual (ie. GridVania, Free). For Horizontal and Vertical layouts, the
+    /// value is always -1 here.
+    #[serde(rename = "worldY")]
+    pub world_y: i64,
+
     /// An array containing all Layer instances. **IMPORTANT**: if the project option "*Save
     /// levels separately*" is enabled, this field will be `null`.<br/>  This array is **sorted
     /// in display order**: the 1st layer is the top-most and the last is behind.
