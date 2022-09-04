@@ -95,7 +95,7 @@ impl Level {
         if x < 0 || x >= self.width || y < 0 || y >= self.height {
             return false;
         }
-        self.colliders[(y * self.height + x) as usize] == 1
+        self.colliders[(y * self.width + x) as usize] == 1
     }
 
     fn get_bounding_cell_rect_in_grid(&self, rect: &Rect) -> Rect {
