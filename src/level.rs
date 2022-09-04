@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
@@ -36,7 +38,50 @@ impl TryFrom<i64> for ColliderType {
     }
 }
 
+pub struct World {
+    levels: HashMap<String, Level>,
+}
+
+impl World {
+    pub async fn load(path: &str, scale: f32) -> Result<Self> {
+        let world_json = load_string(&path).await?;
+        let world: ldtk::Coordinate = serde_json::from_str(world_json.as_str())?;
+        if world.json_version != EXPECTED_JSON_VERSION {
+            return Err(anyhow!(
+                "Expected json_version {}, got {}",
+                EXPECTED_JSON_VERSION,
+                world.json_version
+            ));
+        }
+        let mut levels = HashMap::with_capacity(world.levels.len());
+
+        for ldtk_level in world.levels.iter() {
+            let level = Level::from_ldtk(&ldtk_level, scale)?;
+            levels.insert(level.identifier.clone(), level);
+        }
+
+        Ok(World { levels })
+    }
+
+    pub fn player_start_bottom_left_in_pixels(&self) -> Option<(&Level, Vec2)> {
+        for level in self.levels.values() {
+            if let Some(player_start) = level.player_start {
+                return Some((
+                    &level,
+                    Vec2::new(
+                        player_start.0 as f32 * level.scale,
+                        player_start.1 as f32 * level.scale,
+                    ),
+                ));
+            }
+        }
+
+        None
+    }
+}
+
 pub struct Level {
+    /// Unique name for the level.
     identifier: String,
 
     /// Width in grid cells.
@@ -52,30 +97,22 @@ pub struct Level {
     /// an IntGrid layer in LDtk.
     colliders: Vec<ColliderType>,
 
-    /// The bottom-left of corner of where the player starts, in pixels.
-    player_start: (i64, i64),
+    /// The bottom-left of corner of where the player starts, in pixels, if
+    /// this level declares a player start.
+    player_start: Option<(i64, i64)>,
 
     /// How much we're scaling each pixel by.
     scale: f32,
 }
 
 impl Level {
-    pub async fn load(path: &str, scale: f32) -> Result<Self> {
-        let level_json = load_string(&path).await?;
-        let level: ldtk::Coordinate = serde_json::from_str(level_json.as_str())?;
-        if level.json_version != EXPECTED_JSON_VERSION {
-            return Err(anyhow!(
-                "Expected json_version {}, got {}",
-                EXPECTED_JSON_VERSION,
-                level.json_version
-            ));
-        }
+    pub fn from_ldtk(level: &ldtk::Level, scale: f32) -> Result<Self> {
         let mut colliders: Option<Vec<ColliderType>> = None;
         let mut player_start: Option<(i64, i64)> = None;
         let mut width: i64 = 0;
         let mut height: i64 = 0;
         let mut grid_size: i64 = 0;
-        let layers = level.levels[0].layer_instances.as_ref().unwrap();
+        let layers = level.layer_instances.as_ref().unwrap();
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
                 width = layer.c_wid;
@@ -93,12 +130,12 @@ impl Level {
             }
         }
         Ok(Level {
-            identifier: level.levels[0].identifier.clone(),
+            identifier: level.identifier.clone(),
             width,
             height,
             grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
-            player_start: player_start.ok_or(anyhow!("Couldn't find PlayerStart"))?,
+            player_start,
             scale,
         })
     }
@@ -109,13 +146,6 @@ impl Level {
 
     pub fn height_in_pixels(&self) -> f32 {
         (self.height * self.grid_size) as f32 * self.scale
-    }
-
-    pub fn player_start_bottom_left_in_pixels(&self) -> Vec2 {
-        Vec2::new(
-            self.player_start.0 as f32 * self.scale,
-            self.player_start.1 as f32 * self.scale,
-        )
     }
 
     pub fn draw(&self) {

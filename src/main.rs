@@ -6,7 +6,7 @@ extern crate serde_json;
 use aseprite::load_aseprite_slices;
 use config::load_config;
 use drawing::draw_rect_lines;
-use level::Level;
+use level::World;
 use macroquad::prelude::*;
 use running::RunManager;
 use sprite::{Sprite, SpriteDrawParams};
@@ -37,7 +37,10 @@ async fn main() {
         .await
         .unwrap();
     let player_relative_bbox = idle_slices.get("idle_bounding_box").unwrap();
-    let level = Level::load("media/world.ldtk", sprite_scale).await.unwrap();
+    let world = World::load("media/world.ldtk", sprite_scale).await.unwrap();
+    let (level, player_start_bottom_left) = world
+        .player_start_bottom_left_in_pixels()
+        .expect("World must define a player start position");
 
     request_new_screen_size(level.width_in_pixels(), level.height_in_pixels());
     next_frame().await;
@@ -72,7 +75,6 @@ async fn main() {
             sprite_scale,
         ),
     };
-    let player_start_bottom_left = level.player_start_bottom_left_in_pixels();
     let mut x = player_start_bottom_left.x - player_relative_bbox.x;
     let mut y = player_start_bottom_left.y - player_relative_bbox.bottom();
     let mut is_in_air = false;
