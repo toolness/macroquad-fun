@@ -37,6 +37,8 @@ impl TryFrom<i64> for ColliderType {
 }
 
 pub struct Level {
+    identifier: String,
+
     /// Width in grid cells.
     width: i64,
 
@@ -91,6 +93,7 @@ impl Level {
             }
         }
         Ok(Level {
+            identifier: level.levels[0].identifier.clone(),
             width,
             height,
             grid_size,

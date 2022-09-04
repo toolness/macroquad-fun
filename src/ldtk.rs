@@ -14,6 +14,9 @@ pub struct Coordinate {
 
 #[derive(Deserialize)]
 pub struct Level {
+    /// User defined unique identifier
+    pub identifier: String,
+
     /// An array containing all Layer instances. **IMPORTANT**: if the project option "*Save
     /// levels separately*" is enabled, this field will be `null`.<br/>  This array is **sorted
     /// in display order**: the 1st layer is the top-most and the last is behind.
