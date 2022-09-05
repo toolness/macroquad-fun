@@ -156,6 +156,24 @@ async fn main() {
             is_in_air = true;
         }
 
+        // Draw NPCs.
+
+        for flying_eye in level.iter_flying_eyes() {
+            let sprite = &sprites.flying_eye.flight;
+            let bbox = &sprites.flying_eye.flight_bbox;
+            let sprite_pos = flying_eye.point() - bbox.point();
+            sprite.draw(
+                sprite_pos.x,
+                sprite_pos.y,
+                absolute_frame_number % sprite.num_frames(),
+            );
+            if debug_mode {
+                sprite.draw_debug_rect(flying_eye.x, flying_eye.y, GREEN);
+                let flying_eye_bbox = bbox.offset(sprite_pos);
+                draw_rect_lines(&flying_eye_bbox, 2., PURPLE);
+            }
+        }
+
         // Draw player.
 
         let sprite: &Sprite;

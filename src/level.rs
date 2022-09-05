@@ -286,6 +286,13 @@ impl Level {
         }
     }
 
+    pub fn iter_flying_eyes(&self) -> impl Iterator<Item = Rect> + '_ {
+        self.entities
+            .iter()
+            .filter(|entity| entity.kind == EntityKind::FlyingEye)
+            .map(|entity| entity.rect)
+    }
+
     pub fn get_text(&self, rect: &Rect) -> Option<&Vec<String>> {
         for entity in self.entities.iter() {
             if let EntityKind::Text(text) = &entity.kind {
