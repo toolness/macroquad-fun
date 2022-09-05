@@ -277,6 +277,17 @@ impl Level {
             y: y_start,
         }
     }
+
+    pub fn get_text(&self, rect: &Rect) -> Option<&String> {
+        for entity in self.entities.iter() {
+            if let EntityKind::Text(text) = &entity.kind {
+                if entity.rect.overlaps(rect) {
+                    return Some(text);
+                }
+            }
+        }
+        None
+    }
 }
 
 pub struct GridColliderIterator<'a> {

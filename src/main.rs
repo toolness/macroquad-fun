@@ -223,6 +223,12 @@ async fn main() {
             },
         );
 
+        // Draw level text.
+        let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
+        if let Some(text) = level.get_text(&player_bbox) {
+            draw_text(text, camera_rect.x + 32., camera_rect.y + 128., 32.0, WHITE);
+        }
+
         // Process miscellaneous system input.
 
         if is_key_released(KeyCode::Escape) {
@@ -232,7 +238,6 @@ async fn main() {
         }
         if debug_mode {
             sprite.draw_debug_rect(x, y, GREEN);
-            let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
             draw_rect_lines(&player_bbox, 2., PURPLE);
             for collider in level.iter_colliders(&level.pixel_bounds()) {
                 collider.draw_debug_rect(PURPLE);
