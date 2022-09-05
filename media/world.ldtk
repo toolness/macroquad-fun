@@ -261,19 +261,19 @@
 						},
 						{
 							"__identifier": "Text",
-							"__grid": [1,6],
+							"__grid": [1,5],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#A294D9",
 							"iid": "6941d220-2a00-11ed-9706-2950bed05376",
-							"width": 16,
-							"height": 48,
+							"width": 32,
+							"height": 64,
 							"defUid": 6,
-							"px": [16,96],
-							"fieldInstances": [{ "__identifier": "text", "__value": "Use A and D to move left and right.\n\nUse the spacebar to jump.\n", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"px": [16,80],
+							"fieldInstances": [{ "__identifier": "text", "__value": "Press A and D to move left and right.\nTap the spacebar to jump.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["Use A and D to move left and right.\n\nUse the spacebar to jump.\n"]
+								"params": ["Press A and D to move left and right.\nTap the spacebar to jump."]
 							}] }]
 						}
 					]

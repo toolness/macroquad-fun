@@ -226,7 +226,11 @@ async fn main() {
         // Draw level text.
         let player_bbox = player_relative_bbox.offset(Vec2::new(x, y));
         if let Some(text) = level.get_text(&player_bbox) {
-            draw_text(text, camera_rect.x + 32., camera_rect.y + 128., 32.0, WHITE);
+            let mut y = camera_rect.y + 128.;
+            for line in text {
+                draw_text(line, camera_rect.x + 32., y, 32.0, WHITE);
+                y += 36.;
+            }
         }
 
         // Process miscellaneous system input.

@@ -130,7 +130,7 @@ pub struct Entity {
 #[derive(Eq, PartialEq)]
 pub enum EntityKind {
     PlayerStart,
-    Text(String),
+    Text(Vec<String>),
 }
 
 impl Level {
@@ -165,7 +165,12 @@ impl Level {
                     if entity.identifier == "PlayerStart" {
                         kind = EntityKind::PlayerStart;
                     } else if entity.identifier == "Text" {
-                        kind = EntityKind::Text(entity.get_string_field_instance("text")?);
+                        let lines: Vec<String> = entity
+                            .get_string_field_instance("text")?
+                            .split('\n')
+                            .map(|s| s.to_owned())
+                            .collect();
+                        kind = EntityKind::Text(lines);
                     } else {
                         eprintln!("Unexpected entity found: {}", entity.identifier);
                         continue;
@@ -278,7 +283,7 @@ impl Level {
         }
     }
 
-    pub fn get_text(&self, rect: &Rect) -> Option<&String> {
+    pub fn get_text(&self, rect: &Rect) -> Option<&Vec<String>> {
         for entity in self.entities.iter() {
             if let EntityKind::Text(text) = &entity.kind {
                 if entity.rect.overlaps(rect) {
