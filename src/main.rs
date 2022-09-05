@@ -3,7 +3,6 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use aseprite::load_aseprite_slices;
 use camera::calculate_camera_rect;
 use config::load_config;
 use drawing::draw_rect_lines;
@@ -30,15 +29,12 @@ mod sprite;
 async fn main() {
     let config = load_config("media/config.json").await.unwrap();
     let sprite_scale = config.sprite_scale;
-    let idle_slices = load_aseprite_slices("media/Huntress/Idle.json", sprite_scale)
-        .await
-        .unwrap();
-    let player_relative_bbox = idle_slices.get("idle_bounding_box").unwrap();
     let world = World::load("media/world.ldtk", sprite_scale).await.unwrap();
     let (mut level, player_start_bottom_left) = world
         .player_start_bottom_left_in_pixels()
         .expect("World must define a player start position");
     let sprites = load_game_sprites(sprite_scale).await.unwrap();
+    let player_relative_bbox = sprites.huntress.idle_bbox;
 
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
