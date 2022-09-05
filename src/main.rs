@@ -30,8 +30,8 @@ async fn main() {
     let config = load_config("media/config.json").await.unwrap();
     let sprite_scale = config.sprite_scale;
     let world = World::load("media/world.ldtk", sprite_scale).await.unwrap();
-    let (mut level, player_start_bottom_left) = world
-        .player_start_bottom_left_in_pixels()
+    let (mut level, player_start) = world
+        .player_start()
         .expect("World must define a player start position");
     let sprites = load_game_sprites(sprite_scale).await.unwrap();
     let player_relative_bbox = sprites.huntress.idle_bbox;
@@ -39,8 +39,8 @@ async fn main() {
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
 
-    let mut x = player_start_bottom_left.x - player_relative_bbox.x;
-    let mut y = player_start_bottom_left.y - player_relative_bbox.bottom();
+    let mut x = player_start.left() - player_relative_bbox.x;
+    let mut y = player_start.bottom() - player_relative_bbox.bottom();
     let mut is_in_air = false;
     let mut velocity = Vec2::new(0., 0.);
     let mut last_frame_time = get_time();

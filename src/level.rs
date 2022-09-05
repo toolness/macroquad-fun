@@ -63,11 +63,11 @@ impl World {
         Ok(World { levels })
     }
 
-    pub fn player_start_bottom_left_in_pixels(&self) -> Option<(&Level, Vec2)> {
+    pub fn player_start(&self) -> Option<(&Level, Rect)> {
         for level in self.levels.values() {
             for entity in level.entities.iter() {
                 if entity.kind == EntityKind::PlayerStart {
-                    return Some((&level, Vec2::new(entity.rect.left(), entity.rect.bottom())));
+                    return Some((&level, entity.rect));
                 }
             }
         }
