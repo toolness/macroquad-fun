@@ -67,13 +67,7 @@ impl World {
         for level in self.levels.values() {
             for entity in level.entities.iter() {
                 if entity.kind == EntityKind::PlayerStart {
-                    return Some((
-                        &level,
-                        Vec2::new(
-                            entity.rect.left() * level.scale,
-                            entity.rect.bottom() * level.scale,
-                        ),
-                    ));
+                    return Some((&level, Vec2::new(entity.rect.left(), entity.rect.bottom())));
                 }
             }
         }
@@ -112,7 +106,7 @@ pub struct Level {
     height: i64,
 
     /// Width/height of each grid cell in pixels.
-    grid_size: i64,
+    grid_size: f32,
 
     /// Where the level exists in world coordinates.
     world_rect: Rect,
@@ -123,9 +117,6 @@ pub struct Level {
 
     /// Various other entities in the level.
     entities: Vec<Entity>,
-
-    /// How much we're scaling each pixel by.
-    scale: f32,
 }
 
 pub struct Entity {
@@ -147,12 +138,12 @@ impl Level {
         let mut colliders: Option<Vec<ColliderType>> = None;
         let mut width: i64 = 0;
         let mut height: i64 = 0;
-        let mut grid_size: i64 = 0;
+        let mut grid_size: f32 = 0.;
         let world_rect = Rect::new(
-            level.world_x as f32,
-            level.world_y as f32,
-            level.px_wid as f32,
-            level.px_hei as f32,
+            level.world_x as f32 * scale,
+            level.world_y as f32 * scale,
+            level.px_wid as f32 * scale,
+            level.px_hei as f32 * scale,
         );
         let layers = level.layer_instances.as_ref().unwrap();
         let mut entities = vec![];
@@ -160,15 +151,15 @@ impl Level {
             if layer.identifier == "IntGrid" {
                 width = layer.c_wid;
                 height = layer.c_hei;
-                grid_size = layer.grid_size;
+                grid_size = layer.grid_size as f32 * scale;
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
             } else if layer.identifier == "Entities" {
                 for entity in layer.entity_instances.iter() {
                     let rect = Rect::new(
-                        entity.px[0] as f32,
-                        entity.px[1] as f32,
-                        entity.width as f32,
-                        entity.height as f32,
+                        entity.px[0] as f32 * scale,
+                        entity.px[1] as f32 * scale,
+                        entity.width as f32 * scale,
+                        entity.height as f32 * scale,
                     );
                     let kind: EntityKind;
                     if entity.identifier == "PlayerStart" {
@@ -193,7 +184,6 @@ impl Level {
             grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
             entities,
-            scale,
         })
     }
 
@@ -202,16 +192,15 @@ impl Level {
     }
 
     pub fn width_in_pixels(&self) -> f32 {
-        (self.width * self.grid_size) as f32 * self.scale
+        self.width as f32 * self.grid_size
     }
 
     pub fn height_in_pixels(&self) -> f32 {
-        (self.height * self.grid_size) as f32 * self.scale
+        self.height as f32 * self.grid_size
     }
 
     pub fn contains_majority_of(&self, rect: &Rect) -> bool {
-        let level_rect = Rect::new(0., 0., self.width_in_pixels(), self.height_in_pixels());
-        if let Some(overlap) = level_rect.intersect(*rect) {
+        if let Some(overlap) = self.pixel_bounds().intersect(*rect) {
             let total_area = rect.w * rect.h;
             let area_in_our_level = overlap.w * overlap.h;
             return area_in_our_level / total_area >= 0.5;
@@ -219,32 +208,24 @@ impl Level {
         false
     }
 
-    fn world_offset(&self) -> Vec2 {
-        Vec2::new(
-            self.world_rect.x * self.scale,
-            self.world_rect.y * self.scale,
-        )
-    }
-
     pub fn from_world_coords(&self, coords: &Vec2) -> Vec2 {
-        *coords - self.world_offset()
+        *coords - self.world_rect.point()
     }
 
     pub fn to_world_coords(&self, coords: &Vec2) -> Vec2 {
-        *coords + self.world_offset()
+        *coords + self.world_rect.point()
     }
 
     pub fn draw(&self, bounding_rect: &Rect) {
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
-        let scaled_size = self.grid_size as f32 * self.scale;
         for y in extents.top() as i64..extents.bottom() as i64 {
             for x in extents.left() as i64..extents.right() as i64 {
                 if self.colliders[self.get_index(x, y)] == ColliderType::Solid {
                     draw_rectangle(
-                        (x * self.grid_size) as f32 * self.scale,
-                        (y * self.grid_size) as f32 * self.scale,
-                        scaled_size,
-                        scaled_size,
+                        x as f32 * self.grid_size,
+                        y as f32 * self.grid_size,
+                        self.grid_size,
+                        self.grid_size,
                         DARKGRAY,
                     )
                 }
@@ -264,22 +245,20 @@ impl Level {
     }
 
     fn get_bounding_cell_rect_in_grid(&self, rect: &Rect) -> Rect {
-        let grid_scale = self.grid_size as f32 * self.scale;
         let max_x = (self.width) as f32;
         let max_y = (self.height) as f32;
-        let left = clamp((rect.left() / grid_scale).floor(), 0., max_x);
-        let top = clamp((rect.top() / grid_scale).floor(), 0., max_y);
-        let right = clamp((rect.right() / grid_scale).ceil(), 0., max_x);
-        let bottom = clamp((rect.bottom() / grid_scale).ceil(), 0., max_y);
+        let left = clamp((rect.left() / self.grid_size).floor(), 0., max_x);
+        let top = clamp((rect.top() / self.grid_size).floor(), 0., max_y);
+        let right = clamp((rect.right() / self.grid_size).ceil(), 0., max_x);
+        let bottom = clamp((rect.bottom() / self.grid_size).ceil(), 0., max_y);
         Rect::new(left, top, right - left, bottom - top)
     }
 
     pub fn get_bounding_cell_rect(&self, rect: &Rect) -> Rect {
-        let grid_scale = self.grid_size as f32 * self.scale;
         let mut result = self.get_bounding_cell_rect_in_grid(&rect);
-        result.x *= grid_scale;
-        result.y *= grid_scale;
-        result.scale(grid_scale, grid_scale);
+        result.x *= self.grid_size;
+        result.y *= self.grid_size;
+        result.scale(self.grid_size, self.grid_size);
         result
     }
 
@@ -320,17 +299,16 @@ impl<'a> Iterator for GridColliderIterator<'a> {
             if self.level.is_occupied_at(self.x, self.y) {
                 let x = self.x;
                 let y = self.y;
-                let scaled_size = self.level.grid_size as f32 * self.level.scale;
                 let collider = Collider {
                     enable_top: !self.level.is_occupied_at(x, y - 1),
                     enable_bottom: !self.level.is_occupied_at(x, y + 1),
                     enable_left: !self.level.is_occupied_at(x - 1, y),
                     enable_right: !self.level.is_occupied_at(x + 1, y),
                     rect: Rect::new(
-                        (x * self.level.grid_size) as f32 * self.level.scale,
-                        (y * self.level.grid_size) as f32 * self.level.scale,
-                        scaled_size,
-                        scaled_size,
+                        x as f32 * self.level.grid_size,
+                        y as f32 * self.level.grid_size,
+                        self.level.grid_size,
+                        self.level.grid_size,
                     ),
                 };
                 self.advance();
