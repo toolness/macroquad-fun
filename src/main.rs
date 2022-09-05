@@ -35,7 +35,7 @@ struct GameSprites {
 async fn main() {
     let config = load_config("media/config.json").await.unwrap();
     let sprite_scale = config.sprite_scale;
-    let idle_slices = load_aseprite_slices("media/Huntress/Sprites/Idle.json", sprite_scale)
+    let idle_slices = load_aseprite_slices("media/Huntress/Idle.json", sprite_scale)
         .await
         .unwrap();
     let player_relative_bbox = idle_slices.get("idle_bounding_box").unwrap();
@@ -49,30 +49,22 @@ async fn main() {
 
     let sprites = GameSprites {
         idle: Sprite::new(
-            load_texture("media/Huntress/Sprites/Idle.png")
-                .await
-                .unwrap(),
+            load_texture("media/Huntress/Idle.png").await.unwrap(),
             8,
             sprite_scale,
         ),
         run: Sprite::new(
-            load_texture("media/Huntress/Sprites/Run.png")
-                .await
-                .unwrap(),
+            load_texture("media/Huntress/Run.png").await.unwrap(),
             8,
             sprite_scale,
         ),
         jump: Sprite::new(
-            load_texture("media/Huntress/Sprites/Jump.png")
-                .await
-                .unwrap(),
+            load_texture("media/Huntress/Jump.png").await.unwrap(),
             2,
             sprite_scale,
         ),
         fall: Sprite::new(
-            load_texture("media/Huntress/Sprites/Fall.png")
-                .await
-                .unwrap(),
+            load_texture("media/Huntress/Fall.png").await.unwrap(),
             2,
             sprite_scale,
         ),
