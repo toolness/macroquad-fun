@@ -131,6 +131,7 @@ pub struct Entity {
 pub enum EntityKind {
     PlayerStart,
     Text(Vec<String>),
+    FlyingEye,
 }
 
 impl Level {
@@ -161,20 +162,22 @@ impl Level {
                         entity.width as f32 * scale,
                         entity.height as f32 * scale,
                     );
-                    let kind: EntityKind;
-                    if entity.identifier == "PlayerStart" {
-                        kind = EntityKind::PlayerStart;
-                    } else if entity.identifier == "Text" {
-                        let lines: Vec<String> = entity
-                            .get_string_field_instance("text")?
-                            .split('\n')
-                            .map(|s| s.to_owned())
-                            .collect();
-                        kind = EntityKind::Text(lines);
-                    } else {
-                        eprintln!("Unexpected entity found: {}", entity.identifier);
-                        continue;
-                    }
+                    let kind = match entity.identifier.as_str() {
+                        "PlayerStart" => EntityKind::PlayerStart,
+                        "Text" => {
+                            let lines: Vec<String> = entity
+                                .get_string_field_instance("text")?
+                                .split('\n')
+                                .map(|s| s.to_owned())
+                                .collect();
+                            EntityKind::Text(lines)
+                        }
+                        "FlyingEye" => EntityKind::FlyingEye,
+                        _ => {
+                            eprintln!("Unexpected entity found: {}", entity.identifier);
+                            continue;
+                        }
+                    };
                     entities.push(Entity { kind, rect });
                 }
             } else {
