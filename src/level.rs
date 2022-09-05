@@ -65,14 +65,16 @@ impl World {
 
     pub fn player_start_bottom_left_in_pixels(&self) -> Option<(&Level, Vec2)> {
         for level in self.levels.values() {
-            if let Some(player_start) = level.player_start {
-                return Some((
-                    &level,
-                    Vec2::new(
-                        player_start.0 as f32 * level.scale,
-                        player_start.1 as f32 * level.scale,
-                    ),
-                ));
+            for entity in level.entities.iter() {
+                if entity.kind == EntityKind::PlayerStart {
+                    return Some((
+                        &level,
+                        Vec2::new(
+                            entity.rect.left() * level.scale,
+                            entity.rect.bottom() * level.scale,
+                        ),
+                    ));
+                }
             }
         }
 
@@ -119,18 +121,30 @@ pub struct Level {
     /// an IntGrid layer in LDtk.
     colliders: Vec<ColliderType>,
 
-    /// The bottom-left of corner of where the player starts, in pixels, if
-    /// this level declares a player start.
-    player_start: Option<(i64, i64)>,
+    /// Various other entities in the level.
+    entities: Vec<Entity>,
 
     /// How much we're scaling each pixel by.
     scale: f32,
 }
 
+pub struct Entity {
+    /// The type of entity.
+    kind: EntityKind,
+
+    /// The entity's position in pixel coordinates.
+    rect: Rect,
+}
+
+#[derive(Eq, PartialEq)]
+pub enum EntityKind {
+    PlayerStart,
+    Text(String),
+}
+
 impl Level {
     pub fn from_ldtk(level: &ldtk::Level, scale: f32) -> Result<Self> {
         let mut colliders: Option<Vec<ColliderType>> = None;
-        let mut player_start: Option<(i64, i64)> = None;
         let mut width: i64 = 0;
         let mut height: i64 = 0;
         let mut grid_size: i64 = 0;
@@ -141,6 +155,7 @@ impl Level {
             level.px_hei as f32,
         );
         let layers = level.layer_instances.as_ref().unwrap();
+        let mut entities = vec![];
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
                 width = layer.c_wid;
@@ -149,9 +164,22 @@ impl Level {
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
             } else if layer.identifier == "Entities" {
                 for entity in layer.entity_instances.iter() {
+                    let rect = Rect::new(
+                        entity.px[0] as f32,
+                        entity.px[1] as f32,
+                        entity.width as f32,
+                        entity.height as f32,
+                    );
+                    let kind: EntityKind;
                     if entity.identifier == "PlayerStart" {
-                        player_start = Some((entity.px[0], entity.px[1] + entity.height))
+                        kind = EntityKind::PlayerStart;
+                    } else if entity.identifier == "Text" {
+                        kind = EntityKind::Text("TODO".to_owned());
+                    } else {
+                        eprintln!("Unexpected entity found: {}", entity.identifier);
+                        continue;
                     }
+                    entities.push(Entity { kind, rect });
                 }
             } else {
                 eprintln!("Unexpected layer found: {}", layer.identifier);
@@ -164,7 +192,7 @@ impl Level {
             height,
             grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
-            player_start,
+            entities,
             scale,
         })
     }
