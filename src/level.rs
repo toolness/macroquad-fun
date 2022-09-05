@@ -174,7 +174,7 @@ impl Level {
                     if entity.identifier == "PlayerStart" {
                         kind = EntityKind::PlayerStart;
                     } else if entity.identifier == "Text" {
-                        kind = EntityKind::Text("TODO".to_owned());
+                        kind = EntityKind::Text(entity.get_string_field_instance("text")?);
                     } else {
                         eprintln!("Unexpected entity found: {}", entity.identifier);
                         continue;

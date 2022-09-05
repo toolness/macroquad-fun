@@ -1,5 +1,8 @@
 /// This is a subset of the full LDtk schema, which is at `ldtk_full_unused.rs`.
+/// We also add some convenience methods.
 extern crate serde_derive;
+
+use anyhow::{anyhow, Result};
 
 #[derive(Deserialize)]
 pub struct Coordinate {
@@ -102,6 +105,27 @@ pub struct EntityInstance {
     /// An array of all custom fields and their values.
     #[serde(rename = "fieldInstances")]
     pub field_instances: Vec<FieldInstance>,
+}
+
+impl EntityInstance {
+    pub fn get_string_field_instance(&self, identifier: &str) -> Result<String> {
+        for field in self.field_instances.iter() {
+            if field.identifier == identifier {
+                if let Some(serde_json::Value::String(value)) = &field.value {
+                    return Ok(value.to_owned());
+                }
+                return Err(anyhow!(
+                    "Expected field instance with identifier '{}' to be a string",
+                    identifier
+                ));
+            }
+        }
+
+        Err(anyhow!(
+            "Unable to find field instance with identifier '{}'",
+            identifier
+        ))
+    }
 }
 
 #[derive(Serialize, Deserialize)]
