@@ -7,6 +7,7 @@ use aseprite::load_aseprite_slices;
 use camera::calculate_camera_rect;
 use config::load_config;
 use drawing::draw_rect_lines;
+use game_sprites::load_game_sprites;
 use level::World;
 use macroquad::prelude::*;
 use running::RunManager;
@@ -19,17 +20,11 @@ mod camera;
 mod collision;
 mod config;
 mod drawing;
+mod game_sprites;
 mod ldtk;
 mod level;
 mod running;
 mod sprite;
-
-struct GameSprites {
-    idle: Sprite,
-    run: Sprite,
-    jump: Sprite,
-    fall: Sprite,
-}
 
 #[macroquad::main("Fun")]
 async fn main() {
@@ -43,32 +38,11 @@ async fn main() {
     let (mut level, player_start_bottom_left) = world
         .player_start_bottom_left_in_pixels()
         .expect("World must define a player start position");
+    let sprites = load_game_sprites(sprite_scale).await.unwrap();
 
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
 
-    let sprites = GameSprites {
-        idle: Sprite::new(
-            load_texture("media/Huntress/Idle.png").await.unwrap(),
-            8,
-            sprite_scale,
-        ),
-        run: Sprite::new(
-            load_texture("media/Huntress/Run.png").await.unwrap(),
-            8,
-            sprite_scale,
-        ),
-        jump: Sprite::new(
-            load_texture("media/Huntress/Jump.png").await.unwrap(),
-            2,
-            sprite_scale,
-        ),
-        fall: Sprite::new(
-            load_texture("media/Huntress/Fall.png").await.unwrap(),
-            2,
-            sprite_scale,
-        ),
-    };
     let mut x = player_start_bottom_left.x - player_relative_bbox.x;
     let mut y = player_start_bottom_left.y - player_relative_bbox.bottom();
     let mut is_in_air = false;
@@ -192,16 +166,16 @@ async fn main() {
 
         if is_in_air {
             if velocity.y >= 0. {
-                sprite = &sprites.fall;
+                sprite = &sprites.huntress.fall;
             } else {
-                sprite = &sprites.jump;
+                sprite = &sprites.huntress.jump;
             }
         } else {
             if x_impulse != 0. {
-                sprite = &sprites.run;
+                sprite = &sprites.huntress.run;
                 is_facing_left = x_impulse < 0.;
             } else {
-                sprite = &sprites.idle;
+                sprite = &sprites.huntress.idle;
             }
         }
 
