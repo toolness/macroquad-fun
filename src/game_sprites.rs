@@ -13,8 +13,13 @@ pub struct HuntressSprites {
     pub idle_bbox: Rect,
 }
 
+pub struct FlyingEyeSprites {
+    pub flight: Sprite,
+}
+
 pub struct GameSprites {
     pub huntress: HuntressSprites,
+    pub flying_eye: FlyingEyeSprites,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -35,6 +40,9 @@ pub async fn load_game_sprites(scale: f32) -> Result<GameSprites> {
             jump: Sprite::new(load_texture("media/Huntress/Jump.png").await?, 2, scale),
             fall: Sprite::new(load_texture("media/Huntress/Fall.png").await?, 2, scale),
             idle_bbox: get_slice(&huntress_idle_slices, "idle_bounding_box")?,
+        },
+        flying_eye: FlyingEyeSprites {
+            flight: Sprite::new(load_texture("media/FlyingEye/Flight.png").await?, 8, scale),
         },
     };
 
