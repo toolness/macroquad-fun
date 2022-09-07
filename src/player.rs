@@ -4,7 +4,7 @@ use crate::{
     collision::{process_collision, Actor},
     config::Config,
     drawing::draw_rect_lines,
-    game_sprites::GameSprites,
+    game_sprites::HuntressSprites,
     level::Level,
     running::RunManager,
     sprite::{Sprite, SpriteDrawParams},
@@ -21,7 +21,8 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(start_rect: Rect, relative_bbox: Rect) -> Self {
+    pub fn new(start_rect: Rect, sprites: &HuntressSprites) -> Self {
+        let relative_bbox = sprites.idle_bbox;
         Player {
             pos: Vec2::new(
                 start_rect.left() - relative_bbox.x,
@@ -131,22 +132,31 @@ impl Player {
         }
     }
 
-    pub fn draw(&self, sprites: &GameSprites, absolute_frame_number: u32, debug_mode: bool) {
-        let sprite: &Sprite;
-
+    pub fn sprite<'a>(&self, sprites: &'a HuntressSprites) -> &'a Sprite {
         if self.is_in_air {
             if self.velocity.y >= 0. {
-                sprite = &sprites.huntress.fall;
+                &sprites.fall
             } else {
-                sprite = &sprites.huntress.jump;
+                &sprites.jump
             }
         } else {
             if self.x_impulse != 0. {
-                sprite = &sprites.huntress.run;
+                &sprites.run
             } else {
-                sprite = &sprites.huntress.idle;
+                &sprites.idle
             }
         }
+    }
+
+    pub fn draw_debug_rects(&self, sprites: &HuntressSprites) {
+        let sprite = self.sprite(&sprites);
+
+        sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
+        draw_rect_lines(&self.bbox(), 2., PURPLE);
+    }
+
+    pub fn draw(&self, sprites: &HuntressSprites, absolute_frame_number: u32) {
+        let sprite = self.sprite(&sprites);
 
         sprite.draw_ex(
             self.pos.x,
@@ -157,10 +167,5 @@ impl Player {
                 ..Default::default()
             },
         );
-
-        if debug_mode {
-            sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
-            draw_rect_lines(&self.bbox(), 2., PURPLE);
-        }
     }
 }
