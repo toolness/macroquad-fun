@@ -120,7 +120,7 @@ impl Player {
         }
     }
 
-    pub fn sprite<'a>(&self, sprites: &'a GameSprites) -> &'a Sprite {
+    fn sprite<'a>(&self, sprites: &'a GameSprites) -> &'a Sprite {
         if self.is_in_air {
             if self.velocity.y >= 0. {
                 &sprites.huntress.fall
