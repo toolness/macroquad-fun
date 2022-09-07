@@ -85,7 +85,7 @@ impl Player {
             }
         }
 
-        let player_prev_bbox = self.bbox();
+        let prev_bbox = self.bbox();
         self.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
         self.pos.y += self.velocity.y * time_since_last_frame as f32;
 
@@ -93,7 +93,7 @@ impl Player {
 
         loop {
             let player_actor = Actor {
-                prev_bbox: player_prev_bbox,
+                prev_bbox,
                 bbox: self.bbox(),
                 velocity: self.velocity,
             };
