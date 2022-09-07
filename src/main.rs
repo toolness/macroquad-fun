@@ -4,15 +4,12 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use camera::calculate_camera_rect;
-use config::{load_config, Config};
+use config::load_config;
 use drawing::draw_rect_lines;
-use game_sprites::{load_game_sprites, GameSprites};
-use level::{Level, World};
+use game_sprites::load_game_sprites;
+use level::World;
 use macroquad::prelude::*;
-use running::RunManager;
-use sprite::{Sprite, SpriteDrawParams};
-
-use crate::collision::{process_collision, Actor};
+use player::Player;
 
 mod aseprite;
 mod camera;
@@ -22,151 +19,9 @@ mod drawing;
 mod game_sprites;
 mod ldtk;
 mod level;
+mod player;
 mod running;
 mod sprite;
-
-pub struct Player {
-    pub pos: Vec2,
-    pub is_in_air: bool,
-    pub velocity: Vec2,
-    pub is_facing_left: bool,
-    pub relative_bbox: Rect,
-    x_impulse: f32,
-    run_manager: RunManager,
-}
-
-impl Player {
-    pub fn new(start_rect: Rect, relative_bbox: Rect) -> Self {
-        Player {
-            pos: Vec2::new(
-                start_rect.left() - relative_bbox.x,
-                start_rect.bottom() - relative_bbox.bottom(),
-            ),
-            relative_bbox,
-            is_in_air: false,
-            velocity: Vec2::new(0., 0.),
-            is_facing_left: false,
-            x_impulse: 0.,
-            run_manager: RunManager::new(),
-        }
-    }
-
-    pub fn bbox(&self) -> Rect {
-        self.relative_bbox.offset(self.pos)
-    }
-
-    pub fn process_input_and_physics(
-        &mut self,
-        config: &Config,
-        level: &Level,
-        time_since_last_frame: f64,
-    ) {
-        self.run_manager.update(
-            &config,
-            time_since_last_frame,
-            is_key_down(KeyCode::A),
-            is_key_down(KeyCode::D),
-        );
-        self.x_impulse = 0.;
-
-        if self.is_in_air {
-            if is_key_down(KeyCode::Space) && self.velocity.y < 0. {
-                self.velocity.y -=
-                    config.long_jump_keypress_extra_force * time_since_last_frame as f32;
-            }
-            self.velocity.y += config.gravity * time_since_last_frame as f32;
-            if self.run_manager.is_running() {
-                self.velocity.x = self.run_manager.run_speed();
-            }
-        } else {
-            if is_key_pressed(KeyCode::Space) {
-                self.velocity = Vec2::new(self.run_manager.run_speed(), -config.jump_velocity);
-                self.is_in_air = true
-            } else {
-                self.x_impulse = self.run_manager.run_speed();
-            }
-        }
-
-        let player_prev_bbox = self.bbox();
-        self.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
-        self.pos.y += self.velocity.y * time_since_last_frame as f32;
-
-        let mut is_on_any_surface_this_frame = false;
-
-        loop {
-            let player_actor = Actor {
-                prev_bbox: player_prev_bbox,
-                bbox: self.bbox(),
-                velocity: self.velocity,
-            };
-            let mut displacement_occurred = false;
-            for collider in level.iter_colliders(&player_actor.bbox) {
-                if let Some(collision) = process_collision(&collider, &player_actor) {
-                    if collision.is_on_surface {
-                        is_on_any_surface_this_frame = true;
-                    }
-                    if let Some(new_velocity) = collision.new_velocity {
-                        self.velocity = new_velocity;
-                    }
-
-                    if collision.displacement.x != 0. || collision.displacement.y != 0. {
-                        self.pos += collision.displacement;
-                        displacement_occurred = true;
-                        break;
-                    }
-                }
-            }
-            if !displacement_occurred {
-                break;
-            }
-        }
-
-        if is_on_any_surface_this_frame {
-            // The player just landed (or remains on the ground).
-            self.is_in_air = false;
-        } else if !self.is_in_air {
-            // The player just fell off a ledge.
-            self.is_in_air = true;
-        }
-
-        if !self.is_in_air && self.x_impulse != 0. {
-            self.is_facing_left = self.x_impulse < 0.;
-        }
-    }
-
-    pub fn draw(&self, sprites: &GameSprites, absolute_frame_number: u32, debug_mode: bool) {
-        let sprite: &Sprite;
-
-        if self.is_in_air {
-            if self.velocity.y >= 0. {
-                sprite = &sprites.huntress.fall;
-            } else {
-                sprite = &sprites.huntress.jump;
-            }
-        } else {
-            if self.x_impulse != 0. {
-                sprite = &sprites.huntress.run;
-            } else {
-                sprite = &sprites.huntress.idle;
-            }
-        }
-
-        sprite.draw_ex(
-            self.pos.x,
-            self.pos.y,
-            absolute_frame_number % sprite.num_frames(),
-            SpriteDrawParams {
-                flip_x: self.is_facing_left,
-                ..Default::default()
-            },
-        );
-
-        if debug_mode {
-            sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
-            draw_rect_lines(&self.bbox(), 2., PURPLE);
-        }
-    }
-}
 
 #[macroquad::main("Fun")]
 async fn main() {
@@ -196,12 +51,12 @@ async fn main() {
         // If the player isn't mostly inside the current level, change levels.
         {
             if !level.contains_majority_of(&player.bbox()) {
-                let world_pos = level.to_world_coords(&player.pos);
+                let world_pos = level.to_world_coords(&player.pos());
                 if let Some((new_level, new_pos)) =
-                    world.find_level_containing_majority_of(&world_pos, &player.relative_bbox)
+                    world.find_level_containing_majority_of(&world_pos, &player.relative_bbox())
                 {
                     level = new_level;
-                    player.pos = new_pos;
+                    player.set_pos(new_pos);
                 }
             }
         }
