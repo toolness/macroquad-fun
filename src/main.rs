@@ -49,16 +49,8 @@ async fn main() {
         last_frame_time = now;
 
         // If the player isn't mostly inside the current level, change levels.
-        {
-            if !level.contains_majority_of(&player.bbox()) {
-                let world_pos = level.to_world_coords(&player.pos());
-                if let Some((new_level, new_pos)) =
-                    world.find_level_containing_majority_of(&world_pos, &player.relative_bbox())
-                {
-                    level = new_level;
-                    player.set_pos(new_pos);
-                }
-            }
+        if let Some(new_level) = player.maybe_switch_levels(&level, &world) {
+            level = new_level;
         }
 
         // Position the camera.

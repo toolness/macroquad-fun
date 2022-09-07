@@ -5,7 +5,7 @@ use crate::{
     config::Config,
     drawing::draw_rect_lines,
     game_sprites::GameSprites,
-    level::Level,
+    level::{Level, World},
     running::RunManager,
     sprite::{Sprite, SpriteDrawParams},
 };
@@ -35,18 +35,6 @@ impl Player {
             x_impulse: 0.,
             run_manager: RunManager::new(),
         }
-    }
-
-    pub fn pos(&self) -> Vec2 {
-        self.pos
-    }
-
-    pub fn set_pos(&mut self, pos: Vec2) {
-        self.pos = pos;
-    }
-
-    pub fn relative_bbox(&self) -> Rect {
-        self.relative_bbox
     }
 
     pub fn bbox(&self) -> Rect {
@@ -146,6 +134,23 @@ impl Player {
                 &sprites.huntress.idle
             }
         }
+    }
+
+    pub fn maybe_switch_levels<'a>(
+        &mut self,
+        level: &'a Level,
+        world: &'a World,
+    ) -> Option<&'a Level> {
+        if !level.contains_majority_of(&self.bbox()) {
+            let world_pos = level.to_world_coords(&self.pos);
+            if let Some((new_level, new_pos)) =
+                world.find_level_containing_majority_of(&world_pos, &self.relative_bbox)
+            {
+                self.pos = new_pos;
+                return Some(new_level);
+            }
+        }
+        None
     }
 
     pub fn draw_debug_rects(&self, sprites: &GameSprites) {
