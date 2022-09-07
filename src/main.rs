@@ -36,7 +36,7 @@ async fn main() {
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
 
-    let mut player = Player::new(player_start, &sprites.huntress);
+    let mut player = Player::new(player_start, &sprites);
     let mut last_frame_time = get_time();
     let mut debug_mode = false;
 
@@ -97,7 +97,7 @@ async fn main() {
         }
 
         // Draw player.
-        player.draw(&sprites.huntress, absolute_frame_number);
+        player.draw(&sprites, absolute_frame_number);
 
         // Draw level text.
         if let Some(text) = level.get_text(&player.bbox()) {
@@ -116,7 +116,7 @@ async fn main() {
             debug_mode = !debug_mode;
         }
         if debug_mode {
-            player.draw_debug_rects(&sprites.huntress);
+            player.draw_debug_rects(&sprites);
             for collider in level.iter_colliders(&level.pixel_bounds()) {
                 collider.draw_debug_rect(PURPLE);
             }
