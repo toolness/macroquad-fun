@@ -6,7 +6,6 @@ extern crate serde_json;
 use camera::calculate_camera_rect;
 use config::load_config;
 use drawing::draw_rect_lines;
-use flying_eye::FlyingEye;
 use game_sprites::load_game_sprites;
 use level::World;
 use macroquad::prelude::*;
@@ -34,6 +33,7 @@ async fn main() {
         .player_start()
         .expect("World must define a player start position");
     let sprites = load_game_sprites(sprite_scale).await.unwrap();
+    let mut flying_eyes = level.spawn_flying_eyes(&sprites);
 
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
@@ -53,6 +53,7 @@ async fn main() {
         // If the player isn't mostly inside the current level, change levels.
         if let Some(new_level) = player.maybe_switch_levels(&level, &world) {
             level = new_level;
+            flying_eyes = level.spawn_flying_eyes(&sprites);
         }
 
         // Position the camera.
@@ -74,12 +75,8 @@ async fn main() {
 
         // Draw NPCs.
 
-        for flying_eye_rect in level.iter_flying_eyes() {
-            let flying_eye = FlyingEye::new(flying_eye_rect, &sprites);
+        for flying_eye in flying_eyes.iter() {
             flying_eye.draw(&sprites, absolute_frame_number);
-            if debug_mode {
-                flying_eye.draw_debug_rects(&sprites);
-            }
         }
 
         // Draw player.
@@ -107,6 +104,9 @@ async fn main() {
                 collider.draw_debug_rect(PURPLE);
             }
             draw_rect_lines(&level.get_bounding_cell_rect(&player.bbox()), 1., WHITE);
+            for flying_eye in flying_eyes.iter() {
+                flying_eye.draw_debug_rects(&sprites);
+            }
             let text = format!("fps: {}", get_fps());
             draw_text(&text, camera_rect.x + 32., camera_rect.y + 32., 32.0, WHITE);
         }

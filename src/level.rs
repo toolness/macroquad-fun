@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
-use crate::{collision::Collider, ldtk};
+use crate::{collision::Collider, flying_eye::FlyingEye, game_sprites::GameSprites, ldtk};
 
 /// The LDtk version we're using.
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
@@ -195,6 +195,18 @@ impl Level {
         })
     }
 
+    pub fn spawn_flying_eyes(&self, sprites: &GameSprites) -> Vec<FlyingEye> {
+        let mut result: Vec<FlyingEye> = Vec::new();
+
+        for entity in self.entities.iter() {
+            if entity.kind == EntityKind::FlyingEye {
+                result.push(FlyingEye::new(entity.rect, &sprites));
+            }
+        }
+
+        result
+    }
+
     pub fn pixel_bounds(&self) -> Rect {
         Rect::new(0., 0., self.width_in_pixels(), self.height_in_pixels())
     }
@@ -284,13 +296,6 @@ impl Level {
             x: x_start,
             y: y_start,
         }
-    }
-
-    pub fn iter_flying_eyes(&self) -> impl Iterator<Item = Rect> + '_ {
-        self.entities
-            .iter()
-            .filter(|entity| entity.kind == EntityKind::FlyingEye)
-            .map(|entity| entity.rect)
     }
 
     pub fn get_text(&self, rect: &Rect) -> Option<&Vec<String>> {
