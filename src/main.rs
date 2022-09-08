@@ -6,6 +6,7 @@ extern crate serde_json;
 use camera::calculate_camera_rect;
 use config::load_config;
 use drawing::draw_rect_lines;
+use flying_eye::FlyingEye;
 use game_sprites::load_game_sprites;
 use level::World;
 use macroquad::prelude::*;
@@ -16,6 +17,7 @@ mod camera;
 mod collision;
 mod config;
 mod drawing;
+mod flying_eye;
 mod game_sprites;
 mod ldtk;
 mod level;
@@ -72,19 +74,11 @@ async fn main() {
 
         // Draw NPCs.
 
-        for flying_eye in level.iter_flying_eyes() {
-            let sprite = &sprites.flying_eye.flight;
-            let bbox = &sprites.flying_eye.flight_bbox;
-            let sprite_pos = flying_eye.point() - bbox.point();
-            sprite.draw(
-                sprite_pos.x,
-                sprite_pos.y,
-                absolute_frame_number % sprite.num_frames(),
-            );
+        for flying_eye_rect in level.iter_flying_eyes() {
+            let flying_eye = FlyingEye::new(flying_eye_rect, &sprites);
+            flying_eye.draw(&sprites, absolute_frame_number);
             if debug_mode {
-                sprite.draw_debug_rect(flying_eye.x, flying_eye.y, GREEN);
-                let flying_eye_bbox = bbox.offset(sprite_pos);
-                draw_rect_lines(&flying_eye_bbox, 2., PURPLE);
+                flying_eye.draw_debug_rects(&sprites);
             }
         }
 
