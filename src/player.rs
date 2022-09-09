@@ -1,21 +1,19 @@
-use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2, GREEN, PURPLE};
+use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
     collision::{process_collision, Actor},
     config::Config,
-    drawing::draw_rect_lines,
     game_sprites::game_sprites,
     level::{Level, World},
     running::RunManager,
-    sprite::{Sprite, SpriteDrawParams},
+    sprite::Sprite,
+    sprite_entity::SpriteEntity,
 };
 
 pub struct Player {
-    pos: Vec2,
+    entity: SpriteEntity,
     is_in_air: bool,
     velocity: Vec2,
-    is_facing_left: bool,
-    relative_bbox: Rect,
     x_impulse: f32,
     run_manager: RunManager,
 }
@@ -23,22 +21,26 @@ pub struct Player {
 impl Player {
     pub fn new(start_rect: Rect) -> Self {
         let relative_bbox = game_sprites().huntress.idle_bbox;
-        Player {
+        let entity = SpriteEntity {
             pos: Vec2::new(
                 start_rect.left() - relative_bbox.x,
                 start_rect.bottom() - relative_bbox.bottom(),
             ),
             relative_bbox,
+            sprite: &game_sprites().huntress.idle,
+            is_facing_left: false,
+        };
+        Player {
+            entity,
             is_in_air: false,
             velocity: Vec2::new(0., 0.),
-            is_facing_left: false,
             x_impulse: 0.,
             run_manager: RunManager::new(),
         }
     }
 
-    pub fn bbox(&self) -> Rect {
-        self.relative_bbox.offset(self.pos)
+    pub fn entity(&self) -> &SpriteEntity {
+        &self.entity
     }
 
     pub fn process_input_and_physics(
@@ -73,16 +75,16 @@ impl Player {
             }
         }
 
-        let prev_bbox = self.bbox();
-        self.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
-        self.pos.y += self.velocity.y * time_since_last_frame as f32;
+        let prev_bbox = self.entity.bbox();
+        self.entity.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
+        self.entity.pos.y += self.velocity.y * time_since_last_frame as f32;
 
         let mut is_on_any_surface_this_frame = false;
 
         loop {
             let player_actor = Actor {
                 prev_bbox,
-                bbox: self.bbox(),
+                bbox: self.entity.bbox(),
                 velocity: self.velocity,
             };
             let mut displacement_occurred = false;
@@ -96,7 +98,7 @@ impl Player {
                     }
 
                     if collision.displacement.x != 0. || collision.displacement.y != 0. {
-                        self.pos += collision.displacement;
+                        self.entity.pos += collision.displacement;
                         displacement_occurred = true;
                         break;
                     }
@@ -116,8 +118,10 @@ impl Player {
         }
 
         if !self.is_in_air && self.x_impulse != 0. {
-            self.is_facing_left = self.x_impulse < 0.;
+            self.entity.is_facing_left = self.x_impulse < 0.;
         }
+
+        self.entity.sprite = self.sprite();
     }
 
     fn sprite(&self) -> &'static Sprite {
@@ -142,36 +146,15 @@ impl Player {
         level: &'a Level,
         world: &'a World,
     ) -> Option<&'a Level> {
-        if !level.contains_majority_of(&self.bbox()) {
-            let world_pos = level.to_world_coords(&self.pos);
+        if !level.contains_majority_of(&self.entity.bbox()) {
+            let world_pos = level.to_world_coords(&self.entity.pos);
             if let Some((new_level, new_pos)) =
-                world.find_level_containing_majority_of(&world_pos, &self.relative_bbox)
+                world.find_level_containing_majority_of(&world_pos, &self.entity.relative_bbox)
             {
-                self.pos = new_pos;
+                self.entity.pos = new_pos;
                 return Some(new_level);
             }
         }
         None
-    }
-
-    pub fn draw_debug_rects(&self) {
-        let sprite = self.sprite();
-
-        sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
-        draw_rect_lines(&self.bbox(), 2., PURPLE);
-    }
-
-    pub fn draw(&self, absolute_frame_number: u32) {
-        let sprite = self.sprite();
-
-        sprite.draw_ex(
-            self.pos.x,
-            self.pos.y,
-            absolute_frame_number % sprite.num_frames(),
-            SpriteDrawParams {
-                flip_x: self.is_facing_left,
-                ..Default::default()
-            },
-        );
     }
 }

@@ -62,7 +62,7 @@ async fn main() {
         // Position the camera.
         let camera_rect: Rect;
         {
-            let bbox = player.bbox();
+            let bbox = player.entity().bbox();
             let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
             camera_rect = calculate_camera_rect(&config, &bbox_center, &level.pixel_bounds());
             set_camera(&Camera2D::from_display_rect(camera_rect));
@@ -83,10 +83,10 @@ async fn main() {
         }
 
         // Draw player.
-        player.draw(absolute_frame_number);
+        player.entity().draw(absolute_frame_number);
 
         // Draw level text.
-        if let Some(text) = level.get_text(&player.bbox()) {
+        if let Some(text) = level.get_text(&player.entity().bbox()) {
             let mut y = camera_rect.y + 128.;
             for line in text {
                 draw_text(line, camera_rect.x + 32., y, 32.0, WHITE);
@@ -102,11 +102,15 @@ async fn main() {
             debug_mode = !debug_mode;
         }
         if debug_mode {
-            player.draw_debug_rects();
+            player.entity().draw_debug_rects();
             for collider in level.iter_colliders(&level.pixel_bounds()) {
                 collider.draw_debug_rect(PURPLE);
             }
-            draw_rect_lines(&level.get_bounding_cell_rect(&player.bbox()), 1., WHITE);
+            draw_rect_lines(
+                &level.get_bounding_cell_rect(&player.entity().bbox()),
+                1.,
+                WHITE,
+            );
             for flying_eye in flying_eyes.iter() {
                 flying_eye.entity().draw_debug_rects();
             }

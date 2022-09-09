@@ -16,6 +16,7 @@ impl FlyingEye {
             ),
             relative_bbox,
             sprite: &game_sprites().flying_eye.flight,
+            is_facing_left: false,
         };
         FlyingEye { entity }
     }

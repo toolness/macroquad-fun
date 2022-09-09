@@ -1,11 +1,15 @@
 use macroquad::prelude::{Rect, Vec2, GREEN, PURPLE};
 
-use crate::{drawing::draw_rect_lines, sprite::Sprite};
+use crate::{
+    drawing::draw_rect_lines,
+    sprite::{Sprite, SpriteDrawParams},
+};
 
 pub struct SpriteEntity {
     pub pos: Vec2,
     pub relative_bbox: Rect,
     pub sprite: &'static Sprite,
+    pub is_facing_left: bool,
 }
 
 impl SpriteEntity {
@@ -14,10 +18,14 @@ impl SpriteEntity {
     }
 
     pub fn draw(&self, absolute_frame_number: u32) {
-        self.sprite.draw(
+        self.sprite.draw_ex(
             self.pos.x,
             self.pos.y,
             absolute_frame_number % self.sprite.num_frames(),
+            SpriteDrawParams {
+                flip_x: self.is_facing_left,
+                ..Default::default()
+            },
         );
     }
 
