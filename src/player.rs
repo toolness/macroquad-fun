@@ -27,8 +27,7 @@ impl Player {
                 start_rect.bottom() - relative_bbox.bottom(),
             ),
             relative_bbox,
-            sprite: &game_sprites().huntress.idle,
-            is_facing_left: false,
+            ..Default::default()
         };
         Player {
             entity,
@@ -121,7 +120,7 @@ impl Player {
             self.entity.is_facing_left = self.x_impulse < 0.;
         }
 
-        self.entity.sprite = self.sprite();
+        self.entity.sprite = Some(self.sprite());
     }
 
     fn sprite(&self) -> &'static Sprite {

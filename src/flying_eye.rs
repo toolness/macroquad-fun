@@ -15,8 +15,8 @@ impl FlyingEye {
                 start_rect.top() - relative_bbox.y,
             ),
             relative_bbox,
-            sprite: &game_sprites().flying_eye.flight,
-            is_facing_left: false,
+            sprite: Some(&game_sprites().flying_eye.flight),
+            ..Default::default()
         };
         FlyingEye { entity }
     }
