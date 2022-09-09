@@ -23,6 +23,7 @@ mod level;
 mod player;
 mod running;
 mod sprite;
+mod sprite_entity;
 
 #[macroquad::main("Fun")]
 async fn main() {
@@ -78,7 +79,7 @@ async fn main() {
         // Draw NPCs.
 
         for flying_eye in flying_eyes.iter() {
-            flying_eye.draw(absolute_frame_number);
+            flying_eye.entity().draw(absolute_frame_number);
         }
 
         // Draw player.
@@ -107,7 +108,7 @@ async fn main() {
             }
             draw_rect_lines(&level.get_bounding_cell_rect(&player.bbox()), 1., WHITE);
             for flying_eye in flying_eyes.iter() {
-                flying_eye.draw_debug_rects();
+                flying_eye.entity().draw_debug_rects();
             }
             let text = format!("fps: {}", get_fps());
             draw_text(&text, camera_rect.x + 32., camera_rect.y + 32., 32.0, WHITE);
