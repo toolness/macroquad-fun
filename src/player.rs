@@ -4,7 +4,7 @@ use crate::{
     collision::{process_collision, Actor},
     config::Config,
     drawing::draw_rect_lines,
-    game_sprites::GameSprites,
+    game_sprites::game_sprites,
     level::{Level, World},
     running::RunManager,
     sprite::{Sprite, SpriteDrawParams},
@@ -21,8 +21,8 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(start_rect: Rect, sprites: &GameSprites) -> Self {
-        let relative_bbox = sprites.huntress.idle_bbox;
+    pub fn new(start_rect: Rect) -> Self {
+        let relative_bbox = game_sprites().huntress.idle_bbox;
         Player {
             pos: Vec2::new(
                 start_rect.left() - relative_bbox.x,
@@ -120,7 +120,8 @@ impl Player {
         }
     }
 
-    fn sprite<'a>(&self, sprites: &'a GameSprites) -> &'a Sprite {
+    fn sprite<'a>(&self) -> &'static Sprite {
+        let sprites = game_sprites();
         if self.is_in_air {
             if self.velocity.y >= 0. {
                 &sprites.huntress.fall
@@ -153,15 +154,15 @@ impl Player {
         None
     }
 
-    pub fn draw_debug_rects(&self, sprites: &GameSprites) {
-        let sprite = self.sprite(&sprites);
+    pub fn draw_debug_rects(&self) {
+        let sprite = self.sprite();
 
         sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
         draw_rect_lines(&self.bbox(), 2., PURPLE);
     }
 
-    pub fn draw(&self, sprites: &GameSprites, absolute_frame_number: u32) {
-        let sprite = self.sprite(&sprites);
+    pub fn draw(&self, absolute_frame_number: u32) {
+        let sprite = self.sprite();
 
         sprite.draw_ex(
             self.pos.x,

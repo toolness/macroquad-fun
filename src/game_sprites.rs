@@ -31,7 +31,7 @@ fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
     }
 }
 
-pub async fn load_game_sprites(scale: f32) -> Result<GameSprites> {
+pub async fn load_game_sprites(scale: f32) -> Result<()> {
     let sprites = GameSprites {
         huntress: HuntressSprites {
             idle: Sprite::new(load_texture("media/Huntress/Idle.png").await?, 8, scale),
@@ -52,5 +52,19 @@ pub async fn load_game_sprites(scale: f32) -> Result<GameSprites> {
         },
     };
 
-    Ok(sprites)
+    unsafe {
+        GAME_SPRITES = Some(sprites);
+    }
+
+    Ok(())
 }
+
+pub fn game_sprites() -> &'static GameSprites {
+    unsafe {
+        GAME_SPRITES
+            .as_ref()
+            .expect("load_game_sprites() was not called or did not finish")
+    }
+}
+
+static mut GAME_SPRITES: Option<GameSprites> = None;
