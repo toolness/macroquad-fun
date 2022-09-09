@@ -120,7 +120,7 @@ impl Player {
         }
     }
 
-    fn sprite<'a>(&self) -> &'static Sprite {
+    fn sprite(&self) -> &'static Sprite {
         let sprites = game_sprites();
         if self.is_in_air {
             if self.velocity.y >= 0. {

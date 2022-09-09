@@ -23,7 +23,7 @@ impl FlyingEye {
         self.relative_bbox.offset(self.pos)
     }
 
-    fn sprite<'a>(&self) -> &'static Sprite {
+    fn sprite(&self) -> &'static Sprite {
         &game_sprites().flying_eye.flight
     }
 
