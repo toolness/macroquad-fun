@@ -1,10 +1,5 @@
 use macroquad::prelude::*;
 
-pub struct Actor {
-    pub prev_bbox: Rect,
-    pub bbox: Rect,
-}
-
 pub struct Collision {
     pub side: Side,
     pub displacement: Vec2,
@@ -73,42 +68,44 @@ impl Collider {
     }
 }
 
-pub fn process_collision(collider: &Collider, actor: &Actor) -> Option<Collision> {
-    let player_bbox = actor.bbox;
-    let player_prev_bbox = actor.prev_bbox;
+pub fn process_collision(
+    collider: &Collider,
+    actor_prev_bbox: &Rect,
+    actor_bbox: &Rect,
+) -> Option<Collision> {
     let collider_rect = collider.rect;
 
-    if let Some(intersection) = collider_rect.intersect(player_bbox) {
+    if let Some(intersection) = collider_rect.intersect(*actor_bbox) {
         if collider.enable_top
             && intersection.top() <= collider_rect.top()
-            && player_prev_bbox.bottom() <= collider_rect.top()
+            && actor_prev_bbox.bottom() <= collider_rect.top()
         {
             // The top of the collider is being intersected with.
-            let y_diff = player_bbox.bottom() - collider_rect.top();
+            let y_diff = actor_bbox.bottom() - collider_rect.top();
             return Some(Collision {
                 side: Side::Top,
                 displacement: Vec2::new(0., -y_diff),
             });
         } else if collider.enable_bottom
             && intersection.bottom() >= collider_rect.bottom()
-            && player_prev_bbox.top() >= collider_rect.bottom()
+            && actor_prev_bbox.top() >= collider_rect.bottom()
         {
             // The bottom side of the collider is being intersected with.
-            let y_diff = collider_rect.bottom() - player_bbox.top();
+            let y_diff = collider_rect.bottom() - actor_bbox.top();
             return Some(Collision {
                 side: Side::Bottom,
                 displacement: Vec2::new(0., y_diff),
             });
         } else if collider.enable_left && intersection.left() <= collider_rect.left() {
             // The left side of the collider is being intersected with.
-            let x_diff = player_bbox.right() - collider_rect.left();
+            let x_diff = actor_bbox.right() - collider_rect.left();
             return Some(Collision {
                 side: Side::Left,
                 displacement: Vec2::new(-x_diff, 0.),
             });
         } else if collider.enable_right && intersection.right() >= collider_rect.right() {
             // The right side of the collider is being intersected with.
-            let x_diff = collider_rect.right() - player_bbox.left();
+            let x_diff = collider_rect.right() - actor_bbox.left();
             return Some(Collision {
                 side: Side::Right,
                 displacement: Vec2::new(x_diff, 0.),

@@ -1,7 +1,7 @@
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
-    collision::{process_collision, Actor, Side},
+    collision::{process_collision, Side},
     config::config,
     game_sprites::game_sprites,
     level::Level,
@@ -80,13 +80,10 @@ impl Player {
         let mut displacements_this_frame = 0;
 
         loop {
-            let player_actor = Actor {
-                prev_bbox,
-                bbox: self.entity.bbox(),
-            };
+            let bbox = self.entity.bbox();
             let mut displacement_occurred = false;
-            for collider in level.iter_colliders(&player_actor.bbox) {
-                if let Some(collision) = process_collision(&collider, &player_actor) {
+            for collider in level.iter_colliders(&bbox) {
+                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     match collision.side {
                         Side::Top => {
                             is_on_any_surface_this_frame = true;
