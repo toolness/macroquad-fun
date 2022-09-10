@@ -1,7 +1,7 @@
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
-    collision::{process_collision, Side},
+    collision::{collision_resolution_loop, process_collision, Side},
     config::config,
     game_sprites::game_sprites,
     level::Level,
@@ -18,8 +18,6 @@ pub struct Player {
     x_impulse: f32,
     run_manager: RunManager,
 }
-
-const MAX_DISPLACEMENTS_PER_FRAME: u32 = 30;
 
 impl Player {
     pub fn new(start_rect: Rect) -> Self {
@@ -77,11 +75,9 @@ impl Player {
         self.entity.pos.y += self.velocity.y * time_since_last_frame as f32;
 
         let mut is_on_any_surface_this_frame = false;
-        let mut displacements_this_frame = 0;
 
-        loop {
+        collision_resolution_loop(|| {
             let bbox = self.entity.bbox();
-            let mut displacement_occurred = false;
             for collider in level.iter_colliders(&bbox) {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     match collision.side {
@@ -99,22 +95,12 @@ impl Player {
 
                     if collision.displacement != Vec2::ZERO {
                         self.entity.pos += collision.displacement;
-                        displacement_occurred = true;
-                        break;
+                        return true;
                     }
                 }
             }
-            if !displacement_occurred {
-                break;
-            }
-            displacements_this_frame += 1;
-            if displacements_this_frame > MAX_DISPLACEMENTS_PER_FRAME {
-                println!(
-                    "WARNING: stuck in possible displacement loop, aborting collision resolution."
-                );
-                break;
-            }
-        }
+            false
+        });
 
         if is_on_any_surface_this_frame {
             // The player just landed (or remains on the ground).

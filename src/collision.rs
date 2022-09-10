@@ -22,6 +22,8 @@ pub enum Side {
     Right,
 }
 
+const MAX_DISPLACEMENTS_PER_FRAME: u32 = 30;
+
 impl Collider {
     pub fn draw_debug_rect(&self, color: Color) {
         let thickness = 2.;
@@ -114,4 +116,22 @@ pub fn process_collision(
     }
 
     None
+}
+
+pub fn collision_resolution_loop<F: FnMut() -> bool>(mut resolve_collisions: F) {
+    let mut displacements_this_frame = 0;
+
+    loop {
+        let displacement_occurred = resolve_collisions();
+        if !displacement_occurred {
+            break;
+        }
+        displacements_this_frame += 1;
+        if displacements_this_frame > MAX_DISPLACEMENTS_PER_FRAME {
+            println!(
+                "WARNING: stuck in possible displacement loop, aborting collision resolution."
+            );
+            break;
+        }
+    }
 }

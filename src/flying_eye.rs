@@ -1,7 +1,10 @@
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
-    collision::process_collision, config::config, game_sprites::game_sprites, level::Level,
+    collision::{collision_resolution_loop, process_collision},
+    config::config,
+    game_sprites::game_sprites,
+    level::Level,
     sprite_entity::SpriteEntity,
 };
 
@@ -44,18 +47,24 @@ impl FlyingEye {
     pub fn update(&mut self, level: &Level, time_since_last_frame: f64) {
         let prev_bbox = self.entity.bbox();
         self.entity.pos += self.velocity * time_since_last_frame as f32;
-        let bbox = self.entity.bbox();
 
-        for collider in level
-            .iter_colliders(&bbox)
-            .chain(level.iter_bounds_as_colliders())
-        {
-            if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                self.entity.pos += collision.displacement;
-                self.maybe_reverse_direction(&collision.displacement);
-                break;
+        collision_resolution_loop(|| {
+            let bbox = self.entity.bbox();
+
+            for collider in level
+                .iter_colliders(&bbox)
+                .chain(level.iter_bounds_as_colliders())
+            {
+                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                    if collision.displacement != Vec2::ZERO {
+                        self.entity.pos += collision.displacement;
+                        self.maybe_reverse_direction(&collision.displacement);
+                        return true;
+                    }
+                }
             }
-        }
+            false
+        });
         self.entity.is_facing_left = self.velocity.x < 0.;
     }
 
