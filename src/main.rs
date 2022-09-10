@@ -3,7 +3,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use camera::calculate_camera_rect;
+use camera::center_camera;
 use config::load_config;
 use drawing::draw_rect_lines;
 use game_sprites::load_game_sprites;
@@ -60,16 +60,9 @@ async fn main() {
         }
 
         // Position the camera.
-        let camera_rect: Rect;
-        {
-            let bbox = player.entity().bbox();
-            let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
-            camera_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
-            set_camera(&Camera2D::from_display_rect(camera_rect));
-        }
+        let camera_rect = center_camera(&player, &level);
 
         // Draw environment.
-
         clear_background(GRAY);
         level.draw(&camera_rect);
 
