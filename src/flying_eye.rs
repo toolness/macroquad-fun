@@ -40,7 +40,7 @@ impl FlyingEye {
             velocity: self.velocity,
             bbox: self.entity.bbox(),
         };
-        // TODO: Also test collisions against level bounds.
+
         for collider in level
             .iter_colliders(&actor.bbox)
             .chain(level.iter_bounds_as_colliders())
