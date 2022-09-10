@@ -18,11 +18,8 @@ impl SpriteEntity {
     pub fn bbox(&self) -> Rect {
         if self.flip_bbox_when_facing_left && self.is_facing_left {
             if let Some(sprite) = self.sprite {
-                let half_frame_width = sprite.frame_width() / 2.;
-                let half_bbox_width = self.relative_bbox.w / 2.;
-                let flipped_x = (self.relative_bbox.x + half_bbox_width - half_frame_width) * -1.
-                    - half_bbox_width
-                    + half_frame_width;
+                let center_offset = sprite.frame_width() / 2. - self.relative_bbox.w / 2.;
+                let flipped_x = (self.relative_bbox.x - center_offset) * -1. + center_offset;
                 let mut flipped_relative_bbox = self.relative_bbox;
                 flipped_relative_bbox.x = flipped_x;
                 return flipped_relative_bbox.offset(self.pos);
