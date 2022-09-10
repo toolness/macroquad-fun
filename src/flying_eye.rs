@@ -46,8 +46,7 @@ impl FlyingEye {
 
     pub fn update(&mut self, level: &Level, time_since_last_frame: f64) {
         let prev_bbox = self.entity.bbox();
-        self.entity.pos.x += self.velocity.x * time_since_last_frame as f32;
-        self.entity.pos.y += self.velocity.y * time_since_last_frame as f32;
+        self.entity.pos += self.velocity * time_since_last_frame as f32;
         let actor = Actor {
             prev_bbox,
             bbox: self.entity.bbox(),
