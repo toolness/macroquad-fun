@@ -4,10 +4,11 @@ use crate::{
     collision::{process_collision, Actor},
     config::config,
     game_sprites::game_sprites,
-    level::{Level, World},
+    level::Level,
     running::RunManager,
     sprite::Sprite,
     sprite_entity::SpriteEntity,
+    world::world,
 };
 
 pub struct Player {
@@ -135,11 +136,8 @@ impl Player {
         }
     }
 
-    pub fn maybe_switch_levels<'a>(
-        &mut self,
-        level: &'a Level,
-        world: &'a World,
-    ) -> Option<&'a Level> {
+    pub fn maybe_switch_levels(&mut self, level: &'static Level) -> Option<&'static Level> {
+        let world = world();
         if !level.contains_majority_of(&self.entity.bbox()) {
             let world_pos = level.to_world_coords(&self.entity.pos);
             if let Some((new_level, new_pos)) =

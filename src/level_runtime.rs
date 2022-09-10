@@ -1,12 +1,12 @@
 use crate::{flying_eye::FlyingEye, level::Level};
 
-pub struct LevelRuntime<'a> {
-    pub level: &'a Level,
+pub struct LevelRuntime {
+    pub level: &'static Level,
     pub flying_eyes: Vec<FlyingEye>,
 }
 
-impl<'a> LevelRuntime<'a> {
-    pub fn new(level: &'a Level) -> Self {
+impl LevelRuntime {
+    pub fn new(level: &'static Level) -> Self {
         LevelRuntime {
             level,
             flying_eyes: level.spawn_flying_eyes(),
