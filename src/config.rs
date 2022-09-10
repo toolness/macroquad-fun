@@ -12,6 +12,7 @@ pub struct Config {
     pub gravity: f32,
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
+    pub flying_eye_speed: f32,
     pub screen_width: f32,
     pub screen_height: f32,
 }
@@ -24,6 +25,7 @@ pub async fn load_config(path: &str) -> Result<()> {
     config.long_jump_keypress_extra_force *= config.sprite_scale;
     config.screen_width *= config.sprite_scale;
     config.screen_height *= config.sprite_scale;
+    config.flying_eye_speed *= config.sprite_scale;
 
     unsafe {
         CONFIG = Some(config);

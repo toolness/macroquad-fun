@@ -77,7 +77,11 @@ async fn main() {
         clear_background(GRAY);
         level.draw(&camera_rect);
 
-        // Process input/physics.
+        // Update entities.
+        for flying_eye in level_runtime.flying_eyes.iter_mut() {
+            flying_eye.update(&level, time_since_last_frame);
+        }
+
         player.process_input_and_physics(&level, time_since_last_frame);
 
         // Draw entities.
