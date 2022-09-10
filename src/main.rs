@@ -99,24 +99,29 @@ async fn main() {
         }
 
         if debug_mode {
-            player.entity().draw_debug_rects();
-            for collider in level.iter_colliders(&level.pixel_bounds()) {
-                collider.draw_debug_rect(PURPLE);
-            }
-            draw_rect_lines(
-                &level.get_bounding_cell_rect(&player.entity().bbox()),
-                1.,
-                WHITE,
-            );
-            for flying_eye in level_runtime.flying_eyes.iter() {
-                flying_eye.entity().draw_debug_rects();
-            }
-            let text = format!("fps: {}", get_fps());
-            draw_text(&text, camera_rect.x + 32., camera_rect.y + 32., 32.0, WHITE);
+            draw_debug_layer(&player, &level_runtime, &camera_rect);
         }
 
         // Wait for the next frame.
 
         next_frame().await;
     }
+}
+
+pub fn draw_debug_layer(player: &Player, level_runtime: &LevelRuntime, camera_rect: &Rect) {
+    let level = level_runtime.level;
+    player.entity().draw_debug_rects();
+    for collider in level.iter_colliders(&level.pixel_bounds()) {
+        collider.draw_debug_rect(PURPLE);
+    }
+    draw_rect_lines(
+        &level.get_bounding_cell_rect(&player.entity().bbox()),
+        1.,
+        WHITE,
+    );
+    for flying_eye in level_runtime.flying_eyes.iter() {
+        flying_eye.entity().draw_debug_rects();
+    }
+    let text = format!("fps: {}", get_fps());
+    draw_text(&text, camera_rect.x + 32., camera_rect.y + 32., 32.0, WHITE);
 }
