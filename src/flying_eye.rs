@@ -51,6 +51,7 @@ impl FlyingEye {
         let y_diff = bbox.bottom() - config.sprite_scale * 10.0 - entity_bbox.top();
         let x_diff = bbox.left() - entity_bbox.left();
         entity.pos += Vec2::new(x_diff, y_diff);
+        entity.is_facing_left = self.entity.is_facing_left;
     }
 
     pub fn update(&mut self, level: &Level, time_since_last_frame: f64) {
