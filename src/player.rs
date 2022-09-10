@@ -19,6 +19,8 @@ pub struct Player {
     run_manager: RunManager,
 }
 
+const MAX_DISPLACEMENTS_PER_FRAME: u32 = 30;
+
 impl Player {
     pub fn new(start_rect: Rect) -> Self {
         let relative_bbox = game_sprites().huntress.idle_bbox;
@@ -75,6 +77,7 @@ impl Player {
         self.entity.pos.y += self.velocity.y * time_since_last_frame as f32;
 
         let mut is_on_any_surface_this_frame = false;
+        let mut displacements_this_frame = 0;
 
         loop {
             let player_actor = Actor {
@@ -105,6 +108,13 @@ impl Player {
                 }
             }
             if !displacement_occurred {
+                break;
+            }
+            displacements_this_frame += 1;
+            if displacements_this_frame > MAX_DISPLACEMENTS_PER_FRAME {
+                println!(
+                    "WARNING: stuck in possible displacement loop, aborting collision resolution."
+                );
                 break;
             }
         }
