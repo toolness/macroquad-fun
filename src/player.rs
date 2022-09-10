@@ -52,12 +52,9 @@ impl Player {
     fn maybe_attach_to_flying_eye(&mut self, level_runtime: &LevelRuntime) {
         let bbox = &self.entity.bbox();
         for (index, flying_eye) in level_runtime.flying_eyes.iter().enumerate() {
-            if flying_eye.entity().bbox().overlaps(&bbox) {
-                if let Some(prev_index) = self.detached_from_flying_eye_index {
-                    if prev_index == index {
-                        continue;
-                    }
-                }
+            if flying_eye.entity().bbox().overlaps(&bbox)
+                && self.detached_from_flying_eye_index != Some(index)
+            {
                 self.attached_to_flying_eye_index = Some(index);
                 self.velocity = Vec2::ZERO;
                 break;
