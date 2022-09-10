@@ -82,7 +82,7 @@ async fn main() {
             flying_eye.update(&level, time_since_last_frame);
         }
 
-        player.process_input_and_physics(&level, time_since_last_frame);
+        player.process_input_and_update(&level_runtime, time_since_last_frame);
 
         // Draw entities.
 

@@ -3,8 +3,10 @@ use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 use crate::{
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
+    flying_eye::FlyingEye,
     game_sprites::game_sprites,
     level::Level,
+    level_runtime::LevelRuntime,
     running::RunManager,
     sprite::Sprite,
     sprite_entity::SpriteEntity,
@@ -17,6 +19,8 @@ pub struct Player {
     velocity: Vec2,
     x_impulse: f32,
     run_manager: RunManager,
+    attached_to_flying_eye_index: Option<usize>,
+    detached_from_flying_eye_index: Option<usize>,
 }
 
 impl Player {
@@ -36,6 +40,8 @@ impl Player {
             velocity: Vec2::new(0., 0.),
             x_impulse: 0.,
             run_manager: RunManager::new(),
+            attached_to_flying_eye_index: None,
+            detached_from_flying_eye_index: None,
         }
     }
 
@@ -43,7 +49,58 @@ impl Player {
         &self.entity
     }
 
-    pub fn process_input_and_physics(&mut self, level: &Level, time_since_last_frame: f64) {
+    fn maybe_attach_to_flying_eye(&mut self, level_runtime: &LevelRuntime) {
+        let bbox = &self.entity.bbox();
+        for (index, flying_eye) in level_runtime.flying_eyes.iter().enumerate() {
+            if flying_eye.entity().bbox().overlaps(&bbox) {
+                if let Some(prev_index) = self.detached_from_flying_eye_index {
+                    if prev_index == index {
+                        continue;
+                    }
+                }
+                self.attached_to_flying_eye_index = Some(index);
+                self.velocity = Vec2::ZERO;
+                break;
+            }
+        }
+    }
+
+    fn attached_flying_eye<'a>(&self, level_runtime: &'a LevelRuntime) -> Option<&'a FlyingEye> {
+        if let Some(index) = self.attached_to_flying_eye_index {
+            level_runtime.flying_eyes.get(index)
+        } else {
+            None
+        }
+    }
+
+    fn update_while_attached(
+        &mut self,
+        flying_eye: &FlyingEye,
+        _level_runtime: &LevelRuntime,
+        _time_since_last_frame: f64,
+    ) {
+        let config = config();
+        let flyer_bbox = flying_eye.entity().bbox();
+        let bbox = self.entity.bbox();
+        let y_diff = flyer_bbox.bottom() - config.sprite_scale * 10.0 - bbox.top();
+        let x_diff = flyer_bbox.left() - bbox.left();
+        self.entity.pos += Vec2::new(x_diff, y_diff);
+
+        if is_key_pressed(KeyCode::Space) {
+            self.detached_from_flying_eye_index = self.attached_to_flying_eye_index.take();
+            assert!(self.detached_from_flying_eye_index.is_some());
+        }
+    }
+
+    pub fn process_input_and_update(
+        &mut self,
+        level_runtime: &LevelRuntime,
+        time_since_last_frame: f64,
+    ) {
+        if let Some(flying_eye) = self.attached_flying_eye(&level_runtime) {
+            self.update_while_attached(&flying_eye, &level_runtime, time_since_last_frame);
+            return;
+        }
         let config = config();
         self.run_manager.update(
             time_since_last_frame,
@@ -78,7 +135,7 @@ impl Player {
 
         collision_resolution_loop(|| {
             let bbox = self.entity.bbox();
-            for collider in level.iter_colliders(&bbox) {
+            for collider in level_runtime.level.iter_colliders(&bbox) {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     match collision.side {
                         Side::Top => {
@@ -105,6 +162,7 @@ impl Player {
         if is_on_any_surface_this_frame {
             // The player just landed (or remains on the ground).
             self.is_in_air = false;
+            self.detached_from_flying_eye_index = None;
         } else if !self.is_in_air {
             // The player just fell off a ledge.
             self.is_in_air = true;
@@ -112,6 +170,10 @@ impl Player {
 
         if !self.is_in_air && self.x_impulse != 0. {
             self.entity.is_facing_left = self.x_impulse < 0.;
+        }
+
+        if self.is_in_air {
+            self.maybe_attach_to_flying_eye(&level_runtime);
         }
 
         self.entity.sprite = Some(self.sprite());
@@ -142,6 +204,7 @@ impl Player {
                 world.find_level_containing_majority_of(&world_pos, &self.entity.relative_bbox)
             {
                 self.entity.pos = new_pos;
+                self.attached_to_flying_eye_index = None;
                 return Some(new_level);
             }
         }
