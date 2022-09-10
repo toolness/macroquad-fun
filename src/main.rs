@@ -27,13 +27,13 @@ mod sprite_entity;
 
 #[macroquad::main("Fun")]
 async fn main() {
-    let config = load_config("media/config.json").await.unwrap();
-    let sprite_scale = config.sprite_scale;
-    let world = World::load("media/world.ldtk", sprite_scale).await.unwrap();
+    load_config("media/config.json").await.unwrap();
+    let world = World::load("media/world.ldtk").await.unwrap();
+    let config = config::config();
     let (mut level, player_start) = world
         .player_start()
         .expect("World must define a player start position");
-    load_game_sprites(sprite_scale)
+    load_game_sprites()
         .await
         .expect("load_game_sprites() must succeed");
     let mut flying_eyes = level.spawn_flying_eyes();
@@ -64,7 +64,7 @@ async fn main() {
         {
             let bbox = player.entity().bbox();
             let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
-            camera_rect = calculate_camera_rect(&config, &bbox_center, &level.pixel_bounds());
+            camera_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
             set_camera(&Camera2D::from_display_rect(camera_rect));
         }
 
@@ -74,7 +74,7 @@ async fn main() {
         level.draw(&camera_rect);
 
         // Process input/physics.
-        player.process_input_and_physics(&config, &level, time_since_last_frame);
+        player.process_input_and_physics(&level, time_since_last_frame);
 
         // Draw NPCs.
 

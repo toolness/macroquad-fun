@@ -1,8 +1,9 @@
 use macroquad::prelude::{Rect, Vec2};
 
-use crate::config::Config;
+use crate::config::config;
 
-pub fn calculate_camera_rect(config: &Config, center: &Vec2, level_rect: &Rect) -> Rect {
+pub fn calculate_camera_rect(center: &Vec2, level_rect: &Rect) -> Rect {
+    let config = config();
     let mut camera_rect = Rect::new(
         center.x - config.screen_width / 2.,
         center.y - config.screen_height / 2.,

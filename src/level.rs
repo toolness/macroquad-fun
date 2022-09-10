@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
-use crate::{collision::Collider, flying_eye::FlyingEye, ldtk};
+use crate::{collision::Collider, config::config, flying_eye::FlyingEye, ldtk};
 
 /// The LDtk version we're using.
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
@@ -43,7 +43,7 @@ pub struct World {
 }
 
 impl World {
-    pub async fn load(path: &str, scale: f32) -> Result<Self> {
+    pub async fn load(path: &str) -> Result<Self> {
         let world_json = load_string(&path).await?;
         let world: ldtk::Coordinate = serde_json::from_str(world_json.as_str())?;
         if world.json_version != EXPECTED_JSON_VERSION {
@@ -56,7 +56,7 @@ impl World {
         let mut levels = HashMap::with_capacity(world.levels.len());
 
         for ldtk_level in world.levels.iter() {
-            let level = Level::from_ldtk(&ldtk_level, scale)?;
+            let level = Level::from_ldtk(&ldtk_level)?;
             levels.insert(level.identifier.clone(), level);
         }
 
@@ -135,11 +135,12 @@ pub enum EntityKind {
 }
 
 impl Level {
-    pub fn from_ldtk(level: &ldtk::Level, scale: f32) -> Result<Self> {
+    pub fn from_ldtk(level: &ldtk::Level) -> Result<Self> {
         let mut colliders: Option<Vec<ColliderType>> = None;
         let mut width: i64 = 0;
         let mut height: i64 = 0;
         let mut grid_size: f32 = 0.;
+        let scale = config().sprite_scale;
         let world_rect = Rect::new(
             level.world_x as f32 * scale,
             level.world_y as f32 * scale,

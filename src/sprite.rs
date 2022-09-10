@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
 
+use crate::config::config;
+
 pub struct Sprite {
     texture: Texture2D,
     scale: f32,
@@ -28,13 +30,13 @@ impl Default for SpriteDrawParams {
 }
 
 impl Sprite {
-    pub fn new(texture: Texture2D, num_frames: u32, scale: f32) -> Self {
+    pub fn new(texture: Texture2D, num_frames: u32) -> Self {
         texture.set_filter(FilterMode::Nearest);
         Sprite {
             texture,
             num_frames,
             frame_size: Vec2::new(texture.width() / num_frames as f32, texture.height()),
-            scale,
+            scale: config().sprite_scale,
         }
     }
 

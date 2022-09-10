@@ -31,22 +31,22 @@ fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
     }
 }
 
-pub async fn load_game_sprites(scale: f32) -> Result<()> {
+pub async fn load_game_sprites() -> Result<()> {
     let sprites = GameSprites {
         huntress: HuntressSprites {
-            idle: Sprite::new(load_texture("media/Huntress/Idle.png").await?, 8, scale),
-            run: Sprite::new(load_texture("media/Huntress/Run.png").await?, 8, scale),
-            jump: Sprite::new(load_texture("media/Huntress/Jump.png").await?, 2, scale),
-            fall: Sprite::new(load_texture("media/Huntress/Fall.png").await?, 2, scale),
+            idle: Sprite::new(load_texture("media/Huntress/Idle.png").await?, 8),
+            run: Sprite::new(load_texture("media/Huntress/Run.png").await?, 8),
+            jump: Sprite::new(load_texture("media/Huntress/Jump.png").await?, 2),
+            fall: Sprite::new(load_texture("media/Huntress/Fall.png").await?, 2),
             idle_bbox: get_slice(
-                &load_aseprite_slices("media/Huntress/Idle.json", scale).await?,
+                &load_aseprite_slices("media/Huntress/Idle.json").await?,
                 "idle_bounding_box",
             )?,
         },
         flying_eye: FlyingEyeSprites {
-            flight: Sprite::new(load_texture("media/FlyingEye/Flight.png").await?, 8, scale),
+            flight: Sprite::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
             flight_bbox: get_slice(
-                &load_aseprite_slices("media/FlyingEye/Flight.json", scale).await?,
+                &load_aseprite_slices("media/FlyingEye/Flight.json").await?,
                 "flight_bounding_box",
             )?,
         },

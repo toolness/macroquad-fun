@@ -1,6 +1,6 @@
 use macroquad::prelude::clamp;
 
-use crate::config::Config;
+use crate::config::config;
 
 pub struct RunManager {
     run_duration: f64,
@@ -21,11 +21,11 @@ impl RunManager {
 
     pub fn update(
         &mut self,
-        config: &Config,
         time_since_last_frame: f64,
         is_pressing_left: bool,
         is_pressing_right: bool,
     ) {
+        let config = config();
         self.x_direction = if is_pressing_left {
             -1.
         } else if is_pressing_right {

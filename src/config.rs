@@ -16,7 +16,7 @@ pub struct Config {
     pub screen_height: f32,
 }
 
-pub async fn load_config(path: &str) -> Result<Config> {
+pub async fn load_config(path: &str) -> Result<()> {
     let mut config: Config = serde_json::from_str(&load_string(path).await?)?;
     config.run_speed *= config.sprite_scale;
     config.gravity *= config.sprite_scale;
@@ -24,5 +24,20 @@ pub async fn load_config(path: &str) -> Result<Config> {
     config.long_jump_keypress_extra_force *= config.sprite_scale;
     config.screen_width *= config.sprite_scale;
     config.screen_height *= config.sprite_scale;
-    Ok(config)
+
+    unsafe {
+        CONFIG = Some(config);
+    }
+
+    Ok(())
 }
+
+pub fn config() -> &'static Config {
+    unsafe {
+        CONFIG
+            .as_ref()
+            .expect("load_config() was not called or did not finish")
+    }
+}
+
+static mut CONFIG: Option<Config> = None;

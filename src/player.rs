@@ -2,7 +2,7 @@ use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
     collision::{process_collision, Actor},
-    config::Config,
+    config::config,
     game_sprites::game_sprites,
     level::{Level, World},
     running::RunManager,
@@ -42,14 +42,9 @@ impl Player {
         &self.entity
     }
 
-    pub fn process_input_and_physics(
-        &mut self,
-        config: &Config,
-        level: &Level,
-        time_since_last_frame: f64,
-    ) {
+    pub fn process_input_and_physics(&mut self, level: &Level, time_since_last_frame: f64) {
+        let config = config();
         self.run_manager.update(
-            &config,
             time_since_last_frame,
             is_key_down(KeyCode::A),
             is_key_down(KeyCode::D),
