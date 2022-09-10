@@ -31,6 +31,19 @@ impl FlyingEye {
         }
     }
 
+    fn maybe_reverse_direction(&mut self, displacement: &Vec2) {
+        if displacement.x > 0. && self.velocity.x < 0.
+            || displacement.x < 0. && self.velocity.x > 0.
+        {
+            self.velocity.x = -self.velocity.x;
+        }
+        if displacement.y > 0. && self.velocity.y < 0.
+            || displacement.y < 0. && self.velocity.y > 0.
+        {
+            self.velocity.y = -self.velocity.y;
+        }
+    }
+
     pub fn update(&mut self, level: &Level, time_since_last_frame: f64) {
         let prev_bbox = self.entity.bbox();
         self.entity.pos.x += self.velocity.x * time_since_last_frame as f32;
@@ -46,16 +59,7 @@ impl FlyingEye {
         {
             if let Some(collision) = process_collision(&collider, &actor) {
                 self.entity.pos += collision.displacement;
-                if collision.displacement.x > 0. && self.velocity.x < 0.
-                    || collision.displacement.x < 0. && self.velocity.x > 0.
-                {
-                    self.velocity.x = -self.velocity.x;
-                }
-                if collision.displacement.y > 0. && self.velocity.y < 0.
-                    || collision.displacement.y < 0. && self.velocity.y > 0.
-                {
-                    self.velocity.y = -self.velocity.y;
-                }
+                self.maybe_reverse_direction(&collision.displacement);
             }
         }
         self.entity.is_facing_left = self.velocity.x < 0.;
