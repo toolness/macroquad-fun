@@ -3,13 +3,11 @@ use macroquad::prelude::*;
 pub struct Actor {
     pub prev_bbox: Rect,
     pub bbox: Rect,
-    pub velocity: Vec2,
 }
 
 pub struct Collision {
-    pub is_on_surface: bool,
+    pub side: Side,
     pub displacement: Vec2,
-    pub new_velocity: Option<Vec2>,
 }
 
 #[derive(Default)]
@@ -19,6 +17,14 @@ pub struct Collider {
     pub enable_bottom: bool,
     pub enable_right: bool,
     pub enable_left: bool,
+}
+
+#[derive(PartialEq)]
+pub enum Side {
+    Top,
+    Bottom,
+    Left,
+    Right,
 }
 
 impl Collider {
@@ -80,9 +86,8 @@ pub fn process_collision(collider: &Collider, actor: &Actor) -> Option<Collision
             // The top of the collider is being intersected with.
             let y_diff = player_bbox.bottom() - collider_rect.top();
             return Some(Collision {
-                is_on_surface: true,
+                side: Side::Top,
                 displacement: Vec2::new(0., -y_diff),
-                new_velocity: Some(Vec2::new(0., 0.)),
             });
         } else if collider.enable_bottom
             && intersection.bottom() >= collider_rect.bottom()
@@ -91,25 +96,22 @@ pub fn process_collision(collider: &Collider, actor: &Actor) -> Option<Collision
             // The bottom side of the collider is being intersected with.
             let y_diff = collider_rect.bottom() - player_bbox.top();
             return Some(Collision {
-                is_on_surface: false,
+                side: Side::Bottom,
                 displacement: Vec2::new(0., y_diff),
-                new_velocity: Some(Vec2::new(actor.velocity.x, 0.)),
             });
         } else if collider.enable_left && intersection.left() <= collider_rect.left() {
             // The left side of the collider is being intersected with.
             let x_diff = player_bbox.right() - collider_rect.left();
             return Some(Collision {
-                is_on_surface: false,
+                side: Side::Left,
                 displacement: Vec2::new(-x_diff, 0.),
-                new_velocity: Some(Vec2::new(0., actor.velocity.y)),
             });
         } else if collider.enable_right && intersection.right() >= collider_rect.right() {
             // The right side of the collider is being intersected with.
             let x_diff = collider_rect.right() - player_bbox.left();
             return Some(Collision {
-                is_on_surface: false,
+                side: Side::Right,
                 displacement: Vec2::new(x_diff, 0.),
-                new_velocity: Some(Vec2::new(0., actor.velocity.y)),
             });
         }
     }

@@ -37,7 +37,6 @@ impl FlyingEye {
         self.entity.pos.y += self.velocity.y * time_since_last_frame as f32;
         let actor = Actor {
             prev_bbox,
-            velocity: self.velocity,
             bbox: self.entity.bbox(),
         };
 
