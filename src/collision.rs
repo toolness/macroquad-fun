@@ -12,6 +12,7 @@ pub struct Collision {
     pub new_velocity: Option<Vec2>,
 }
 
+#[derive(Default)]
 pub struct Collider {
     pub rect: Rect,
     pub enable_top: bool,

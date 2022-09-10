@@ -41,7 +41,10 @@ impl FlyingEye {
             bbox: self.entity.bbox(),
         };
         // TODO: Also test collisions against level bounds.
-        for collider in level.iter_colliders(&actor.bbox) {
+        for collider in level
+            .iter_colliders(&actor.bbox)
+            .chain(level.iter_bounds_as_colliders())
+        {
             if let Some(collision) = process_collision(&collider, &actor) {
                 self.entity.pos += collision.displacement;
                 if collision.displacement.x > 0. && self.velocity.x < 0.

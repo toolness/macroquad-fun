@@ -221,6 +221,13 @@ impl Level {
         result
     }
 
+    pub fn iter_bounds_as_colliders(&self) -> BoundsColliderIterator {
+        BoundsColliderIterator {
+            bounds: self.pixel_bounds(),
+            position: 0,
+        }
+    }
+
     pub fn iter_colliders(&self, bounding_rect: &Rect) -> GridColliderIterator {
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
         let x_start = extents.left() as i64;
@@ -246,6 +253,49 @@ impl Level {
             }
         }
         None
+    }
+}
+
+pub struct BoundsColliderIterator {
+    bounds: Rect,
+    position: u8,
+}
+
+impl Iterator for BoundsColliderIterator {
+    type Item = Collider;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = match self.position {
+            0 => Collider {
+                // Top side of level.
+                rect: self.bounds.offset(Vec2::new(0., -self.bounds.h)),
+                enable_bottom: true,
+                ..Default::default()
+            },
+            1 => Collider {
+                // Right side of level.
+                rect: self.bounds.offset(Vec2::new(self.bounds.w, 0.)),
+                enable_left: true,
+                ..Default::default()
+            },
+            2 => Collider {
+                // Bottom side of level.
+                rect: self.bounds.offset(Vec2::new(0., self.bounds.h)),
+                enable_top: true,
+                ..Default::default()
+            },
+            3 => Collider {
+                // Left side of level.
+                rect: self.bounds.offset(Vec2::new(-self.bounds.w, 0.)),
+                enable_right: true,
+                ..Default::default()
+            },
+            _ => {
+                return None;
+            }
+        };
+        self.position += 1;
+        Some(result)
     }
 }
 
