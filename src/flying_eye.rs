@@ -59,6 +59,7 @@ impl FlyingEye {
             if let Some(collision) = process_collision(&collider, &actor) {
                 self.entity.pos += collision.displacement;
                 self.maybe_reverse_direction(&collision.displacement);
+                break;
             }
         }
         self.entity.is_facing_left = self.velocity.x < 0.;
