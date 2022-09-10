@@ -10,6 +10,7 @@ use game_sprites::load_game_sprites;
 use level::World;
 use macroquad::prelude::*;
 use player::Player;
+use text::draw_level_text;
 
 mod aseprite;
 mod camera;
@@ -24,6 +25,7 @@ mod player;
 mod running;
 mod sprite;
 mod sprite_entity;
+mod text;
 
 #[macroquad::main("Fun")]
 async fn main() {
@@ -69,23 +71,15 @@ async fn main() {
         // Process input/physics.
         player.process_input_and_physics(&level, time_since_last_frame);
 
-        // Draw NPCs.
+        // Draw entities.
 
         for flying_eye in flying_eyes.iter() {
             flying_eye.entity().draw(absolute_frame_number);
         }
 
-        // Draw player.
         player.entity().draw(absolute_frame_number);
 
-        // Draw level text.
-        if let Some(text) = level.get_text(&player.entity().bbox()) {
-            let mut y = camera_rect.y + 128.;
-            for line in text {
-                draw_text(line, camera_rect.x + 32., y, 32.0, WHITE);
-                y += 36.;
-            }
-        }
+        draw_level_text(&player, &level, &camera_rect);
 
         // Process miscellaneous system input.
 
@@ -94,6 +88,7 @@ async fn main() {
         } else if is_key_pressed(KeyCode::GraveAccent) {
             debug_mode = !debug_mode;
         }
+
         if debug_mode {
             player.entity().draw_debug_rects();
             for collider in level.iter_colliders(&level.pixel_bounds()) {
