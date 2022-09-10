@@ -97,7 +97,7 @@ impl Player {
                         }
                     }
 
-                    if collision.displacement.x != 0. || collision.displacement.y != 0. {
+                    if collision.displacement != Vec2::ZERO {
                         self.entity.pos += collision.displacement;
                         displacement_occurred = true;
                         break;
