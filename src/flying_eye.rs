@@ -23,6 +23,7 @@ impl FlyingEye {
             ),
             relative_bbox,
             sprite: Some(&game_sprites().flying_eye.flight),
+            flip_bbox_when_facing_left: true,
             ..Default::default()
         };
         FlyingEye {
