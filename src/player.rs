@@ -70,10 +70,27 @@ impl Player {
         }
     }
 
-    fn update_while_attached(&mut self, flying_eye: &FlyingEye) {
+    fn update_while_attached(&mut self, flying_eye: &FlyingEye, level_runtime: &LevelRuntime) {
+        let prev_bbox = self.entity.bbox();
         flying_eye.carry_entity(&mut self.entity);
 
-        if is_key_pressed(KeyCode::Space) {
+        let mut should_detach = is_key_pressed(KeyCode::Space);
+
+        collision_resolution_loop(|| {
+            let bbox = self.entity.bbox();
+            for collider in level_runtime.level.iter_colliders(&bbox) {
+                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                    if collision.displacement != Vec2::ZERO {
+                        self.entity.pos += collision.displacement;
+                        should_detach = true;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+
+        if should_detach {
             self.detached_from_flying_eye_index = self.attached_to_flying_eye_index.take();
             assert!(self.detached_from_flying_eye_index.is_some());
         }
@@ -85,7 +102,7 @@ impl Player {
         time_since_last_frame: f64,
     ) {
         if let Some(flying_eye) = self.attached_flying_eye(&level_runtime) {
-            self.update_while_attached(&flying_eye);
+            self.update_while_attached(&flying_eye, &level_runtime);
             return;
         }
         let config = config();
