@@ -8,6 +8,7 @@ use config::load_config;
 use drawing::draw_rect_lines;
 use game_sprites::load_game_sprites;
 use level::World;
+use level_runtime::LevelRuntime;
 use macroquad::prelude::*;
 use player::Player;
 use text::draw_level_text;
@@ -21,6 +22,7 @@ mod flying_eye;
 mod game_sprites;
 mod ldtk;
 mod level;
+mod level_runtime;
 mod player;
 mod running;
 mod sprite;
@@ -29,16 +31,18 @@ mod text;
 
 #[macroquad::main("Fun")]
 async fn main() {
-    load_config("media/config.json").await.unwrap();
-    let world = World::load("media/world.ldtk").await.unwrap();
-    let config = config::config();
-    let (mut level, player_start) = world
-        .player_start()
-        .expect("World must define a player start position");
+    load_config("media/config.json")
+        .await
+        .expect("load_config() must succeed");
     load_game_sprites()
         .await
         .expect("load_game_sprites() must succeed");
-    let mut flying_eyes = level.spawn_flying_eyes();
+    let world = World::load("media/world.ldtk").await.unwrap();
+    let config = config::config();
+    let (level_start, player_start) = world
+        .player_start()
+        .expect("World must define a player start position");
+    let mut level_runtime = LevelRuntime::new(level_start);
 
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
@@ -56,10 +60,11 @@ async fn main() {
         last_frame_time = now;
 
         // If the player isn't mostly inside the current level, change levels.
-        if let Some(new_level) = player.maybe_switch_levels(&level, &world) {
-            level = new_level;
-            flying_eyes = level.spawn_flying_eyes();
+        if let Some(new_level) = player.maybe_switch_levels(&level_runtime.level, &world) {
+            level_runtime = LevelRuntime::new(new_level);
         }
+
+        let level = level_runtime.level;
 
         // Position the camera.
         let camera_rect = center_camera(&player, &level);
@@ -73,7 +78,7 @@ async fn main() {
 
         // Draw entities.
 
-        for flying_eye in flying_eyes.iter() {
+        for flying_eye in level_runtime.flying_eyes.iter() {
             flying_eye.entity().draw(absolute_frame_number);
         }
 
@@ -99,7 +104,7 @@ async fn main() {
                 1.,
                 WHITE,
             );
-            for flying_eye in flying_eyes.iter() {
+            for flying_eye in level_runtime.flying_eyes.iter() {
                 flying_eye.entity().draw_debug_rects();
             }
             let text = format!("fps: {}", get_fps());
