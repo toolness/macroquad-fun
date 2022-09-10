@@ -70,12 +70,7 @@ impl Player {
         }
     }
 
-    fn update_while_attached(
-        &mut self,
-        flying_eye: &FlyingEye,
-        _level_runtime: &LevelRuntime,
-        _time_since_last_frame: f64,
-    ) {
+    fn update_while_attached(&mut self, flying_eye: &FlyingEye) {
         flying_eye.carry_entity(&mut self.entity);
 
         if is_key_pressed(KeyCode::Space) {
@@ -90,7 +85,7 @@ impl Player {
         time_since_last_frame: f64,
     ) {
         if let Some(flying_eye) = self.attached_flying_eye(&level_runtime) {
-            self.update_while_attached(&flying_eye, &level_runtime, time_since_last_frame);
+            self.update_while_attached(&flying_eye);
             return;
         }
         let config = config();
