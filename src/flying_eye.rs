@@ -44,6 +44,15 @@ impl FlyingEye {
         }
     }
 
+    pub fn carry_entity(&self, entity: &mut SpriteEntity) {
+        let config = config();
+        let bbox = self.entity.bbox();
+        let entity_bbox = entity.bbox();
+        let y_diff = bbox.bottom() - config.sprite_scale * 10.0 - entity_bbox.top();
+        let x_diff = bbox.left() - entity_bbox.left();
+        entity.pos += Vec2::new(x_diff, y_diff);
+    }
+
     pub fn update(&mut self, level: &Level, time_since_last_frame: f64) {
         let prev_bbox = self.entity.bbox();
         self.entity.pos += self.velocity * time_since_last_frame as f32;

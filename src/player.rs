@@ -79,12 +79,7 @@ impl Player {
         _level_runtime: &LevelRuntime,
         _time_since_last_frame: f64,
     ) {
-        let config = config();
-        let flyer_bbox = flying_eye.entity().bbox();
-        let bbox = self.entity.bbox();
-        let y_diff = flyer_bbox.bottom() - config.sprite_scale * 10.0 - bbox.top();
-        let x_diff = flyer_bbox.left() - bbox.left();
-        self.entity.pos += Vec2::new(x_diff, y_diff);
+        flying_eye.carry_entity(&mut self.entity);
 
         if is_key_pressed(KeyCode::Space) {
             self.detached_from_flying_eye_index = self.attached_to_flying_eye_index.take();
