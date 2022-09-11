@@ -60,6 +60,8 @@ impl LevelRuntime {
 
             if let Some(new_level) = self.player.maybe_switch_levels(&self.level) {
                 self.change_level(new_level);
+            } else if self.player.fell_off_level(&self.level) {
+                println!("TODO: Player fell off level, restart the game or something!");
             }
 
             let level = self.level;

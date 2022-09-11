@@ -205,6 +205,10 @@ impl Player {
         }
     }
 
+    pub fn fell_off_level(&self, level: &Level) -> bool {
+        self.entity.bbox().top() - level.pixel_bounds().bottom() > config().fall_off_level_threshold
+    }
+
     pub fn maybe_switch_levels(&mut self, level: &Level) -> Option<&'static Level> {
         let world = world();
         if !level.contains_majority_of(&self.entity.bbox()) {

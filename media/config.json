@@ -8,5 +8,6 @@
     "gravity": 800.0,
     "long_jump_keypress_extra_force": 400.0,
     "jump_velocity": 200.0,
-    "flying_eye_speed": 50.0
+    "flying_eye_speed": 50.0,
+    "fall_off_level_threshold": 300.0
 }
