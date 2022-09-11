@@ -5,7 +5,6 @@ use crate::{
     config::config,
     flying_eye::FlyingEye,
     game_sprites::game_sprites,
-    level::Level,
     level_runtime::LevelRuntime,
     running::RunManager,
     sprite::Sprite,
@@ -200,8 +199,9 @@ impl Player {
         }
     }
 
-    pub fn maybe_switch_levels(&mut self, level: &'static Level) -> Option<&'static Level> {
+    pub fn maybe_switch_levels(&mut self, level_runtime: &mut LevelRuntime) {
         let world = world();
+        let level = level_runtime.level;
         if !level.contains_majority_of(&self.entity.bbox()) {
             let world_pos = level.to_world_coords(&self.entity.pos);
             if let Some((new_level, new_pos)) =
@@ -209,9 +209,8 @@ impl Player {
             {
                 self.entity.pos = new_pos;
                 self.attached_to_flying_eye_id = None;
-                return Some(new_level);
+                level_runtime.change_level(new_level);
             }
         }
-        None
     }
 }

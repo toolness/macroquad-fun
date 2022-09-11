@@ -63,10 +63,7 @@ async fn main() {
 
         last_frame_time = now;
 
-        // If the player isn't mostly inside the current level, change levels.
-        if let Some(new_level) = player.maybe_switch_levels(&level_runtime.level) {
-            level_runtime = LevelRuntime::new(new_level);
-        }
+        player.maybe_switch_levels(&mut level_runtime);
 
         let level = level_runtime.level;
 

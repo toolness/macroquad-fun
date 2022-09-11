@@ -15,8 +15,14 @@ impl LevelRuntime {
             flying_eyes: HashMap::new(),
             next_id: 1,
         };
-        level.spawn_entities(&mut instance);
+        instance.change_level(&level);
         instance
+    }
+
+    pub fn change_level(&mut self, level: &'static Level) {
+        self.level = level;
+        self.flying_eyes.clear();
+        level.spawn_entities(self);
     }
 
     pub fn new_id(&mut self) -> u64 {
