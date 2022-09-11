@@ -40,13 +40,14 @@ async fn main() {
         .expect("load_world() must succeed");
 
     let config = config::config();
+
+    request_new_screen_size(config.screen_width, config.screen_height);
+    next_frame().await;
+
     let (level_start, player_start) = world::world()
         .player_start()
         .expect("World must define a player start position");
     let mut level_runtime = LevelRuntime::new(Player::new(player_start), level_start);
-
-    request_new_screen_size(config.screen_width, config.screen_height);
-    next_frame().await;
 
     level_runtime.run().await;
 }
