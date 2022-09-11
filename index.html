@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -28,16 +29,7 @@
 </head>
 <body>
     <canvas id="glcanvas" tabindex="1"></canvas>
-    <script type="module">
-    const config = await (await fetch("media/config.json")).json();
-    const width = config.screen_width * config.sprite_scale;
-    const height = config.screen_height * config.sprite_scale;
-    const canvas = document.getElementById("glcanvas");
-    canvas.style = `width: ${width}px; height: ${height}px`;
-    </script>
-    <!-- Minified and statically hosted version of https://github.com/not-fl3/macroquad/blob/master/js/mq_js_bundle.js -->
-    <script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
-    <!-- This needs to be created with "cargo build --target wasm32-unknown-unknown --release" -->
-    <script>load("target/wasm32-unknown-unknown/release/macroquad-fun.wasm");</script>
+    <script src="media/js/vendor/miniquad/gl.js"></script>
+    <script type="module" src="media/js/main.js"></script>
 </body>
 </html>
