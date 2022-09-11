@@ -36,6 +36,7 @@ impl LevelRuntime {
     pub fn change_level(&mut self, level: &'static Level) {
         self.level = level;
         self.flying_eyes.clear();
+        self.camera.cut();
         level.spawn_entities(self);
     }
 

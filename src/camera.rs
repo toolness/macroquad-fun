@@ -1,23 +1,40 @@
-use macroquad::prelude::{set_camera, Camera2D, Rect, Vec2};
+use macroquad::prelude::{clamp, set_camera, Camera2D, Rect, Vec2};
 
 use crate::{config::config, level::Level, player::Player};
 
 #[derive(Default)]
 pub struct Camera {
     current_rect: Rect,
+    is_panning_next_update: bool,
+    max_pan_speed: f32,
 }
 
 impl Camera {
     pub fn new() -> Self {
-        Default::default()
+        Camera {
+            current_rect: Default::default(),
+            is_panning_next_update: false,
+            max_pan_speed: config().sprite_scale * 1.,
+        }
     }
 
     pub fn update(&mut self, player: &Player, level: &Level) {
         let bbox = player.entity().bbox();
         let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
-        let camera_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
-        set_camera(&Camera2D::from_display_rect(camera_rect));
-        self.current_rect = camera_rect;
+        let target_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
+        if self.is_panning_next_update {
+            let delta = target_rect.point() - self.current_rect.point();
+            self.current_rect.x += clamp(delta.x, -self.max_pan_speed, self.max_pan_speed);
+            self.current_rect.y += clamp(delta.y, -self.max_pan_speed, self.max_pan_speed);
+        } else {
+            self.current_rect = target_rect;
+            self.is_panning_next_update = true;
+        }
+        set_camera(&Camera2D::from_display_rect(self.current_rect));
+    }
+
+    pub fn cut(&mut self) {
+        self.is_panning_next_update = false;
     }
 
     pub fn rect(&self) -> &Rect {
