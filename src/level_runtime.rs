@@ -6,6 +6,12 @@ use std::collections::HashMap;
 
 use crate::{flying_eye::FlyingEye, level::Level, player::Player};
 
+#[derive(PartialEq)]
+pub enum FrameResult {
+    Ok,
+    PlayerDied,
+}
+
 pub struct LevelRuntime {
     level: &'static Level,
     flying_eyes: HashMap<u64, FlyingEye>,
@@ -13,6 +19,7 @@ pub struct LevelRuntime {
     debug_mode: bool,
     camera: Camera,
     next_id: u64,
+    last_frame_time: f64,
 }
 
 impl LevelRuntime {
@@ -24,6 +31,7 @@ impl LevelRuntime {
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
+            last_frame_time: get_time(),
         };
         instance.change_level(&level);
         instance
@@ -46,69 +54,59 @@ impl LevelRuntime {
         id
     }
 
-    pub async fn run(&mut self) {
-        let mut last_frame_time = get_time();
+    pub fn advance_one_frame(&mut self) -> FrameResult {
         let config = config();
 
-        loop {
-            // Keep track of time.
-            let now = get_time();
-            let absolute_frame_number = (now * 1000.0 / config.ms_per_animation_frame) as u32;
-            let time_since_last_frame = now - last_frame_time;
+        // Keep track of time.
+        let now = get_time();
+        let absolute_frame_number = (now * 1000.0 / config.ms_per_animation_frame) as u32;
+        let time_since_last_frame = now - self.last_frame_time;
 
-            last_frame_time = now;
+        self.last_frame_time = now;
 
-            if let Some(new_level) = self.player.maybe_switch_levels(&self.level) {
-                self.change_level(new_level);
-            } else if self.player.fell_off_level(&self.level) {
-                println!("TODO: Player fell off level, restart the game or something!");
-            }
-
-            let level = self.level;
-
-            self.camera.update(&self.player, &level);
-
-            // Draw environment.
-            clear_background(GRAY);
-            level.draw(&self.camera.rect());
-
-            // Update entities.
-            for flying_eye in self.flying_eyes.values_mut() {
-                flying_eye.update(&level, time_since_last_frame);
-            }
-
-            self.player.process_input_and_update(
-                &self.level,
-                &self.flying_eyes,
-                time_since_last_frame,
-            );
-
-            // Draw entities.
-
-            for flying_eye in self.flying_eyes.values() {
-                flying_eye.entity().draw(absolute_frame_number);
-            }
-
-            self.player.entity().draw(absolute_frame_number);
-
-            draw_level_text(&self.player, &level, &self.camera.rect());
-
-            // Process miscellaneous system input.
-
-            if is_key_released(KeyCode::Escape) {
-                break;
-            } else if is_key_pressed(KeyCode::GraveAccent) {
-                self.debug_mode = !self.debug_mode;
-            }
-
-            if self.debug_mode {
-                self.draw_debug_layer();
-            }
-
-            // Wait for the next frame.
-
-            next_frame().await;
+        if let Some(new_level) = self.player.maybe_switch_levels(&self.level) {
+            self.change_level(new_level);
+        } else if self.player.fell_off_level(&self.level) {
+            return FrameResult::PlayerDied;
         }
+
+        let level = self.level;
+
+        self.camera.update(&self.player, &level);
+
+        // Draw environment.
+        clear_background(GRAY);
+        level.draw(&self.camera.rect());
+
+        // Update entities.
+        for flying_eye in self.flying_eyes.values_mut() {
+            flying_eye.update(&level, time_since_last_frame);
+        }
+
+        self.player
+            .process_input_and_update(&self.level, &self.flying_eyes, time_since_last_frame);
+
+        // Draw entities.
+
+        for flying_eye in self.flying_eyes.values() {
+            flying_eye.entity().draw(absolute_frame_number);
+        }
+
+        self.player.entity().draw(absolute_frame_number);
+
+        draw_level_text(&self.player, &level, &self.camera.rect());
+
+        // Process miscellaneous system input.
+
+        if is_key_pressed(KeyCode::GraveAccent) {
+            self.debug_mode = !self.debug_mode;
+        }
+
+        if self.debug_mode {
+            self.draw_debug_layer();
+        }
+
+        return FrameResult::Ok;
     }
 
     fn draw_debug_layer(&self) {

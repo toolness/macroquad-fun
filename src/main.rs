@@ -5,7 +5,7 @@ extern crate serde_json;
 
 use config::load_config;
 use game_sprites::load_game_sprites;
-use level_runtime::LevelRuntime;
+use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::Player;
 use world::load_world;
@@ -44,10 +44,27 @@ async fn main() {
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
 
+    let mut level_runtime = new_game();
+
+    loop {
+        match level_runtime.advance_one_frame() {
+            FrameResult::Ok => {}
+            FrameResult::PlayerDied => {
+                level_runtime = new_game();
+            }
+        }
+
+        if is_key_released(KeyCode::Escape) {
+            break;
+        }
+
+        next_frame().await;
+    }
+}
+
+fn new_game() -> LevelRuntime {
     let (level_start, player_start) = world::world()
         .player_start()
         .expect("World must define a player start position");
-    let mut level_runtime = LevelRuntime::new(Player::new(player_start), level_start);
-
-    level_runtime.run().await;
+    LevelRuntime::new(Player::new(player_start), level_start)
 }
