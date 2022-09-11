@@ -78,7 +78,7 @@ async fn main() {
         level.draw(&camera_rect);
 
         // Update entities.
-        for flying_eye in level_runtime.flying_eyes.iter_mut() {
+        for flying_eye in level_runtime.flying_eyes.values_mut() {
             flying_eye.update(&level, time_since_last_frame);
         }
 
@@ -86,7 +86,7 @@ async fn main() {
 
         // Draw entities.
 
-        for flying_eye in level_runtime.flying_eyes.iter() {
+        for flying_eye in level_runtime.flying_eyes.values() {
             flying_eye.entity().draw(absolute_frame_number);
         }
 
@@ -123,7 +123,7 @@ pub fn draw_debug_layer(player: &Player, level_runtime: &LevelRuntime, camera_re
         1.,
         WHITE,
     );
-    for flying_eye in level_runtime.flying_eyes.iter() {
+    for flying_eye in level_runtime.flying_eyes.values() {
         flying_eye.entity().draw_debug_rects();
     }
     let text = format!("fps: {}", get_fps());

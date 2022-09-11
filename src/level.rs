@@ -1,7 +1,9 @@
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
-use crate::{collision::Collider, config::config, flying_eye::FlyingEye, ldtk};
+use crate::{
+    collision::Collider, config::config, flying_eye::FlyingEye, ldtk, level_runtime::LevelRuntime,
+};
 
 #[derive(Eq, PartialEq)]
 pub enum ColliderType {
@@ -137,16 +139,15 @@ impl Level {
         })
     }
 
-    pub fn spawn_flying_eyes(&self) -> Vec<FlyingEye> {
-        let mut result: Vec<FlyingEye> = Vec::new();
-
+    pub fn spawn_entities(&self, level_runtime: &mut LevelRuntime) {
         for entity in self.entities.iter() {
             if let EntityKind::FlyingEye(velocity) = entity.kind {
-                result.push(FlyingEye::new(entity.rect, velocity));
+                let id = level_runtime.new_id();
+                level_runtime
+                    .flying_eyes
+                    .insert(id, FlyingEye::new(id, entity.rect, velocity));
             }
         }
-
-        result
     }
 
     pub fn pixel_bounds(&self) -> Rect {

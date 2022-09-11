@@ -9,12 +9,13 @@ use crate::{
 };
 
 pub struct FlyingEye {
+    id: u64,
     entity: SpriteEntity,
     velocity: Vec2,
 }
 
 impl FlyingEye {
-    pub fn new(start_rect: Rect, base_velocity: Vec2) -> Self {
+    pub fn new(id: u64, start_rect: Rect, base_velocity: Vec2) -> Self {
         let relative_bbox = game_sprites().flying_eye.flight_bbox;
         let entity = SpriteEntity {
             pos: Vec2::new(
@@ -27,9 +28,14 @@ impl FlyingEye {
             ..Default::default()
         };
         FlyingEye {
+            id,
             entity,
             velocity: base_velocity * config().flying_eye_speed,
         }
+    }
+
+    pub fn id(&self) -> u64 {
+        self.id
     }
 
     fn maybe_reverse_direction(&mut self, displacement: &Vec2) {

@@ -19,8 +19,8 @@ pub struct Player {
     velocity: Vec2,
     x_impulse: f32,
     run_manager: RunManager,
-    attached_to_flying_eye_index: Option<usize>,
-    detached_from_flying_eye_index: Option<usize>,
+    attached_to_flying_eye_id: Option<u64>,
+    detached_from_flying_eye_id: Option<u64>,
 }
 
 impl Player {
@@ -40,8 +40,8 @@ impl Player {
             velocity: Vec2::new(0., 0.),
             x_impulse: 0.,
             run_manager: RunManager::new(),
-            attached_to_flying_eye_index: None,
-            detached_from_flying_eye_index: None,
+            attached_to_flying_eye_id: None,
+            detached_from_flying_eye_id: None,
         }
     }
 
@@ -51,11 +51,11 @@ impl Player {
 
     fn maybe_attach_to_flying_eye(&mut self, level_runtime: &LevelRuntime) {
         let bbox = &self.entity.bbox();
-        for (index, flying_eye) in level_runtime.flying_eyes.iter().enumerate() {
+        for flying_eye in level_runtime.flying_eyes.values() {
             if flying_eye.entity().bbox().overlaps(&bbox)
-                && self.detached_from_flying_eye_index != Some(index)
+                && self.detached_from_flying_eye_id != Some(flying_eye.id())
             {
-                self.attached_to_flying_eye_index = Some(index);
+                self.attached_to_flying_eye_id = Some(flying_eye.id());
                 self.velocity = Vec2::ZERO;
                 break;
             }
@@ -63,8 +63,8 @@ impl Player {
     }
 
     fn attached_flying_eye<'a>(&self, level_runtime: &'a LevelRuntime) -> Option<&'a FlyingEye> {
-        if let Some(index) = self.attached_to_flying_eye_index {
-            level_runtime.flying_eyes.get(index)
+        if let Some(id) = self.attached_to_flying_eye_id {
+            level_runtime.flying_eyes.get(&id)
         } else {
             None
         }
@@ -91,8 +91,8 @@ impl Player {
         });
 
         if should_detach {
-            self.detached_from_flying_eye_index = self.attached_to_flying_eye_index.take();
-            assert!(self.detached_from_flying_eye_index.is_some());
+            self.detached_from_flying_eye_id = self.attached_to_flying_eye_id.take();
+            assert!(self.detached_from_flying_eye_id.is_some());
         }
     }
 
@@ -166,7 +166,7 @@ impl Player {
         if is_on_any_surface_this_frame {
             // The player just landed (or remains on the ground).
             self.is_in_air = false;
-            self.detached_from_flying_eye_index = None;
+            self.detached_from_flying_eye_id = None;
         } else if !self.is_in_air {
             // The player just fell off a ledge.
             self.is_in_air = true;
@@ -208,7 +208,7 @@ impl Player {
                 world.find_level_containing_majority_of(&world_pos, &self.entity.relative_bbox)
             {
                 self.entity.pos = new_pos;
-                self.attached_to_flying_eye_index = None;
+                self.attached_to_flying_eye_id = None;
                 return Some(new_level);
             }
         }
