@@ -108,6 +108,27 @@ pub struct EntityInstance {
 }
 
 impl EntityInstance {
+    pub fn get_float_field_instance(&self, identifier: &str) -> Result<f64> {
+        for field in self.field_instances.iter() {
+            if field.identifier == identifier {
+                if let Some(serde_json::Value::Number(value)) = &field.value {
+                    if let Some(number) = value.as_f64() {
+                        return Ok(number);
+                    }
+                }
+                return Err(anyhow!(
+                    "Expected field instance with identifier '{}' to be a number",
+                    identifier
+                ));
+            }
+        }
+
+        Err(anyhow!(
+            "Unable to find field instance with identifier '{}'",
+            identifier
+        ))
+    }
+
     pub fn get_string_field_instance(&self, identifier: &str) -> Result<String> {
         for field in self.field_instances.iter() {
             if field.identifier == identifier {

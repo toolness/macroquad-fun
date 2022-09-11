@@ -14,7 +14,7 @@ pub struct FlyingEye {
 }
 
 impl FlyingEye {
-    pub fn new(start_rect: Rect) -> Self {
+    pub fn new(start_rect: Rect, base_velocity: Vec2) -> Self {
         let relative_bbox = game_sprites().flying_eye.flight_bbox;
         let entity = SpriteEntity {
             pos: Vec2::new(
@@ -28,7 +28,7 @@ impl FlyingEye {
         };
         FlyingEye {
             entity,
-            velocity: Vec2::new(config().flying_eye_speed, 0.),
+            velocity: base_velocity * config().flying_eye_speed,
         }
     }
 

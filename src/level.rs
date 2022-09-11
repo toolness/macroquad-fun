@@ -65,11 +65,11 @@ pub struct Entity {
     pub rect: Rect,
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(PartialEq)]
 pub enum EntityKind {
     PlayerStart,
     Text(Vec<String>),
-    FlyingEye,
+    FlyingEye(Vec2),
 }
 
 impl Level {
@@ -111,7 +111,10 @@ impl Level {
                                 .collect();
                             EntityKind::Text(lines)
                         }
-                        "FlyingEye" => EntityKind::FlyingEye,
+                        "FlyingEye" => EntityKind::FlyingEye(Vec2::new(
+                            entity.get_float_field_instance("x_velocity")? as f32,
+                            entity.get_float_field_instance("y_velocity")? as f32,
+                        )),
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
                             continue;
@@ -138,8 +141,8 @@ impl Level {
         let mut result: Vec<FlyingEye> = Vec::new();
 
         for entity in self.entities.iter() {
-            if entity.kind == EntityKind::FlyingEye {
-                result.push(FlyingEye::new(entity.rect));
+            if let EntityKind::FlyingEye(velocity) = entity.kind {
+                result.push(FlyingEye::new(entity.rect, velocity));
             }
         }
 
