@@ -11,3 +11,11 @@ macroquad = "0.3.23"
 serde = "1.0.144"
 serde_derive = "1.0.144"
 serde_json = "1.0.85"
+
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies, but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
