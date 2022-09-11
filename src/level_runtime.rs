@@ -1,4 +1,4 @@
-use crate::camera::center_camera;
+use crate::camera::Camera;
 use crate::drawing::draw_rect_lines;
 use crate::{config::config, text::draw_level_text};
 use macroquad::prelude::*;
@@ -11,7 +11,7 @@ pub struct LevelRuntime {
     flying_eyes: HashMap<u64, FlyingEye>,
     player: Player,
     debug_mode: bool,
-    camera_rect: Rect,
+    camera: Camera,
     next_id: u64,
 }
 
@@ -23,7 +23,7 @@ impl LevelRuntime {
             flying_eyes: HashMap::new(),
             next_id: 1,
             debug_mode: false,
-            camera_rect: Default::default(),
+            camera: Camera::new(),
         };
         instance.change_level(&level);
         instance
@@ -63,12 +63,11 @@ impl LevelRuntime {
 
             let level = self.level;
 
-            // Position the camera.
-            self.camera_rect = center_camera(&self.player, &level);
+            self.camera.update(&self.player, &level);
 
             // Draw environment.
             clear_background(GRAY);
-            level.draw(&self.camera_rect);
+            level.draw(&self.camera.rect());
 
             // Update entities.
             for flying_eye in self.flying_eyes.values_mut() {
@@ -89,7 +88,7 @@ impl LevelRuntime {
 
             self.player.entity().draw(absolute_frame_number);
 
-            draw_level_text(&self.player, &level, &self.camera_rect);
+            draw_level_text(&self.player, &level, &self.camera.rect());
 
             // Process miscellaneous system input.
 
@@ -126,8 +125,8 @@ impl LevelRuntime {
         let text = format!("fps: {}", get_fps());
         draw_text(
             &text,
-            self.camera_rect.x + 32.,
-            self.camera_rect.y + 32.,
+            self.camera.rect().x + 32.,
+            self.camera.rect().y + 32.,
             32.0,
             WHITE,
         );
