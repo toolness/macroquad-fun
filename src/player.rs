@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
@@ -5,7 +7,7 @@ use crate::{
     config::config,
     flying_eye::FlyingEye,
     game_sprites::game_sprites,
-    level_runtime::LevelRuntime,
+    level::Level,
     running::RunManager,
     sprite::Sprite,
     sprite_entity::SpriteEntity,
@@ -48,9 +50,9 @@ impl Player {
         &self.entity
     }
 
-    fn maybe_attach_to_flying_eye(&mut self, level_runtime: &LevelRuntime) {
+    fn maybe_attach_to_flying_eye(&mut self, flying_eyes: &HashMap<u64, FlyingEye>) {
         let bbox = &self.entity.bbox();
-        for flying_eye in level_runtime.flying_eyes.values() {
+        for flying_eye in flying_eyes.values() {
             if flying_eye.entity().bbox().overlaps(&bbox)
                 && self.detached_from_flying_eye_id != Some(flying_eye.id())
             {
@@ -61,15 +63,18 @@ impl Player {
         }
     }
 
-    fn attached_flying_eye<'a>(&self, level_runtime: &'a LevelRuntime) -> Option<&'a FlyingEye> {
+    fn attached_flying_eye<'a>(
+        &self,
+        flying_eyes: &'a HashMap<u64, FlyingEye>,
+    ) -> Option<&'a FlyingEye> {
         if let Some(id) = self.attached_to_flying_eye_id {
-            level_runtime.flying_eyes.get(&id)
+            flying_eyes.get(&id)
         } else {
             None
         }
     }
 
-    fn update_while_attached(&mut self, flying_eye: &FlyingEye, level_runtime: &LevelRuntime) {
+    fn update_while_attached(&mut self, flying_eye: &FlyingEye, level: &Level) {
         let prev_bbox = self.entity.bbox();
         flying_eye.carry_entity(&mut self.entity);
 
@@ -77,7 +82,7 @@ impl Player {
 
         collision_resolution_loop(|| {
             let bbox = self.entity.bbox();
-            for collider in level_runtime.level.iter_colliders(&bbox) {
+            for collider in level.iter_colliders(&bbox) {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     if collision.displacement != Vec2::ZERO {
                         self.entity.pos += collision.displacement;
@@ -97,11 +102,12 @@ impl Player {
 
     pub fn process_input_and_update(
         &mut self,
-        level_runtime: &LevelRuntime,
+        level: &Level,
+        flying_eyes: &HashMap<u64, FlyingEye>,
         time_since_last_frame: f64,
     ) {
-        if let Some(flying_eye) = self.attached_flying_eye(&level_runtime) {
-            self.update_while_attached(&flying_eye, &level_runtime);
+        if let Some(flying_eye) = self.attached_flying_eye(&flying_eyes) {
+            self.update_while_attached(&flying_eye, &level);
             return;
         }
         let config = config();
@@ -138,7 +144,7 @@ impl Player {
 
         collision_resolution_loop(|| {
             let bbox = self.entity.bbox();
-            for collider in level_runtime.level.iter_colliders(&bbox) {
+            for collider in level.iter_colliders(&bbox) {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     match collision.side {
                         Side::Top => {
@@ -176,7 +182,7 @@ impl Player {
         }
 
         if self.is_in_air {
-            self.maybe_attach_to_flying_eye(&level_runtime);
+            self.maybe_attach_to_flying_eye(&flying_eyes);
         }
 
         self.entity.sprite = Some(self.sprite());
@@ -199,9 +205,8 @@ impl Player {
         }
     }
 
-    pub fn maybe_switch_levels(&mut self, level_runtime: &mut LevelRuntime) {
+    pub fn maybe_switch_levels(&mut self, level: &Level) -> Option<&'static Level> {
         let world = world();
-        let level = level_runtime.level;
         if !level.contains_majority_of(&self.entity.bbox()) {
             let world_pos = level.to_world_coords(&self.entity.pos);
             if let Some((new_level, new_pos)) =
@@ -209,8 +214,9 @@ impl Player {
             {
                 self.entity.pos = new_pos;
                 self.attached_to_flying_eye_id = None;
-                level_runtime.change_level(new_level);
+                return Some(new_level);
             }
         }
+        None
     }
 }
