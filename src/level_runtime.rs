@@ -7,9 +7,9 @@ use std::collections::HashMap;
 use crate::{flying_eye::FlyingEye, level::Level, player::Player};
 
 pub struct LevelRuntime {
-    pub level: &'static Level,
-    pub flying_eyes: HashMap<u64, FlyingEye>,
-    pub player: Player,
+    level: &'static Level,
+    flying_eyes: HashMap<u64, FlyingEye>,
+    player: Player,
     debug_mode: bool,
     camera_rect: Rect,
     next_id: u64,
@@ -27,6 +27,10 @@ impl LevelRuntime {
         };
         instance.change_level(&level);
         instance
+    }
+
+    pub fn add_flying_eye(&mut self, flying_eye: FlyingEye) {
+        self.flying_eyes.insert(flying_eye.id(), flying_eye);
     }
 
     pub fn change_level(&mut self, level: &'static Level) {

@@ -143,9 +143,7 @@ impl Level {
         for entity in self.entities.iter() {
             if let EntityKind::FlyingEye(velocity) = entity.kind {
                 let id = level_runtime.new_id();
-                level_runtime
-                    .flying_eyes
-                    .insert(id, FlyingEye::new(id, entity.rect, velocity));
+                level_runtime.add_flying_eye(FlyingEye::new(id, entity.rect, velocity));
             }
         }
     }
