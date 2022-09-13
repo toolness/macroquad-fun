@@ -75,7 +75,7 @@ impl LevelRuntime {
         self.camera.update(&self.player, &level);
 
         // Draw environment.
-        clear_background(GRAY);
+        clear_background(DARKGRAY);
         level.draw(&self.camera.rect());
 
         // Update entities.

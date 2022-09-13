@@ -2,7 +2,8 @@ use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
 use crate::{
-    collision::Collider, config::config, flying_eye::FlyingEye, ldtk, level_runtime::LevelRuntime,
+    collision::Collider, config::config, flying_eye::FlyingEye, game_sprites::game_sprites, ldtk,
+    level_runtime::LevelRuntime,
 };
 
 #[derive(Eq, PartialEq)]
@@ -45,8 +46,11 @@ pub struct Level {
     /// Height in grid cells.
     pub height: i64,
 
-    /// Width/height of each grid cell in pixels.
+    /// Width/height of each grid cell in pixels, scaled.
     pub grid_size: f32,
+
+    /// Width/height of each grid cell in pixels, unscaled.
+    pub unscaled_grid_size: i64,
 
     /// Where the level exists in world coordinates.
     pub world_rect: Rect,
@@ -89,6 +93,7 @@ impl Level {
         let mut colliders: Option<Vec<ColliderType>> = None;
         let mut width: i64 = 0;
         let mut height: i64 = 0;
+        let mut unscaled_grid_size: i64 = 0;
         let mut grid_size: f32 = 0.;
         let scale = config().sprite_scale;
         let world_rect = Rect::new(
@@ -104,6 +109,7 @@ impl Level {
             if layer.identifier == "IntGrid" {
                 width = layer.c_wid;
                 height = layer.c_hei;
+                unscaled_grid_size = layer.grid_size;
                 grid_size = layer.grid_size as f32 * scale;
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
             } else if layer.identifier == "Entities" {
@@ -159,6 +165,7 @@ impl Level {
             width,
             height,
             grid_size,
+            unscaled_grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
             tiles: opt_tiles.ok_or(anyhow!("Couldn't find tiles"))?,
             entities,
@@ -204,18 +211,29 @@ impl Level {
     }
 
     pub fn draw(&self, bounding_rect: &Rect) {
+        let tileset = game_sprites().tileset;
+        let tileset_rect = Rect {
+            x: 0.,
+            y: 0.,
+            w: self.unscaled_grid_size as f32,
+            h: self.unscaled_grid_size as f32,
+        };
+        let scaled_tile_size = Vec2::new(self.grid_size, self.grid_size);
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
         for y in extents.top() as i64..extents.bottom() as i64 {
             for x in extents.left() as i64..extents.right() as i64 {
-                if let Some(_tile) = self.tiles[self.get_index(x, y)] {
-                    // TODO: Actually draw tile.
-                    draw_rectangle(
+                if let Some(tile) = self.tiles[self.get_index(x, y)] {
+                    draw_texture_ex(
+                        tileset,
                         x as f32 * self.grid_size,
                         y as f32 * self.grid_size,
-                        self.grid_size,
-                        self.grid_size,
-                        DARKGRAY,
-                    )
+                        WHITE,
+                        DrawTextureParams {
+                            dest_size: Some(scaled_tile_size),
+                            source: Some(tileset_rect.offset(tile.tileset_px)),
+                            ..Default::default()
+                        },
+                    );
                 }
             }
         }

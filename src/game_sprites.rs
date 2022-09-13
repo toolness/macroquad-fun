@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
-use macroquad::{prelude::Rect, texture::load_texture};
+use macroquad::{
+    prelude::Rect,
+    texture::{load_texture, FilterMode, Texture2D},
+};
 
 use crate::{aseprite::load_aseprite_slices, sprite::Sprite};
 
@@ -21,6 +24,7 @@ pub struct FlyingEyeSprites {
 pub struct GameSprites {
     pub huntress: HuntressSprites,
     pub flying_eye: FlyingEyeSprites,
+    pub tileset: Texture2D,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -29,6 +33,12 @@ fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
     } else {
         Err(anyhow!("Slice not found: '{}'", name))
     }
+}
+
+async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
+    let texture = load_texture(path).await?;
+    texture.set_filter(FilterMode::Nearest);
+    Ok(texture)
 }
 
 pub async fn load_game_sprites() -> Result<()> {
@@ -50,6 +60,7 @@ pub async fn load_game_sprites() -> Result<()> {
                 "flight_bounding_box",
             )?,
         },
+        tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
     };
 
     unsafe {
