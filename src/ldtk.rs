@@ -75,6 +75,28 @@ pub struct LayerInstance {
 
     #[serde(rename = "entityInstances")]
     pub entity_instances: Vec<EntityInstance>,
+
+    #[serde(rename = "gridTiles")]
+    pub grid_tiles: Vec<TileInstance>,
+}
+
+/// This structure represents a single tile from a given Tileset.
+#[derive(Serialize, Deserialize)]
+pub struct TileInstance {
+    /// "Flip bits", a 2-bits integer to represent the mirror transformations of the tile.<br/>
+    /// - Bit 0 = X flip<br/>   - Bit 1 = Y flip<br/>   Examples: f=0 (no flip), f=1 (X flip
+    /// only), f=2 (Y flip only), f=3 (both flips)
+    #[serde(rename = "f")]
+    pub flip_bits: i64,
+    /// Pixel coordinates of the tile in the **layer** (`[x,y]` format). Don't forget optional
+    /// layer offsets, if they exist!
+    #[serde(rename = "px")]
+    pub layer_px: Vec<i64>,
+    /// Pixel coordinates of the tile in the **tileset** (`[x,y]` format)
+    #[serde(rename = "src")]
+    pub tileset_px: Vec<i64>,
+    /// The *Tile ID* in the corresponding tileset.
+    pub t: i64,
 }
 
 #[derive(Serialize, Deserialize)]

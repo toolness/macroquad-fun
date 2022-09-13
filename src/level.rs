@@ -55,8 +55,18 @@ pub struct Level {
     /// an IntGrid layer in LDtk.
     pub colliders: Vec<ColliderType>,
 
+    /// Tiles for each grid cell, in row-major order. Corresponds to a
+    /// Tiles layer in LDtk.
+    pub tiles: Vec<Option<Tile>>,
+
     /// Various other entities in the level.
     pub entities: Vec<Entity>,
+}
+
+#[derive(Copy, Clone)]
+pub struct Tile {
+    /// The top-left corner of the tile to use from the tileset, in pixels.
+    pub tileset_px: Vec2,
 }
 
 pub struct Entity {
@@ -89,6 +99,7 @@ impl Level {
         );
         let layers = level.layer_instances.as_ref().unwrap();
         let mut entities = vec![];
+        let mut opt_tiles: Option<Vec<Option<Tile>>> = None;
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
                 width = layer.c_wid;
@@ -124,6 +135,20 @@ impl Level {
                     };
                     entities.push(Entity { kind, rect });
                 }
+            } else if layer.identifier == "Tiles" {
+                let mut tiles: Vec<Option<Tile>> =
+                    vec![None; layer.c_wid as usize * layer.c_hei as usize];
+                for grid_tile in layer.grid_tiles.iter() {
+                    let grid_x = grid_tile.layer_px[0] / layer.grid_size;
+                    let grid_y = grid_tile.layer_px[1] / layer.grid_size;
+                    let tileset_px = Vec2::new(
+                        grid_tile.tileset_px[0] as f32,
+                        grid_tile.tileset_px[1] as f32,
+                    );
+                    let index = (grid_y * layer.c_wid + grid_x) as usize;
+                    tiles[index] = Some(Tile { tileset_px });
+                }
+                opt_tiles = Some(tiles);
             } else {
                 eprintln!("Unexpected layer found: {}", layer.identifier);
             }
@@ -135,6 +160,7 @@ impl Level {
             height,
             grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
+            tiles: opt_tiles.ok_or(anyhow!("Couldn't find tiles"))?,
             entities,
         })
     }
@@ -181,7 +207,8 @@ impl Level {
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
         for y in extents.top() as i64..extents.bottom() as i64 {
             for x in extents.left() as i64..extents.right() as i64 {
-                if self.colliders[self.get_index(x, y)] == ColliderType::Solid {
+                if let Some(_tile) = self.tiles[self.get_index(x, y)] {
+                    // TODO: Actually draw tile.
                     draw_rectangle(
                         x as f32 * self.grid_size,
                         y as f32 * self.grid_size,
