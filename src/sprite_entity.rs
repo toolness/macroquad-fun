@@ -3,6 +3,7 @@ use macroquad::prelude::{Rect, Vec2, GREEN, PURPLE};
 use crate::{
     drawing::draw_rect_lines,
     sprite::{Sprite, SpriteDrawParams},
+    time::GameTime,
 };
 
 #[derive(Default)]
@@ -28,12 +29,18 @@ impl SpriteEntity {
         self.relative_bbox.offset(self.pos)
     }
 
-    pub fn draw(&self, absolute_frame_number: u32) {
+    pub fn draw(&self, time: &GameTime) {
+        if let Some(sprite) = self.sprite {
+            self.draw_frame(time.looping_frame_number(&sprite));
+        }
+    }
+
+    pub fn draw_frame(&self, frame_number: u32) {
         if let Some(sprite) = self.sprite {
             sprite.draw_ex(
                 self.pos.x,
                 self.pos.y,
-                absolute_frame_number % sprite.num_frames(),
+                frame_number,
                 SpriteDrawParams {
                     flip_x: self.is_facing_left,
                     ..Default::default()

@@ -2,6 +2,7 @@ use macroquad::prelude::{clamp, Rect, Vec2};
 
 use crate::{
     config::config, game_sprites::game_sprites, player::Player, sprite_entity::SpriteEntity,
+    time::GameTime,
 };
 
 enum MushroomState {
@@ -54,30 +55,30 @@ impl Mushroom {
         )
     }
 
-    pub fn draw(&self, time: f64, absolute_frame_number: u32) {
+    pub fn draw(&self, time: &GameTime) {
         match self.state {
             MushroomState::Dead => {
-                self.entity.draw(self.death_frames() - 1);
+                self.entity.draw_frame(self.death_frames() - 1);
             }
             MushroomState::Rezzing(time_rezzed) => {
                 self.entity
-                    .draw(self.get_rez_animation_frame(time, time_rezzed).0);
+                    .draw_frame(self.get_rez_animation_frame(time.now, time_rezzed).0);
             }
             MushroomState::Alive => {
-                self.entity.draw(absolute_frame_number);
+                self.entity.draw(&time);
             }
         }
     }
 
-    pub fn update(&mut self, player: &Player, time: f64) {
+    pub fn update(&mut self, player: &Player, time: &GameTime) {
         match self.state {
             MushroomState::Dead => {
                 if player.entity().bbox().overlaps(&self.entity.bbox()) {
-                    self.state = MushroomState::Rezzing(time);
+                    self.state = MushroomState::Rezzing(time.now);
                 }
             }
             MushroomState::Rezzing(time_rezzed) => {
-                if self.get_rez_animation_frame(time, time_rezzed).1 {
+                if self.get_rez_animation_frame(time.now, time_rezzed).1 {
                     self.state = MushroomState::Alive;
                     self.entity.sprite = Some(&game_sprites().mushroom.idle);
                 }

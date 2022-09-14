@@ -26,6 +26,7 @@ mod running;
 mod sprite;
 mod sprite_entity;
 mod text;
+mod time;
 mod world;
 
 #[macroquad::main("Fun")]

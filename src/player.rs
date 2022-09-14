@@ -11,6 +11,7 @@ use crate::{
     running::RunManager,
     sprite::Sprite,
     sprite_entity::SpriteEntity,
+    time::GameTime,
     world::world,
 };
 
@@ -104,12 +105,13 @@ impl Player {
         &mut self,
         level: &Level,
         flying_eyes: &HashMap<u64, FlyingEye>,
-        time_since_last_frame: f64,
+        time: &GameTime,
     ) {
         if let Some(flying_eye) = self.attached_flying_eye(&flying_eyes) {
             self.update_while_attached(&flying_eye, &level);
             return;
         }
+        let time_since_last_frame = time.time_since_last_frame;
         let config = config();
         self.run_manager.update(
             time_since_last_frame,

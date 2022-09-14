@@ -6,6 +6,7 @@ use crate::{
     game_sprites::game_sprites,
     level::Level,
     sprite_entity::SpriteEntity,
+    time::GameTime,
 };
 
 pub struct FlyingEye {
@@ -61,9 +62,9 @@ impl FlyingEye {
         entity.is_facing_left = self.entity.is_facing_left;
     }
 
-    pub fn update(&mut self, level: &Level, time_since_last_frame: f64) {
+    pub fn update(&mut self, level: &Level, time: &GameTime) {
         let prev_bbox = self.entity.bbox();
-        self.entity.pos += self.velocity * time_since_last_frame as f32;
+        self.entity.pos += self.velocity * time.time_since_last_frame as f32;
 
         collision_resolution_loop(|| {
             let bbox = self.entity.bbox();

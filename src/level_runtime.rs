@@ -1,7 +1,8 @@
 use crate::camera::Camera;
 use crate::drawing::draw_rect_lines;
 use crate::mushroom::Mushroom;
-use crate::{config::config, text::draw_level_text};
+use crate::text::draw_level_text;
+use crate::time::GameTime;
 use macroquad::prelude::*;
 use std::collections::HashMap;
 
@@ -21,7 +22,7 @@ pub struct LevelRuntime {
     debug_mode: bool,
     camera: Camera,
     next_id: u64,
-    last_frame_time: f64,
+    time: GameTime,
 }
 
 impl LevelRuntime {
@@ -34,7 +35,7 @@ impl LevelRuntime {
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
-            last_frame_time: get_time(),
+            time: GameTime::new(),
         };
         instance.change_level(&level);
         instance
@@ -63,14 +64,7 @@ impl LevelRuntime {
     }
 
     pub fn advance_one_frame(&mut self) -> FrameResult {
-        let config = config();
-
-        // Keep track of time.
-        let now = get_time();
-        let absolute_frame_number = (now * 1000.0 / config.ms_per_animation_frame) as u32;
-        let time_since_last_frame = now - self.last_frame_time;
-
-        self.last_frame_time = now;
+        self.time.update();
 
         if let Some(new_level) = self.player.maybe_switch_levels(&self.level) {
             self.change_level(new_level);
@@ -88,27 +82,27 @@ impl LevelRuntime {
 
         // Update entities.
         for flying_eye in self.flying_eyes.values_mut() {
-            flying_eye.update(&level, time_since_last_frame);
+            flying_eye.update(&level, &self.time);
         }
 
         for mushroom in self.mushrooms.values_mut() {
-            mushroom.update(&self.player, now);
+            mushroom.update(&self.player, &self.time);
         }
 
         self.player
-            .process_input_and_update(&self.level, &self.flying_eyes, time_since_last_frame);
+            .process_input_and_update(&self.level, &self.flying_eyes, &self.time);
 
         // Draw entities.
 
         for flying_eye in self.flying_eyes.values() {
-            flying_eye.entity().draw(absolute_frame_number);
+            flying_eye.entity().draw(&self.time);
         }
 
         for mushroom in self.mushrooms.values() {
-            mushroom.draw(now, absolute_frame_number);
+            mushroom.draw(&self.time);
         }
 
-        self.player.entity().draw(absolute_frame_number);
+        self.player.entity().draw(&self.time);
 
         draw_level_text(&self.player, &level, &self.camera.rect());
 
