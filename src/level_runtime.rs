@@ -91,6 +91,10 @@ impl LevelRuntime {
             flying_eye.update(&level, time_since_last_frame);
         }
 
+        for mushroom in self.mushrooms.values_mut() {
+            mushroom.update(&self.player, now);
+        }
+
         self.player
             .process_input_and_update(&self.level, &self.flying_eyes, time_since_last_frame);
 
@@ -101,7 +105,7 @@ impl LevelRuntime {
         }
 
         for mushroom in self.mushrooms.values() {
-            mushroom.draw(absolute_frame_number);
+            mushroom.draw(now, absolute_frame_number);
         }
 
         self.player.entity().draw(absolute_frame_number);
