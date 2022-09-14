@@ -1,5 +1,6 @@
 use crate::camera::Camera;
 use crate::drawing::draw_rect_lines;
+use crate::mushroom::Mushroom;
 use crate::{config::config, text::draw_level_text};
 use macroquad::prelude::*;
 use std::collections::HashMap;
@@ -15,6 +16,7 @@ pub enum FrameResult {
 pub struct LevelRuntime {
     level: &'static Level,
     flying_eyes: HashMap<u64, FlyingEye>,
+    mushrooms: HashMap<u64, Mushroom>,
     player: Player,
     debug_mode: bool,
     camera: Camera,
@@ -28,6 +30,7 @@ impl LevelRuntime {
             player,
             level,
             flying_eyes: HashMap::new(),
+            mushrooms: HashMap::new(),
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
@@ -41,9 +44,14 @@ impl LevelRuntime {
         self.flying_eyes.insert(flying_eye.id(), flying_eye);
     }
 
+    pub fn add_mushroom(&mut self, mushroom: Mushroom) {
+        self.mushrooms.insert(mushroom.id(), mushroom);
+    }
+
     pub fn change_level(&mut self, level: &'static Level) {
         self.level = level;
         self.flying_eyes.clear();
+        self.mushrooms.clear();
         self.camera.cut();
         level.spawn_entities(self);
     }
@@ -90,6 +98,10 @@ impl LevelRuntime {
 
         for flying_eye in self.flying_eyes.values() {
             flying_eye.entity().draw(absolute_frame_number);
+        }
+
+        for mushroom in self.mushrooms.values() {
+            mushroom.draw(absolute_frame_number);
         }
 
         self.player.entity().draw(absolute_frame_number);

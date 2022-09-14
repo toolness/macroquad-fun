@@ -20,6 +20,7 @@ mod game_sprites;
 mod ldtk;
 mod level;
 mod level_runtime;
+mod mushroom;
 mod player;
 mod running;
 mod sprite;

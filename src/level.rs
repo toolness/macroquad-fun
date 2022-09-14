@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 
 use crate::{
     collision::Collider, config::config, flying_eye::FlyingEye, game_sprites::game_sprites, ldtk,
-    level_runtime::LevelRuntime,
+    level_runtime::LevelRuntime, mushroom::Mushroom,
 };
 
 #[derive(Eq, PartialEq)]
@@ -86,6 +86,7 @@ pub enum EntityKind {
     PlayerStart,
     Text(Vec<String>),
     FlyingEye(Vec2),
+    Mushroom,
 }
 
 impl Level {
@@ -134,6 +135,7 @@ impl Level {
                             entity.get_float_field_instance("x_velocity")? as f32,
                             entity.get_float_field_instance("y_velocity")? as f32,
                         )),
+                        "Mushroom" => EntityKind::Mushroom,
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
                             continue;
@@ -177,6 +179,9 @@ impl Level {
             if let EntityKind::FlyingEye(velocity) = entity.kind {
                 let id = level_runtime.new_id();
                 level_runtime.add_flying_eye(FlyingEye::new(id, entity.rect, velocity));
+            } else if entity.kind == EntityKind::Mushroom {
+                let id = level_runtime.new_id();
+                level_runtime.add_mushroom(Mushroom::new(id, entity.rect));
             }
         }
     }
