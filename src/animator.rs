@@ -1,6 +1,6 @@
 use macroquad::prelude::clamp;
 
-use crate::{config::config, sprite::Sprite, time::GameTime};
+use crate::{config::config, time::GameTime};
 
 pub struct Animator {
     last_frame: u32,
@@ -10,9 +10,9 @@ pub struct Animator {
 }
 
 impl Animator {
-    pub fn new(sprite: &'static Sprite, is_reversed: bool, time: &GameTime) -> Self {
+    pub fn new(last_frame: u32, is_reversed: bool, time: &GameTime) -> Self {
         Animator {
-            last_frame: sprite.last_frame(),
+            last_frame,
             is_reversed,
             start_time: time.now,
             ms_per_animation_frame: config().ms_per_animation_frame,

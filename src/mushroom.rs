@@ -63,11 +63,8 @@ impl Mushroom {
         match &self.state {
             MushroomState::Dead => {
                 if player.entity().bbox().overlaps(&self.entity.bbox()) {
-                    self.state = MushroomState::Rezzing(Animator::new(
-                        &game_sprites().mushroom.death,
-                        true,
-                        &time,
-                    ));
+                    self.state =
+                        MushroomState::Rezzing(Animator::new(self.dead_frame, true, &time));
                 }
             }
             MushroomState::Rezzing(animator) => {
