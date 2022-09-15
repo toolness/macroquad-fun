@@ -1,13 +1,13 @@
-use macroquad::prelude::{clamp, Rect, Vec2};
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
-    config::config, game_sprites::game_sprites, player::Player, sprite_entity::SpriteEntity,
+    animator::Animator, game_sprites::game_sprites, player::Player, sprite_entity::SpriteEntity,
     time::GameTime,
 };
 
 enum MushroomState {
     Dead,
-    Rezzing(f64),
+    Rezzing(Animator),
     Alive,
 }
 
@@ -15,18 +15,21 @@ pub struct Mushroom {
     id: u64,
     entity: SpriteEntity,
     state: MushroomState,
+    dead_frame: u32,
 }
 
 impl Mushroom {
     pub fn new(id: u64, start_rect: Rect) -> Self {
-        let relative_bbox = game_sprites().mushroom.idle_bbox;
+        let sprites = &game_sprites().mushroom;
+        let relative_bbox = sprites.idle_bbox;
+        let death_sprite = &sprites.death;
         let entity = SpriteEntity {
             pos: Vec2::new(
                 start_rect.left() - relative_bbox.x,
                 start_rect.bottom() - relative_bbox.bottom(),
             ),
             relative_bbox,
-            sprite: Some(&game_sprites().mushroom.death),
+            sprite: Some(&death_sprite),
             flip_bbox_when_facing_left: true,
             ..Default::default()
         };
@@ -34,6 +37,7 @@ impl Mushroom {
             id,
             entity,
             state: MushroomState::Dead,
+            dead_frame: death_sprite.num_frames() - 1,
         }
     }
 
@@ -41,28 +45,13 @@ impl Mushroom {
         self.id
     }
 
-    fn death_frames(&self) -> u32 {
-        game_sprites().mushroom.death.num_frames()
-    }
-
-    fn get_rez_animation_frame(&self, time: f64, time_rezzed: f64) -> (u32, bool) {
-        let death_frames = self.death_frames();
-        let time_since_rez = time - time_rezzed;
-        let frames_since_rez = (time_since_rez * 1000.0 / (config().ms_per_animation_frame)) as u32;
-        (
-            death_frames - 1 - clamp(frames_since_rez, 0, death_frames - 1),
-            frames_since_rez >= death_frames,
-        )
-    }
-
     pub fn draw(&self, time: &GameTime) {
-        match self.state {
+        match &self.state {
             MushroomState::Dead => {
-                self.entity.draw_frame(self.death_frames() - 1);
+                self.entity.draw_frame(self.dead_frame);
             }
-            MushroomState::Rezzing(time_rezzed) => {
-                self.entity
-                    .draw_frame(self.get_rez_animation_frame(time.now, time_rezzed).0);
+            MushroomState::Rezzing(animator) => {
+                self.entity.draw_frame(animator.get_frame(&time));
             }
             MushroomState::Alive => {
                 self.entity.draw(&time);
@@ -71,14 +60,18 @@ impl Mushroom {
     }
 
     pub fn update(&mut self, player: &Player, time: &GameTime) {
-        match self.state {
+        match &self.state {
             MushroomState::Dead => {
                 if player.entity().bbox().overlaps(&self.entity.bbox()) {
-                    self.state = MushroomState::Rezzing(time.now);
+                    self.state = MushroomState::Rezzing(Animator::new(
+                        &game_sprites().mushroom.death,
+                        true,
+                        &time,
+                    ));
                 }
             }
-            MushroomState::Rezzing(time_rezzed) => {
-                if self.get_rez_animation_frame(time.now, time_rezzed).1 {
+            MushroomState::Rezzing(animator) => {
+                if animator.is_done(&time) {
                     self.state = MushroomState::Alive;
                     self.entity.sprite = Some(&game_sprites().mushroom.idle);
                 }

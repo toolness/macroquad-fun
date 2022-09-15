@@ -10,6 +10,7 @@ use macroquad::prelude::*;
 use player::Player;
 use world::load_world;
 
+mod animator;
 mod aseprite;
 mod camera;
 mod collision;
