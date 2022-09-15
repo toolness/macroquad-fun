@@ -37,7 +37,7 @@ impl Mushroom {
             id,
             entity,
             state: MushroomState::Dead,
-            dead_frame: death_sprite.num_frames() - 1,
+            dead_frame: death_sprite.last_frame(),
         }
     }
 

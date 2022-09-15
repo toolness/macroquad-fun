@@ -52,6 +52,10 @@ impl Sprite {
         self.num_frames
     }
 
+    pub fn last_frame(&self) -> u32 {
+        self.num_frames - 1
+    }
+
     pub fn draw_ex(&self, x: f32, y: f32, frame_number: u32, params: SpriteDrawParams) {
         draw_texture_ex(
             self.texture,

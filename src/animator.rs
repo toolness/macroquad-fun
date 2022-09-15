@@ -12,7 +12,7 @@ pub struct Animator {
 impl Animator {
     pub fn new(sprite: &'static Sprite, is_reversed: bool, time: &GameTime) -> Self {
         Animator {
-            last_frame: sprite.num_frames() - 1,
+            last_frame: sprite.last_frame(),
             is_reversed,
             start_time: time.now,
             ms_per_animation_frame: config().ms_per_animation_frame,
