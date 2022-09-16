@@ -29,14 +29,16 @@ impl SpriteEntity {
         self.relative_bbox.offset(self.pos)
     }
 
-    pub fn position_at_bottom_left(&mut self, rect: &Rect) {
+    pub fn at_bottom_left(mut self, rect: &Rect) -> Self {
         self.pos.x = rect.left() - self.relative_bbox.left();
         self.pos.y = rect.bottom() - self.relative_bbox.bottom();
+        self
     }
 
-    pub fn position_at_top_left(&mut self, rect: &Rect) {
+    pub fn at_top_left(mut self, rect: &Rect) -> Self {
         self.pos.x = rect.left() - self.relative_bbox.left();
         self.pos.y = rect.top() - self.relative_bbox.top();
+        self
     }
 
     pub fn draw(&self, time: &GameTime) {
