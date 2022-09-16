@@ -2,7 +2,7 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     animator::Animator,
-    collision::{collision_resolution_loop, process_collision},
+    collision::{collision_resolution_loop, process_collision, Side},
     config::config,
     game_sprites::game_sprites,
     level::Level,
@@ -91,6 +91,7 @@ impl Mushroom {
                 }
             }
             MushroomState::Alive => {
+                self.velocity.y += config().gravity * time.time_since_last_frame as f32;
                 let prev_bbox = self.entity.bbox();
                 self.entity.pos += self.velocity * time.time_since_last_frame as f32;
 
@@ -102,6 +103,9 @@ impl Mushroom {
                         .chain(level.iter_bounds_as_colliders())
                     {
                         if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                            if collision.side == Side::Top {
+                                self.velocity.y = 0.;
+                            }
                             if collision.displacement != Vec2::ZERO {
                                 self.entity.pos += collision.displacement;
                                 self.maybe_reverse_direction(&collision.displacement);
