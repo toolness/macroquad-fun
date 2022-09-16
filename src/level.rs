@@ -1,7 +1,12 @@
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
-use crate::{collision::Collider, config::config, game_sprites::game_sprites, ldtk};
+use crate::{
+    collision::Collider,
+    config::config,
+    game_sprites::game_sprites,
+    ldtk::{self, LayerInstance},
+};
 
 #[derive(Eq, PartialEq)]
 pub enum ColliderType {
@@ -56,9 +61,13 @@ pub struct Level {
     /// an IntGrid layer in LDtk.
     pub colliders: Vec<ColliderType>,
 
-    /// Tiles for each grid cell, in row-major order. Corresponds to a
+    /// Foreground tiles for each grid cell, in row-major order. Corresponds to a
     /// Tiles layer in LDtk.
     pub tiles: Vec<Option<Tile>>,
+
+    /// Background tiles for each grid cell, in row-major order. Corresponds to a
+    /// Tiles layer in LDtk.
+    pub background_tiles: Vec<Option<Tile>>,
 
     /// Various other entities in the level.
     pub entities: Vec<Entity>,
@@ -103,6 +112,7 @@ impl Level {
         let layers = level.layer_instances.as_ref().unwrap();
         let mut entities = vec![];
         let mut opt_tiles: Option<Vec<Option<Tile>>> = None;
+        let mut opt_background_tiles: Option<Vec<Option<Tile>>> = None;
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
                 width = layer.c_wid;
@@ -141,19 +151,9 @@ impl Level {
                     entities.push(Entity { kind, rect });
                 }
             } else if layer.identifier == "Tiles" {
-                let mut tiles: Vec<Option<Tile>> =
-                    vec![None; layer.c_wid as usize * layer.c_hei as usize];
-                for grid_tile in layer.grid_tiles.iter() {
-                    let grid_x = grid_tile.layer_px[0] / layer.grid_size;
-                    let grid_y = grid_tile.layer_px[1] / layer.grid_size;
-                    let tileset_px = Vec2::new(
-                        grid_tile.tileset_px[0] as f32,
-                        grid_tile.tileset_px[1] as f32,
-                    );
-                    let index = (grid_y * layer.c_wid + grid_x) as usize;
-                    tiles[index] = Some(Tile { tileset_px });
-                }
-                opt_tiles = Some(tiles);
+                opt_tiles = Some(load_tile_layer(&layer));
+            } else if layer.identifier == "BackgroundTiles" {
+                opt_background_tiles = Some(load_tile_layer(&layer));
             } else {
                 eprintln!("Unexpected layer found: {}", layer.identifier);
             }
@@ -167,6 +167,8 @@ impl Level {
             unscaled_grid_size,
             colliders: colliders.ok_or(anyhow!("Couldn't find colliders"))?,
             tiles: opt_tiles.ok_or(anyhow!("Couldn't find tiles"))?,
+            background_tiles: opt_background_tiles
+                .ok_or(anyhow!("Couldn't find background tiles"))?,
             entities,
         })
     }
@@ -200,8 +202,7 @@ impl Level {
         *coords + self.world_rect.point()
     }
 
-    pub fn draw(&self, bounding_rect: &Rect) {
-        let tileset = game_sprites().tileset;
+    fn draw_tiles(&self, tiles: &Vec<Option<Tile>>, tileset: Texture2D, bounding_rect: &Rect) {
         let tileset_rect = Rect {
             x: 0.,
             y: 0.,
@@ -212,7 +213,7 @@ impl Level {
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
         for y in extents.top() as i64..extents.bottom() as i64 {
             for x in extents.left() as i64..extents.right() as i64 {
-                if let Some(tile) = self.tiles[self.get_index(x, y)] {
+                if let Some(tile) = tiles[self.get_index(x, y)] {
                     draw_texture_ex(
                         tileset,
                         x as f32 * self.grid_size,
@@ -227,6 +228,12 @@ impl Level {
                 }
             }
         }
+    }
+
+    pub fn draw(&self, bounding_rect: &Rect) {
+        let tileset = game_sprites().tileset;
+        self.draw_tiles(&self.background_tiles, tileset, &bounding_rect);
+        self.draw_tiles(&self.tiles, tileset, &bounding_rect);
     }
 
     fn get_index(&self, x: i64, y: i64) -> usize {
@@ -291,6 +298,21 @@ impl Level {
         }
         None
     }
+}
+
+fn load_tile_layer(layer: &LayerInstance) -> Vec<Option<Tile>> {
+    let mut tiles: Vec<Option<Tile>> = vec![None; layer.c_wid as usize * layer.c_hei as usize];
+    for grid_tile in layer.grid_tiles.iter() {
+        let grid_x = grid_tile.layer_px[0] / layer.grid_size;
+        let grid_y = grid_tile.layer_px[1] / layer.grid_size;
+        let tileset_px = Vec2::new(
+            grid_tile.tileset_px[0] as f32,
+            grid_tile.tileset_px[1] as f32,
+        );
+        let index = (grid_y * layer.c_wid + grid_x) as usize;
+        tiles[index] = Some(Tile { tileset_px });
+    }
+    tiles
 }
 
 pub struct BoundsColliderIterator {
