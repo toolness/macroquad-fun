@@ -42,11 +42,13 @@ impl LevelRuntime {
     }
 
     pub fn add_flying_eye(&mut self, flying_eye: FlyingEye) {
-        self.flying_eyes.insert(flying_eye.id(), flying_eye);
+        let id = self.new_id();
+        self.flying_eyes.insert(id, flying_eye);
     }
 
     pub fn add_mushroom(&mut self, mushroom: Mushroom) {
-        self.mushrooms.insert(mushroom.id(), mushroom);
+        let id = self.new_id();
+        self.mushrooms.insert(id, mushroom);
     }
 
     pub fn change_level(&mut self, level: &'static Level) {
@@ -61,19 +63,17 @@ impl LevelRuntime {
         for entity in self.level.entities.iter() {
             match entity.kind {
                 EntityKind::FlyingEye(velocity) => {
-                    let id = self.new_id();
-                    self.add_flying_eye(FlyingEye::new(id, entity.rect, velocity));
+                    self.add_flying_eye(FlyingEye::new(entity.rect, velocity));
                 }
                 EntityKind::Mushroom => {
-                    let id = self.new_id();
-                    self.add_mushroom(Mushroom::new(id, entity.rect));
+                    self.add_mushroom(Mushroom::new(entity.rect));
                 }
                 _ => {}
             }
         }
     }
 
-    pub fn new_id(&mut self) -> u64 {
+    fn new_id(&mut self) -> u64 {
         let id = self.next_id;
         self.next_id += 1;
         id

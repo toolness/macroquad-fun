@@ -18,7 +18,6 @@ enum MushroomState {
 }
 
 pub struct Mushroom {
-    id: u64,
     entity: SpriteEntity,
     state: MushroomState,
     dead_frame: u32,
@@ -26,7 +25,7 @@ pub struct Mushroom {
 }
 
 impl Mushroom {
-    pub fn new(id: u64, start_rect: Rect) -> Self {
+    pub fn new(start_rect: Rect) -> Self {
         let sprites = &game_sprites().mushroom;
         let relative_bbox = sprites.idle_bbox;
         let death_sprite = &sprites.death;
@@ -41,16 +40,11 @@ impl Mushroom {
             ..Default::default()
         };
         Mushroom {
-            id,
             entity,
             state: MushroomState::Dead,
             dead_frame: death_sprite.last_frame(),
             velocity: Vec2::new(0., 0.),
         }
-    }
-
-    pub fn id(&self) -> u64 {
-        self.id
     }
 
     pub fn draw(&self, time: &GameTime) {

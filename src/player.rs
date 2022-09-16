@@ -53,11 +53,11 @@ impl Player {
 
     fn maybe_attach_to_flying_eye(&mut self, flying_eyes: &HashMap<u64, FlyingEye>) {
         let bbox = &self.entity.bbox();
-        for flying_eye in flying_eyes.values() {
+        for (&id, flying_eye) in flying_eyes.iter() {
             if flying_eye.entity().bbox().overlaps(&bbox)
-                && self.detached_from_flying_eye_id != Some(flying_eye.id())
+                && self.detached_from_flying_eye_id != Some(id)
             {
-                self.attached_to_flying_eye_id = Some(flying_eye.id());
+                self.attached_to_flying_eye_id = Some(id);
                 self.velocity = Vec2::ZERO;
                 break;
             }
