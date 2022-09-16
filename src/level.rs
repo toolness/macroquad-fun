@@ -1,10 +1,7 @@
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
-use crate::{
-    collision::Collider, config::config, flying_eye::FlyingEye, game_sprites::game_sprites, ldtk,
-    level_runtime::LevelRuntime, mushroom::Mushroom,
-};
+use crate::{collision::Collider, config::config, game_sprites::game_sprites, ldtk};
 
 #[derive(Eq, PartialEq)]
 pub enum ColliderType {
@@ -172,18 +169,6 @@ impl Level {
             tiles: opt_tiles.ok_or(anyhow!("Couldn't find tiles"))?,
             entities,
         })
-    }
-
-    pub fn spawn_entities(&self, level_runtime: &mut LevelRuntime) {
-        for entity in self.entities.iter() {
-            if let EntityKind::FlyingEye(velocity) = entity.kind {
-                let id = level_runtime.new_id();
-                level_runtime.add_flying_eye(FlyingEye::new(id, entity.rect, velocity));
-            } else if entity.kind == EntityKind::Mushroom {
-                let id = level_runtime.new_id();
-                level_runtime.add_mushroom(Mushroom::new(id, entity.rect));
-            }
-        }
     }
 
     pub fn pixel_bounds(&self) -> Rect {

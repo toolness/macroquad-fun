@@ -1,8 +1,8 @@
-use crate::camera::Camera;
 use crate::drawing::draw_rect_lines;
 use crate::mushroom::Mushroom;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
+use crate::{camera::Camera, level::EntityKind};
 use macroquad::prelude::*;
 use std::collections::HashMap;
 
@@ -54,7 +54,23 @@ impl LevelRuntime {
         self.flying_eyes.clear();
         self.mushrooms.clear();
         self.camera.cut();
-        level.spawn_entities(self);
+        self.spawn_entities();
+    }
+
+    fn spawn_entities(&mut self) {
+        for entity in self.level.entities.iter() {
+            match entity.kind {
+                EntityKind::FlyingEye(velocity) => {
+                    let id = self.new_id();
+                    self.add_flying_eye(FlyingEye::new(id, entity.rect, velocity));
+                }
+                EntityKind::Mushroom => {
+                    let id = self.new_id();
+                    self.add_mushroom(Mushroom::new(id, entity.rect));
+                }
+                _ => {}
+            }
+        }
     }
 
     pub fn new_id(&mut self) -> u64 {
