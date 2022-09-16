@@ -16,17 +16,13 @@ pub struct FlyingEye {
 
 impl FlyingEye {
     pub fn new(start_rect: Rect, base_velocity: Vec2) -> Self {
-        let relative_bbox = game_sprites().flying_eye.flight_bbox;
-        let entity = SpriteEntity {
-            pos: Vec2::new(
-                start_rect.left() - relative_bbox.x,
-                start_rect.top() - relative_bbox.y,
-            ),
-            relative_bbox,
+        let mut entity = SpriteEntity {
+            relative_bbox: game_sprites().flying_eye.flight_bbox,
             sprite: Some(&game_sprites().flying_eye.flight),
             flip_bbox_when_facing_left: true,
             ..Default::default()
         };
+        entity.position_at_top_left(&start_rect);
         FlyingEye {
             entity,
             velocity: base_velocity * config().flying_eye_speed,

@@ -27,18 +27,14 @@ pub struct Mushroom {
 impl Mushroom {
     pub fn new(start_rect: Rect) -> Self {
         let sprites = &game_sprites().mushroom;
-        let relative_bbox = sprites.idle_bbox;
         let death_sprite = &sprites.death;
-        let entity = SpriteEntity {
-            pos: Vec2::new(
-                start_rect.left() - relative_bbox.x,
-                start_rect.bottom() - relative_bbox.bottom(),
-            ),
-            relative_bbox,
+        let mut entity = SpriteEntity {
+            relative_bbox: sprites.idle_bbox,
             sprite: Some(&death_sprite),
             flip_bbox_when_facing_left: true,
             ..Default::default()
         };
+        entity.position_at_bottom_left(&start_rect);
         Mushroom {
             entity,
             state: MushroomState::Dead,

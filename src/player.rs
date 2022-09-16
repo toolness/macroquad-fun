@@ -27,15 +27,11 @@ pub struct Player {
 
 impl Player {
     pub fn new(start_rect: Rect) -> Self {
-        let relative_bbox = game_sprites().huntress.idle_bbox;
-        let entity = SpriteEntity {
-            pos: Vec2::new(
-                start_rect.left() - relative_bbox.x,
-                start_rect.bottom() - relative_bbox.bottom(),
-            ),
-            relative_bbox,
+        let mut entity = SpriteEntity {
+            relative_bbox: game_sprites().huntress.idle_bbox,
             ..Default::default()
         };
+        entity.position_at_bottom_left(&start_rect);
         Player {
             entity,
             is_in_air: false,
