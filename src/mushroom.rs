@@ -6,6 +6,7 @@ use crate::{
     config::config,
     game_sprites::game_sprites,
     level::Level,
+    math_util::are_opposites,
     player::Player,
     sprite_entity::SpriteEntity,
     time::GameTime,
@@ -58,9 +59,7 @@ impl Mushroom {
     }
 
     fn maybe_reverse_direction(&mut self, displacement: &Vec2) {
-        if displacement.x > 0. && self.velocity.x < 0.
-            || displacement.x < 0. && self.velocity.x > 0.
-        {
+        if are_opposites(displacement.x, self.velocity.x) {
             self.velocity.x = -self.velocity.x;
         }
     }
