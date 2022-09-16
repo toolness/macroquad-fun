@@ -30,7 +30,14 @@ impl Camera {
             self.current_rect = target_rect;
             self.is_panning_next_update = true;
         }
-        set_camera(&Camera2D::from_display_rect(self.current_rect));
+        // Clamp to integers to avoid weird visual artifacts.
+        let int_rect = Rect::new(
+            self.current_rect.x.floor(),
+            self.current_rect.y.floor(),
+            self.current_rect.w.floor(),
+            self.current_rect.h.floor(),
+        );
+        set_camera(&Camera2D::from_display_rect(int_rect));
     }
 
     pub fn cut(&mut self) {
