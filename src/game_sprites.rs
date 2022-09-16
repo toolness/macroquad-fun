@@ -23,8 +23,8 @@ pub struct FlyingEyeSprites {
 
 pub struct MushroomSprites {
     pub death: Sprite,
-    pub idle: Sprite,
     pub idle_bbox: Rect,
+    pub run: Sprite,
 }
 
 pub struct GameSprites {
@@ -69,11 +69,11 @@ pub async fn load_game_sprites() -> Result<()> {
         },
         mushroom: MushroomSprites {
             death: Sprite::new(load_texture("media/Mushroom/Death.png").await?, 4),
-            idle: Sprite::new(load_texture("media/Mushroom/Idle.png").await?, 4),
             idle_bbox: get_slice(
                 &load_aseprite_slices("media/Mushroom/Idle.json").await?,
                 "idle_bounding_box",
             )?,
+            run: Sprite::new(load_texture("media/Mushroom/Run.png").await?, 8),
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
     };

@@ -13,6 +13,7 @@ pub struct Config {
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
     pub flying_eye_speed: f32,
+    pub mushroom_speed: f32,
     pub screen_width: f32,
     pub screen_height: f32,
     pub fall_off_level_threshold: f32,
@@ -27,6 +28,7 @@ pub async fn load_config(path: &str) -> Result<()> {
     config.screen_width *= config.sprite_scale;
     config.screen_height *= config.sprite_scale;
     config.flying_eye_speed *= config.sprite_scale;
+    config.mushroom_speed *= config.sprite_scale;
     config.fall_off_level_threshold *= config.sprite_scale;
 
     unsafe {

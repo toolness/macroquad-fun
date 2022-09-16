@@ -86,7 +86,7 @@ impl LevelRuntime {
         }
 
         for mushroom in self.mushrooms.values_mut() {
-            mushroom.update(&self.player, &self.time);
+            mushroom.update(&self.player, &self.level, &self.time);
         }
 
         self.player
@@ -132,6 +132,9 @@ impl LevelRuntime {
         );
         for flying_eye in self.flying_eyes.values() {
             flying_eye.entity().draw_debug_rects();
+        }
+        for mushroom in self.mushrooms.values() {
+            mushroom.entity().draw_debug_rects();
         }
         let text = format!("fps: {}", get_fps());
         draw_text(
