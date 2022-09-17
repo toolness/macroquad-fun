@@ -90,7 +90,12 @@ impl LevelRuntime {
         // Draw environment.
         self.level.draw(&self.camera.rect());
 
-        mushroom_movement_system(&mut self.entities, &self.player, &self.level, &self.time);
+        mushroom_movement_system(
+            &mut self.entities,
+            &self.player.sprite(),
+            &self.level,
+            &self.time,
+        );
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
 
         self.player

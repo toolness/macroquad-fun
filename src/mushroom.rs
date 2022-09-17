@@ -9,7 +9,6 @@ use crate::{
     entity::Entity,
     game_sprites::game_sprites,
     level::Level,
-    player::Player,
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -48,7 +47,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
 
 pub fn mushroom_movement_system(
     entities: &mut HashMap<u64, Entity>,
-    player: &Player,
+    player_sprite: &SpriteComponent,
     level: &Level,
     time: &GameTime,
 ) {
@@ -56,7 +55,7 @@ pub fn mushroom_movement_system(
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.velocity;
             let sprite = &mut entity.sprite;
-            update_mushroom(mushroom, velocity, sprite, player, level, time);
+            update_mushroom(mushroom, velocity, sprite, player_sprite, level, time);
         }
     }
 }
@@ -65,13 +64,13 @@ fn update_mushroom(
     mushroom: &mut MushroomComponent,
     velocity: &mut Vec2,
     sprite: &mut SpriteComponent,
-    player: &Player,
+    player_sprite: &SpriteComponent,
     level: &Level,
     time: &GameTime,
 ) {
     match &mushroom.state {
         MushroomState::Dead => {
-            if player.sprite().bbox().overlaps(&sprite.bbox()) {
+            if player_sprite.bbox().overlaps(&sprite.bbox()) {
                 mushroom.state = MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
             }
         }
