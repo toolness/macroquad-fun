@@ -33,7 +33,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
     Entity {
         sprite: SpriteComponent {
             relative_bbox: sprites.idle_bbox,
-            sprite: Some(&death_sprite),
+            renderer: Some(&death_sprite),
             flip_bbox_when_facing_left: true,
             ..Default::default()
         }
@@ -70,7 +70,7 @@ pub fn update_mushroom(
         MushroomState::Rezzing(animator) => {
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
-                sprite.sprite = Some(&game_sprites().mushroom.run);
+                sprite.renderer = Some(&game_sprites().mushroom.run);
                 velocity.x = config().mushroom_speed;
             }
         }

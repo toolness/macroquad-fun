@@ -17,7 +17,7 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
     Entity {
         sprite: SpriteComponent {
             relative_bbox: game_sprites().flying_eye.flight_bbox,
-            sprite: Some(&game_sprites().flying_eye.flight),
+            renderer: Some(&game_sprites().flying_eye.flight),
             flip_bbox_when_facing_left: true,
             ..Default::default()
         }

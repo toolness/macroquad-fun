@@ -6,25 +6,25 @@ use macroquad::{
     texture::{load_texture, FilterMode, Texture2D},
 };
 
-use crate::{aseprite::load_aseprite_slices, sprite::Sprite};
+use crate::{aseprite::load_aseprite_slices, sprite_renderer::SpriteRenderer};
 
 pub struct HuntressSprites {
-    pub idle: Sprite,
-    pub run: Sprite,
-    pub jump: Sprite,
-    pub fall: Sprite,
+    pub idle: SpriteRenderer,
+    pub run: SpriteRenderer,
+    pub jump: SpriteRenderer,
+    pub fall: SpriteRenderer,
     pub idle_bbox: Rect,
 }
 
 pub struct FlyingEyeSprites {
-    pub flight: Sprite,
+    pub flight: SpriteRenderer,
     pub flight_bbox: Rect,
 }
 
 pub struct MushroomSprites {
-    pub death: Sprite,
+    pub death: SpriteRenderer,
     pub idle_bbox: Rect,
-    pub run: Sprite,
+    pub run: SpriteRenderer,
 }
 
 pub struct GameSprites {
@@ -51,29 +51,29 @@ async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
 pub async fn load_game_sprites() -> Result<()> {
     let sprites = GameSprites {
         huntress: HuntressSprites {
-            idle: Sprite::new(load_texture("media/Huntress/Idle.png").await?, 8),
-            run: Sprite::new(load_texture("media/Huntress/Run.png").await?, 8),
-            jump: Sprite::new(load_texture("media/Huntress/Jump.png").await?, 2),
-            fall: Sprite::new(load_texture("media/Huntress/Fall.png").await?, 2),
+            idle: SpriteRenderer::new(load_texture("media/Huntress/Idle.png").await?, 8),
+            run: SpriteRenderer::new(load_texture("media/Huntress/Run.png").await?, 8),
+            jump: SpriteRenderer::new(load_texture("media/Huntress/Jump.png").await?, 2),
+            fall: SpriteRenderer::new(load_texture("media/Huntress/Fall.png").await?, 2),
             idle_bbox: get_slice(
                 &load_aseprite_slices("media/Huntress/Idle.json").await?,
                 "idle_bounding_box",
             )?,
         },
         flying_eye: FlyingEyeSprites {
-            flight: Sprite::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
+            flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
             flight_bbox: get_slice(
                 &load_aseprite_slices("media/FlyingEye/Flight.json").await?,
                 "flight_bounding_box",
             )?,
         },
         mushroom: MushroomSprites {
-            death: Sprite::new(load_texture("media/Mushroom/Death.png").await?, 4),
+            death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(
                 &load_aseprite_slices("media/Mushroom/Idle.json").await?,
                 "idle_bounding_box",
             )?,
-            run: Sprite::new(load_texture("media/Mushroom/Run.png").await?, 8),
+            run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
     };

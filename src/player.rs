@@ -10,8 +10,8 @@ use crate::{
     game_sprites::game_sprites,
     level::Level,
     running::RunManager,
-    sprite::Sprite,
     sprite_component::SpriteComponent,
+    sprite_renderer::SpriteRenderer,
     time::GameTime,
     world::world,
 };
@@ -145,10 +145,10 @@ impl Player {
                 .maybe_attach_to_entity(&entities, &self.sprite, &mut self.velocity);
         }
 
-        self.sprite.sprite = Some(self.sprite());
+        self.sprite.renderer = Some(self.sprite());
     }
 
-    fn sprite(&self) -> &'static Sprite {
+    fn sprite(&self) -> &'static SpriteRenderer {
         let sprites = game_sprites();
         if self.is_in_air {
             if self.velocity.y >= 0. {

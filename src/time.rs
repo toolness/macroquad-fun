@@ -1,6 +1,6 @@
 use macroquad::time::get_time;
 
-use crate::{config::config, sprite::Sprite};
+use crate::{config::config, sprite_renderer::SpriteRenderer};
 
 pub struct GameTime {
     pub now: f64,
@@ -25,7 +25,7 @@ impl GameTime {
         self.time_since_last_frame = self.now - last_frame_time;
     }
 
-    pub fn looping_frame_number(&self, sprite: &Sprite) -> u32 {
+    pub fn looping_frame_number(&self, sprite: &SpriteRenderer) -> u32 {
         (self.absolute_frame_number % sprite.num_frames() as u64) as u32
     }
 }

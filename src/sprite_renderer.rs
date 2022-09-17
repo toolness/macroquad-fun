@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::config::config;
 
-pub struct Sprite {
+pub struct SpriteRenderer {
     texture: Texture2D,
     scale: f32,
     frame_size: Vec2,
@@ -29,10 +29,10 @@ impl Default for SpriteDrawParams {
     }
 }
 
-impl Sprite {
+impl SpriteRenderer {
     pub fn new(texture: Texture2D, num_frames: u32) -> Self {
         texture.set_filter(FilterMode::Nearest);
-        Sprite {
+        SpriteRenderer {
             texture,
             num_frames,
             frame_size: Vec2::new(texture.width() / num_frames as f32, texture.height()),

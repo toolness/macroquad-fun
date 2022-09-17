@@ -2,7 +2,7 @@ use macroquad::prelude::{Rect, Vec2, GREEN, PURPLE};
 
 use crate::{
     drawing::draw_rect_lines,
-    sprite::{Sprite, SpriteDrawParams},
+    sprite_renderer::{SpriteDrawParams, SpriteRenderer},
     time::GameTime,
 };
 
@@ -10,7 +10,7 @@ use crate::{
 pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
-    pub sprite: Option<&'static Sprite>,
+    pub renderer: Option<&'static SpriteRenderer>,
     pub is_facing_left: bool,
     pub flip_bbox_when_facing_left: bool,
     pub current_frame_number: u32,
@@ -19,7 +19,7 @@ pub struct SpriteComponent {
 impl SpriteComponent {
     pub fn bbox(&self) -> Rect {
         if self.flip_bbox_when_facing_left && self.is_facing_left {
-            if let Some(sprite) = self.sprite {
+            if let Some(sprite) = self.renderer {
                 let center_offset = sprite.frame_width() / 2. - self.relative_bbox.w / 2.;
                 let flipped_x = (self.relative_bbox.x - center_offset) * -1. + center_offset;
                 let mut flipped_relative_bbox = self.relative_bbox;
@@ -43,13 +43,13 @@ impl SpriteComponent {
     }
 
     pub fn update_looping_frame_number(&mut self, time: &GameTime) {
-        if let Some(sprite) = self.sprite {
+        if let Some(sprite) = self.renderer {
             self.current_frame_number = time.looping_frame_number(&sprite);
         }
     }
 
     pub fn draw_current_frame(&self) {
-        if let Some(sprite) = self.sprite {
+        if let Some(sprite) = self.renderer {
             sprite.draw_ex(
                 self.pos.x,
                 self.pos.y,
@@ -63,7 +63,7 @@ impl SpriteComponent {
     }
 
     pub fn draw_debug_rects(&self) {
-        if let Some(sprite) = self.sprite {
+        if let Some(sprite) = self.renderer {
             sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
         }
         draw_rect_lines(&self.bbox(), 2., PURPLE);
