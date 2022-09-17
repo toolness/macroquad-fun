@@ -11,12 +11,12 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct Attachment {
+pub struct AttachmentComponent {
     attached_to_entity_id: Option<u64>,
     detached_from_entity_id: Option<u64>,
 }
 
-impl Attachment {
+impl AttachmentComponent {
     pub fn maybe_attach_to_entity(
         &mut self,
         entities: &HashMap<u64, Entity>,

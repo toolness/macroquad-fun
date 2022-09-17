@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
-    attachment::Attachment,
+    attachment::AttachmentComponent,
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
     entity::Entity,
     game_sprites::game_sprites,
     level::Level,
-    running::RunManager,
+    running::RunComponent,
     sprite_component::SpriteComponent,
     sprite_renderer::SpriteRenderer,
     time::GameTime,
@@ -21,8 +21,8 @@ pub struct Player {
     is_in_air: bool,
     velocity: Vec2,
     x_impulse: f32,
-    run_manager: RunManager,
-    attachment: Attachment,
+    run: RunComponent,
+    attachment: AttachmentComponent,
 }
 
 impl Player {
@@ -36,7 +36,7 @@ impl Player {
             is_in_air: false,
             velocity: Vec2::new(0., 0.),
             x_impulse: 0.,
-            run_manager: RunManager::new(),
+            run: RunComponent::new(),
             attachment: Default::default(),
         }
     }
@@ -70,7 +70,7 @@ impl Player {
     ) {
         let time_since_last_frame = time.time_since_last_frame;
         let config = config();
-        self.run_manager.update(
+        self.run.update(
             time_since_last_frame,
             is_key_down(KeyCode::A),
             is_key_down(KeyCode::D),
@@ -83,15 +83,15 @@ impl Player {
                     config.long_jump_keypress_extra_force * time_since_last_frame as f32;
             }
             self.velocity.y += config.gravity * time_since_last_frame as f32;
-            if self.run_manager.is_running() {
-                self.velocity.x = self.run_manager.run_speed();
+            if self.run.is_running() {
+                self.velocity.x = self.run.run_speed();
             }
         } else {
             if is_key_pressed(KeyCode::Space) {
-                self.velocity = Vec2::new(self.run_manager.run_speed(), -config.jump_velocity);
+                self.velocity = Vec2::new(self.run.run_speed(), -config.jump_velocity);
                 self.is_in_air = true
             } else {
-                self.x_impulse = self.run_manager.run_speed();
+                self.x_impulse = self.run.run_speed();
             }
         }
 

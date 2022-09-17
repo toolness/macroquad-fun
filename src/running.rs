@@ -2,16 +2,16 @@ use macroquad::prelude::clamp;
 
 use crate::config::config;
 
-pub struct RunManager {
+pub struct RunComponent {
     run_duration: f64,
     x_direction: f32,
     prev_x_direction: f32,
     run_speed: f32,
 }
 
-impl RunManager {
+impl RunComponent {
     pub fn new() -> Self {
-        RunManager {
+        RunComponent {
             run_duration: 0.,
             x_direction: 0.,
             prev_x_direction: 0.,
