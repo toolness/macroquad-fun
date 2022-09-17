@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
+    attachment::AttachableComponent,
     collision::{collision_resolution_loop, maybe_reverse_direction_xy, process_collision},
     config::config,
     entity::Entity,
@@ -25,6 +26,7 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
         .at_top_left(&start_rect),
         velocity: base_velocity * config().flying_eye_speed,
         flying_eye: Some(FlyingEyeComponent()),
+        attachable: Some(AttachableComponent()),
         ..Default::default()
     }
 }
@@ -47,7 +49,7 @@ pub fn flying_eye_movement_system(
     time: &GameTime,
 ) {
     for entity in entities.values_mut() {
-        if let Some(_flying_eye) = entity.flying_eye.as_mut() {
+        if entity.flying_eye.is_some() {
             update_flying_eye(&mut entity.velocity, &mut entity.sprite, level, time);
         }
     }

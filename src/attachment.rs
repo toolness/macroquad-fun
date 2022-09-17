@@ -16,6 +16,8 @@ pub struct AttachmentComponent {
     detached_from_entity_id: Option<u64>,
 }
 
+pub struct AttachableComponent();
+
 impl AttachmentComponent {
     pub fn maybe_attach_to_entity(
         &mut self,
@@ -26,7 +28,7 @@ impl AttachmentComponent {
         let passenger_bbox = &passenger.bbox();
 
         for (&id, carrier) in entities.iter() {
-            if carrier.flying_eye.is_none() {
+            if carrier.attachable.is_none() {
                 continue;
             }
             if carrier.sprite.bbox().overlaps(&passenger_bbox)
