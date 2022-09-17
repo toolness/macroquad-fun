@@ -17,7 +17,7 @@ use crate::{
 };
 
 pub struct Player {
-    sprite: SpriteComponent,
+    pub sprite: SpriteComponent,
     player: PlayerComponent,
     velocity: Vec2,
     run: RunComponent,
@@ -41,10 +41,6 @@ impl Player {
             run: RunComponent::new(),
             attachment: Default::default(),
         }
-    }
-
-    pub fn sprite(&self) -> &SpriteComponent {
-        &self.sprite
     }
 
     pub fn teleport(&mut self, pos: Vec2) {

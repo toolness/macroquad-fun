@@ -77,22 +77,21 @@ impl LevelRuntime {
     pub fn advance_one_frame(&mut self) -> FrameResult {
         self.time.update();
 
-        if let Some((new_level, new_pos)) = should_switch_levels(&self.player.sprite(), &self.level)
-        {
+        if let Some((new_level, new_pos)) = should_switch_levels(&self.player.sprite, &self.level) {
             self.player.teleport(new_pos);
             self.change_level(new_level);
-        } else if did_fall_off_level(&self.player.sprite(), &self.level) {
+        } else if did_fall_off_level(&self.player.sprite, &self.level) {
             return FrameResult::PlayerDied;
         }
 
-        self.camera.update(&self.player.sprite(), &self.level);
+        self.camera.update(&self.player.sprite, &self.level);
 
         // Draw environment.
         self.level.draw(&self.camera.rect());
 
         mushroom_movement_system(
             &mut self.entities,
-            &self.player.sprite(),
+            &self.player.sprite,
             &self.level,
             &self.time,
         );
@@ -106,9 +105,9 @@ impl LevelRuntime {
             entity.sprite.draw_current_frame();
         }
 
-        self.player.sprite().draw_current_frame();
+        self.player.sprite.draw_current_frame();
 
-        draw_level_text(&self.player.sprite(), &self.level, &self.camera.rect());
+        draw_level_text(&self.player.sprite, &self.level, &self.camera.rect());
 
         // Process miscellaneous system input.
 
@@ -125,12 +124,12 @@ impl LevelRuntime {
 
     fn draw_debug_layer(&self) {
         let level = self.level;
-        self.player.sprite().draw_debug_rects();
+        self.player.sprite.draw_debug_rects();
         for collider in level.iter_colliders(&level.pixel_bounds()) {
             collider.draw_debug_rect(PURPLE);
         }
         draw_rect_lines(
-            &level.get_bounding_cell_rect(&self.player.sprite().bbox()),
+            &level.get_bounding_cell_rect(&self.player.sprite.bbox()),
             1.,
             WHITE,
         );
