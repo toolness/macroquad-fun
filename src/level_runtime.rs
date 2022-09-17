@@ -2,14 +2,16 @@ use crate::drawing::draw_rect_lines;
 use crate::entity::Entity;
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
-use crate::player::{did_fall_off_level, process_player_input_and_update, should_switch_levels};
+use crate::player::{
+    did_fall_off_level, process_player_input_and_update, should_switch_levels, teleport_entity,
+};
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
 use macroquad::prelude::*;
 use std::collections::HashMap;
 
-use crate::{level::Level, player::Player};
+use crate::level::Level;
 
 #[derive(PartialEq)]
 pub enum FrameResult {
@@ -20,7 +22,7 @@ pub enum FrameResult {
 pub struct LevelRuntime {
     level: &'static Level,
     entities: HashMap<u64, Entity>,
-    player: Player,
+    player: Entity,
     debug_mode: bool,
     camera: Camera,
     next_id: u64,
@@ -28,7 +30,7 @@ pub struct LevelRuntime {
 }
 
 impl LevelRuntime {
-    pub fn new(player: Player, level: &'static Level) -> Self {
+    pub fn new(player: Entity, level: &'static Level) -> Self {
         let mut instance = LevelRuntime {
             player,
             level,
@@ -78,7 +80,7 @@ impl LevelRuntime {
         self.time.update();
 
         if let Some((new_level, new_pos)) = should_switch_levels(&self.player.sprite, &self.level) {
-            self.player.teleport(new_pos);
+            teleport_entity(&mut self.player, new_pos);
             self.change_level(new_level);
         } else if did_fall_off_level(&self.player.sprite, &self.level) {
             return FrameResult::PlayerDied;

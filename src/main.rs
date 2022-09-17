@@ -7,7 +7,7 @@ use config::load_config;
 use game_sprites::load_game_sprites;
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
-use player::Player;
+use player::create_player;
 use world::load_world;
 
 mod animator;
@@ -72,5 +72,5 @@ fn new_game() -> LevelRuntime {
     let (level_start, player_start) = world::world()
         .player_start()
         .expect("World must define a player start position");
-    LevelRuntime::new(Player::new(player_start), level_start)
+    LevelRuntime::new(create_player(player_start), level_start)
 }

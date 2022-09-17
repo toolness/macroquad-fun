@@ -1,7 +1,11 @@
 use macroquad::prelude::Vec2;
 
 use crate::{
-    attachment::AttachableComponent, flying_eye::FlyingEyeComponent, mushroom::MushroomComponent,
+    attachment::{AttachableComponent, AttachmentComponent},
+    flying_eye::FlyingEyeComponent,
+    mushroom::MushroomComponent,
+    player::PlayerComponent,
+    running::RunComponent,
     sprite_component::SpriteComponent,
 };
 
@@ -12,4 +16,7 @@ pub struct Entity {
     pub mushroom: Option<MushroomComponent>,
     pub flying_eye: Option<FlyingEyeComponent>,
     pub attachable: Option<AttachableComponent>,
+    pub player: Option<PlayerComponent>,
+    pub run: Option<RunComponent>,
+    pub attachment: Option<AttachmentComponent>,
 }

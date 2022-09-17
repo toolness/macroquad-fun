@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
-    attachment::AttachmentComponent,
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
     entity::Entity,
@@ -16,46 +15,39 @@ use crate::{
     world::world,
 };
 
-pub struct Player {
-    pub sprite: SpriteComponent,
-    player: PlayerComponent,
-    velocity: Vec2,
-    run: RunComponent,
-    attachment: AttachmentComponent,
-}
-
 pub struct PlayerComponent {
     is_in_air: bool,
 }
 
-impl Player {
-    pub fn new(start_rect: Rect) -> Self {
-        Player {
-            sprite: SpriteComponent {
-                relative_bbox: game_sprites().huntress.idle_bbox,
-                ..Default::default()
-            }
-            .at_bottom_left(&start_rect),
-            player: PlayerComponent { is_in_air: false },
-            velocity: Vec2::new(0., 0.),
-            run: RunComponent::new(),
-            attachment: Default::default(),
+pub fn create_player(start_rect: Rect) -> Entity {
+    Entity {
+        sprite: SpriteComponent {
+            relative_bbox: game_sprites().huntress.idle_bbox,
+            ..Default::default()
         }
+        .at_bottom_left(&start_rect),
+        player: Some(PlayerComponent { is_in_air: false }),
+        velocity: Vec2::new(0., 0.),
+        run: Some(RunComponent::new()),
+        attachment: Some(Default::default()),
+        ..Default::default()
     }
+}
 
-    pub fn teleport(&mut self, pos: Vec2) {
-        self.sprite.pos = pos;
-        self.attachment.reset();
+pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
+    entity.sprite.pos = pos;
+    if let Some(attachment) = entity.attachment.as_mut() {
+        attachment.reset();
     }
 }
 
 pub fn process_player_input_and_update(
-    player: &mut Player,
+    player: &mut Entity,
     level: &Level,
     entities: &HashMap<u64, Entity>,
     time: &GameTime,
 ) {
-    if !player.attachment.update(
+    if !player.attachment.as_mut().unwrap().update(
         entities,
         level,
         &mut player.sprite,
@@ -67,18 +59,18 @@ pub fn process_player_input_and_update(
 }
 
 fn unattached_player_process_input_and_update(
-    player_entity: &mut Player,
+    player_entity: &mut Entity,
     level: &Level,
     entities: &HashMap<u64, Entity>,
     time: &GameTime,
 ) {
     let time_since_last_frame = time.time_since_last_frame;
     let config = config();
-    let run = &mut player_entity.run;
-    let player = &mut player_entity.player;
     let velocity = &mut player_entity.velocity;
     let sprite = &mut player_entity.sprite;
-    let attachment = &mut player_entity.attachment;
+    let run = player_entity.run.as_mut().unwrap();
+    let player = player_entity.player.as_mut().unwrap();
+    let attachment = &mut player_entity.attachment.as_mut().unwrap();
     run.update(
         time_since_last_frame,
         is_key_down(KeyCode::A),
