@@ -1,6 +1,6 @@
 use macroquad::prelude::{clamp, set_camera, Camera2D, Rect, Vec2};
 
-use crate::{config::config, level::Level, player::Player};
+use crate::{config::config, level::Level, sprite_component::SpriteComponent};
 
 #[derive(Default)]
 pub struct Camera {
@@ -18,8 +18,8 @@ impl Camera {
         }
     }
 
-    pub fn update(&mut self, player: &Player, level: &Level) {
-        let bbox = player.sprite_component().bbox();
+    pub fn update(&mut self, sprite: &SpriteComponent, level: &Level) {
+        let bbox = sprite.bbox();
         let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
         let target_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
         if self.is_panning_next_update {

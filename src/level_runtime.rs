@@ -86,7 +86,8 @@ impl LevelRuntime {
             return FrameResult::PlayerDied;
         }
 
-        self.camera.update(&self.player, &self.level);
+        self.camera
+            .update(&self.player.sprite_component(), &self.level);
 
         // Draw environment.
         self.level.draw(&self.camera.rect());
