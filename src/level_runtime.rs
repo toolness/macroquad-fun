@@ -105,7 +105,11 @@ impl LevelRuntime {
 
         self.player.sprite_component().draw_current_frame();
 
-        draw_level_text(&self.player, &self.level, &self.camera.rect());
+        draw_level_text(
+            &self.player.sprite_component(),
+            &self.level,
+            &self.camera.rect(),
+        );
 
         // Process miscellaneous system input.
 
