@@ -18,10 +18,14 @@ use crate::{
 
 pub struct Player {
     sprite: SpriteComponent,
-    is_in_air: bool,
+    player: PlayerComponent,
     velocity: Vec2,
     run: RunComponent,
     attachment: AttachmentComponent,
+}
+
+pub struct PlayerComponent {
+    is_in_air: bool,
 }
 
 impl Player {
@@ -32,7 +36,7 @@ impl Player {
                 ..Default::default()
             }
             .at_bottom_left(&start_rect),
-            is_in_air: false,
+            player: PlayerComponent { is_in_air: false },
             velocity: Vec2::new(0., 0.),
             run: RunComponent::new(),
             attachment: Default::default(),
@@ -43,129 +47,135 @@ impl Player {
         &self.sprite
     }
 
-    pub fn process_input_and_update(
-        &mut self,
-        level: &Level,
-        entities: &HashMap<u64, Entity>,
-        time: &GameTime,
-    ) {
-        if !self.attachment.update(
-            entities,
-            level,
-            &mut self.sprite,
-            is_key_pressed(KeyCode::Space),
-        ) {
-            self.unattached_process_input_and_update(level, entities, time)
-        }
-        self.sprite.update_looping_frame_number(time);
-    }
-
-    fn unattached_process_input_and_update(
-        &mut self,
-        level: &Level,
-        entities: &HashMap<u64, Entity>,
-        time: &GameTime,
-    ) {
-        let time_since_last_frame = time.time_since_last_frame;
-        let config = config();
-        self.run.update(
-            time_since_last_frame,
-            is_key_down(KeyCode::A),
-            is_key_down(KeyCode::D),
-        );
-        let mut x_impulse = 0.;
-
-        if self.is_in_air {
-            if is_key_down(KeyCode::Space) && self.velocity.y < 0. {
-                self.velocity.y -=
-                    config.long_jump_keypress_extra_force * time_since_last_frame as f32;
-            }
-            self.velocity.y += config.gravity * time_since_last_frame as f32;
-            if self.run.is_running() {
-                self.velocity.x = self.run.run_speed();
-            }
-        } else {
-            if is_key_pressed(KeyCode::Space) {
-                self.velocity = Vec2::new(self.run.run_speed(), -config.jump_velocity);
-                self.is_in_air = true
-            } else {
-                x_impulse = self.run.run_speed();
-            }
-        }
-
-        let prev_bbox = self.sprite.bbox();
-        self.sprite.pos.x += (self.velocity.x + x_impulse) * time_since_last_frame as f32;
-        self.sprite.pos.y += self.velocity.y * time_since_last_frame as f32;
-
-        let mut is_on_any_surface_this_frame = false;
-
-        collision_resolution_loop(|| {
-            let bbox = self.sprite.bbox();
-            for collider in level.iter_colliders(&bbox) {
-                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                    match collision.side {
-                        Side::Top => {
-                            is_on_any_surface_this_frame = true;
-                            self.velocity = Vec2::new(0., 0.);
-                        }
-                        Side::Bottom => {
-                            self.velocity.y = 0.;
-                        }
-                        Side::Left | Side::Right => {
-                            self.velocity.x = 0.;
-                        }
-                    }
-
-                    if collision.displacement != Vec2::ZERO {
-                        self.sprite.pos += collision.displacement;
-                        return true;
-                    }
-                }
-            }
-            false
-        });
-
-        if is_on_any_surface_this_frame {
-            // The player just landed (or remains on the ground).
-            self.is_in_air = false;
-            self.attachment.reset();
-        } else if !self.is_in_air {
-            // The player just fell off a ledge.
-            self.is_in_air = true;
-        }
-
-        if !self.is_in_air && x_impulse != 0. {
-            self.sprite.is_facing_left = x_impulse < 0.;
-        }
-
-        if self.is_in_air {
-            self.attachment
-                .maybe_attach_to_entity(&entities, &self.sprite, &mut self.velocity);
-        }
-
-        self.sprite.renderer = Some(self.sprite_renderer(x_impulse));
-    }
-
-    fn sprite_renderer(&self, x_impulse: f32) -> &'static SpriteRenderer {
-        let sprites = game_sprites();
-        if self.is_in_air {
-            if self.velocity.y >= 0. {
-                &sprites.huntress.fall
-            } else {
-                &sprites.huntress.jump
-            }
-        } else {
-            if x_impulse != 0. {
-                &sprites.huntress.run
-            } else {
-                &sprites.huntress.idle
-            }
-        }
-    }
-
     pub fn teleport(&mut self, pos: Vec2) {
         self.sprite.pos = pos;
         self.attachment.reset();
+    }
+}
+
+pub fn process_player_input_and_update(
+    player: &mut Player,
+    level: &Level,
+    entities: &HashMap<u64, Entity>,
+    time: &GameTime,
+) {
+    if !player.attachment.update(
+        entities,
+        level,
+        &mut player.sprite,
+        is_key_pressed(KeyCode::Space),
+    ) {
+        unattached_player_process_input_and_update(player, level, entities, time)
+    }
+    player.sprite.update_looping_frame_number(time);
+}
+
+fn unattached_player_process_input_and_update(
+    player_entity: &mut Player,
+    level: &Level,
+    entities: &HashMap<u64, Entity>,
+    time: &GameTime,
+) {
+    let time_since_last_frame = time.time_since_last_frame;
+    let config = config();
+    let run = &mut player_entity.run;
+    let player = &mut player_entity.player;
+    let velocity = &mut player_entity.velocity;
+    let sprite = &mut player_entity.sprite;
+    let attachment = &mut player_entity.attachment;
+    run.update(
+        time_since_last_frame,
+        is_key_down(KeyCode::A),
+        is_key_down(KeyCode::D),
+    );
+    let mut x_impulse = 0.;
+
+    if player.is_in_air {
+        if is_key_down(KeyCode::Space) && velocity.y < 0. {
+            velocity.y -= config.long_jump_keypress_extra_force * time_since_last_frame as f32;
+        }
+        velocity.y += config.gravity * time_since_last_frame as f32;
+        if run.is_running() {
+            velocity.x = run.run_speed();
+        }
+    } else {
+        if is_key_pressed(KeyCode::Space) {
+            let new_velocity = Vec2::new(run.run_speed(), -config.jump_velocity);
+            velocity.x = new_velocity.x;
+            velocity.y = new_velocity.y;
+            player.is_in_air = true
+        } else {
+            x_impulse = run.run_speed();
+        }
+    }
+
+    let prev_bbox = sprite.bbox();
+    sprite.pos.x += (velocity.x + x_impulse) * time_since_last_frame as f32;
+    sprite.pos.y += velocity.y * time_since_last_frame as f32;
+
+    let mut is_on_any_surface_this_frame = false;
+
+    collision_resolution_loop(|| {
+        let bbox = sprite.bbox();
+        for collider in level.iter_colliders(&bbox) {
+            if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                match collision.side {
+                    Side::Top => {
+                        is_on_any_surface_this_frame = true;
+                        velocity.x = 0.;
+                        velocity.y = 0.;
+                    }
+                    Side::Bottom => {
+                        velocity.y = 0.;
+                    }
+                    Side::Left | Side::Right => {
+                        velocity.x = 0.;
+                    }
+                }
+
+                if collision.displacement != Vec2::ZERO {
+                    sprite.pos += collision.displacement;
+                    return true;
+                }
+            }
+        }
+        false
+    });
+
+    if is_on_any_surface_this_frame {
+        // The player just landed (or remains on the ground).
+        player.is_in_air = false;
+        attachment.reset();
+    } else if !player.is_in_air {
+        // The player just fell off a ledge.
+        player.is_in_air = true;
+    }
+
+    if !player.is_in_air && x_impulse != 0. {
+        sprite.is_facing_left = x_impulse < 0.;
+    }
+
+    if player.is_in_air {
+        attachment.maybe_attach_to_entity(&entities, sprite, velocity);
+    }
+
+    sprite.renderer = Some(sprite_renderer(player.is_in_air, velocity, x_impulse));
+}
+
+fn sprite_renderer(is_in_air: bool, velocity: &Vec2, x_impulse: f32) -> &'static SpriteRenderer {
+    let sprites = game_sprites();
+    if is_in_air {
+        if velocity.y >= 0. {
+            &sprites.huntress.fall
+        } else {
+            &sprites.huntress.jump
+        }
+    } else {
+        if x_impulse != 0. {
+            &sprites.huntress.run
+        } else {
+            &sprites.huntress.idle
+        }
     }
 }
 
