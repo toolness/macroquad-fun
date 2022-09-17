@@ -6,59 +6,60 @@ use crate::{
     collision::{collision_resolution_loop, process_collision},
     flying_eye::FlyingEye,
     level::Level,
+    level_runtime::Npc,
     sprite_entity::SpriteEntity,
 };
 
 #[derive(Default)]
 pub struct Attachment {
-    attached_to_flying_eye_id: Option<u64>,
-    detached_from_flying_eye_id: Option<u64>,
+    attached_to_npc_id: Option<u64>,
+    detached_from_npc_id: Option<u64>,
 }
 
 impl Attachment {
-    pub fn maybe_attach_to_flying_eye(
+    pub fn maybe_attach_to_npc(
         &mut self,
-        flying_eyes: &HashMap<u64, FlyingEye>,
+        npcs: &HashMap<u64, Npc>,
         entity: &SpriteEntity,
         velocity: &mut Vec2,
     ) {
         let bbox = &entity.bbox();
-        for (&id, flying_eye) in flying_eyes.iter() {
-            if flying_eye.entity().bbox().overlaps(&bbox)
-                && self.detached_from_flying_eye_id != Some(id)
-            {
-                self.attached_to_flying_eye_id = Some(id);
-                velocity.x = 0.;
-                velocity.y = 0.;
-                break;
+        for (&id, npc) in npcs.iter() {
+            if let Npc::FlyingEye(flying_eye) = npc {
+                if flying_eye.entity().bbox().overlaps(&bbox)
+                    && self.detached_from_npc_id != Some(id)
+                {
+                    self.attached_to_npc_id = Some(id);
+                    velocity.x = 0.;
+                    velocity.y = 0.;
+                    break;
+                }
             }
         }
     }
 
-    fn attached_flying_eye<'a>(
-        &self,
-        flying_eyes: &'a HashMap<u64, FlyingEye>,
-    ) -> Option<&'a FlyingEye> {
-        if let Some(id) = self.attached_to_flying_eye_id {
-            flying_eyes.get(&id)
-        } else {
-            None
+    fn attached_flying_eye<'a>(&self, npcs: &'a HashMap<u64, Npc>) -> Option<&'a FlyingEye> {
+        if let Some(id) = self.attached_to_npc_id {
+            if let Some(Npc::FlyingEye(flying_eye)) = npcs.get(&id) {
+                return Some(&flying_eye);
+            }
         }
+        None
     }
 
     pub fn reset(&mut self) {
-        self.attached_to_flying_eye_id = None;
-        self.detached_from_flying_eye_id = None;
+        self.attached_to_npc_id = None;
+        self.detached_from_npc_id = None;
     }
 
     pub fn update(
         &mut self,
-        flying_eyes: &HashMap<u64, FlyingEye>,
+        npcs: &HashMap<u64, Npc>,
         level: &Level,
         entity: &mut SpriteEntity,
         force_detach: bool,
     ) -> bool {
-        if let Some(flying_eye) = self.attached_flying_eye(&flying_eyes) {
+        if let Some(flying_eye) = self.attached_flying_eye(&npcs) {
             self.update_while_attached(flying_eye, level, entity, force_detach);
             true
         } else {
@@ -93,8 +94,8 @@ impl Attachment {
         });
 
         if should_detach {
-            self.detached_from_flying_eye_id = self.attached_to_flying_eye_id.take();
-            assert!(self.detached_from_flying_eye_id.is_some());
+            self.detached_from_npc_id = self.attached_to_npc_id.take();
+            assert!(self.detached_from_npc_id.is_some());
         }
     }
 }

@@ -6,9 +6,9 @@ use crate::{
     attachment::Attachment,
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
-    flying_eye::FlyingEye,
     game_sprites::game_sprites,
     level::Level,
+    level_runtime::Npc,
     running::RunManager,
     sprite::Sprite,
     sprite_entity::SpriteEntity,
@@ -48,11 +48,11 @@ impl Player {
     pub fn process_input_and_update(
         &mut self,
         level: &Level,
-        flying_eyes: &HashMap<u64, FlyingEye>,
+        npcs: &HashMap<u64, Npc>,
         time: &GameTime,
     ) {
         if self.attachment.update(
-            flying_eyes,
+            npcs,
             level,
             &mut self.entity,
             is_key_pressed(KeyCode::Space),
@@ -132,11 +132,8 @@ impl Player {
         }
 
         if self.is_in_air {
-            self.attachment.maybe_attach_to_flying_eye(
-                &flying_eyes,
-                &self.entity,
-                &mut self.velocity,
-            );
+            self.attachment
+                .maybe_attach_to_npc(&npcs, &self.entity, &mut self.velocity);
         }
 
         self.entity.sprite = Some(self.sprite());

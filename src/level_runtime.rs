@@ -14,10 +14,14 @@ pub enum FrameResult {
     PlayerDied,
 }
 
+pub enum Npc {
+    FlyingEye(FlyingEye),
+    Mushroom(Mushroom),
+}
+
 pub struct LevelRuntime {
     level: &'static Level,
-    flying_eyes: HashMap<u64, FlyingEye>,
-    mushrooms: HashMap<u64, Mushroom>,
+    npcs: HashMap<u64, Npc>,
     player: Player,
     debug_mode: bool,
     camera: Camera,
@@ -30,8 +34,7 @@ impl LevelRuntime {
         let mut instance = LevelRuntime {
             player,
             level,
-            flying_eyes: HashMap::new(),
-            mushrooms: HashMap::new(),
+            npcs: HashMap::new(),
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
@@ -41,20 +44,14 @@ impl LevelRuntime {
         instance
     }
 
-    pub fn add_flying_eye(&mut self, flying_eye: FlyingEye) {
+    fn add_npc(&mut self, npc: Npc) {
         let id = self.new_id();
-        self.flying_eyes.insert(id, flying_eye);
-    }
-
-    pub fn add_mushroom(&mut self, mushroom: Mushroom) {
-        let id = self.new_id();
-        self.mushrooms.insert(id, mushroom);
+        self.npcs.insert(id, npc);
     }
 
     pub fn change_level(&mut self, level: &'static Level) {
         self.level = level;
-        self.flying_eyes.clear();
-        self.mushrooms.clear();
+        self.npcs.clear();
         self.camera.cut();
         self.spawn_entities();
     }
@@ -63,10 +60,10 @@ impl LevelRuntime {
         for entity in self.level.entities.iter() {
             match entity.kind {
                 EntityKind::FlyingEye(velocity) => {
-                    self.add_flying_eye(FlyingEye::new(entity.rect, velocity));
+                    self.add_npc(Npc::FlyingEye(FlyingEye::new(entity.rect, velocity)));
                 }
                 EntityKind::Mushroom => {
-                    self.add_mushroom(Mushroom::new(entity.rect));
+                    self.add_npc(Npc::Mushroom(Mushroom::new(entity.rect)));
                 }
                 _ => {}
             }
@@ -95,26 +92,31 @@ impl LevelRuntime {
         // Draw environment.
         level.draw(&self.camera.rect());
 
-        // Update entities.
-        for flying_eye in self.flying_eyes.values_mut() {
-            flying_eye.update(&level, &self.time);
-        }
-
-        for mushroom in self.mushrooms.values_mut() {
-            mushroom.update(&self.player, &self.level, &self.time);
+        for npc in self.npcs.values_mut() {
+            match npc {
+                Npc::FlyingEye(flying_eye) => {
+                    flying_eye.update(&level, &self.time);
+                }
+                Npc::Mushroom(mushroom) => {
+                    mushroom.update(&self.player, &self.level, &self.time);
+                }
+            }
         }
 
         self.player
-            .process_input_and_update(&self.level, &self.flying_eyes, &self.time);
+            .process_input_and_update(&self.level, &self.npcs, &self.time);
 
         // Draw entities.
 
-        for flying_eye in self.flying_eyes.values() {
-            flying_eye.entity().draw(&self.time);
-        }
-
-        for mushroom in self.mushrooms.values() {
-            mushroom.draw(&self.time);
+        for npc in self.npcs.values() {
+            match npc {
+                Npc::FlyingEye(flying_eye) => {
+                    flying_eye.entity().draw(&self.time);
+                }
+                Npc::Mushroom(mushroom) => {
+                    mushroom.draw(&self.time);
+                }
+            }
         }
 
         self.player.entity().draw(&self.time);
@@ -145,11 +147,15 @@ impl LevelRuntime {
             1.,
             WHITE,
         );
-        for flying_eye in self.flying_eyes.values() {
-            flying_eye.entity().draw_debug_rects();
-        }
-        for mushroom in self.mushrooms.values() {
-            mushroom.entity().draw_debug_rects();
+        for npc in self.npcs.values() {
+            match npc {
+                Npc::FlyingEye(flying_eye) => {
+                    flying_eye.entity().draw_debug_rects();
+                }
+                Npc::Mushroom(mushroom) => {
+                    mushroom.entity().draw_debug_rects();
+                }
+            }
         }
         let text = format!("fps: {}", get_fps());
         draw_text(
