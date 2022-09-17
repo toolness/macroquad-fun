@@ -20,16 +20,18 @@ impl Attachment {
     pub fn maybe_attach_to_entity(
         &mut self,
         entities: &HashMap<u64, Entity>,
-        entity: &SpriteComponent,
+        passenger: &SpriteComponent,
         velocity: &mut Vec2,
     ) {
-        let bbox = &entity.bbox();
+        let passenger_bbox = &passenger.bbox();
 
-        for (&id, entity) in entities.iter() {
-            if entity.flying_eye.is_none() {
+        for (&id, carrier) in entities.iter() {
+            if carrier.flying_eye.is_none() {
                 continue;
             }
-            if entity.sprite.bbox().overlaps(&bbox) && self.detached_from_entity_id != Some(id) {
+            if carrier.sprite.bbox().overlaps(&passenger_bbox)
+                && self.detached_from_entity_id != Some(id)
+            {
                 self.attached_to_entity_id = Some(id);
                 velocity.x = 0.;
                 velocity.y = 0.;
@@ -55,11 +57,11 @@ impl Attachment {
         &mut self,
         entities: &HashMap<u64, Entity>,
         level: &Level,
-        sprite: &mut SpriteComponent,
+        passenger: &mut SpriteComponent,
         force_detach: bool,
     ) -> bool {
         if let Some(entity) = self.attached_entity(&entities) {
-            self.update_while_attached(entity, level, sprite, force_detach);
+            self.update_while_attached(entity, level, passenger, force_detach);
             true
         } else {
             false
@@ -68,22 +70,22 @@ impl Attachment {
 
     fn update_while_attached(
         &mut self,
-        entity: &Entity,
+        carrier: &Entity,
         level: &Level,
-        sprite: &mut SpriteComponent,
+        passenger: &mut SpriteComponent,
         force_detach: bool,
     ) {
-        let prev_bbox = sprite.bbox();
-        carry_entity(entity, sprite);
+        let prev_bbox = passenger.bbox();
+        carry_entity(carrier, passenger);
 
         let mut should_detach = force_detach;
 
         collision_resolution_loop(|| {
-            let bbox = sprite.bbox();
+            let bbox = passenger.bbox();
             for collider in level.iter_colliders(&bbox) {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     if collision.displacement != Vec2::ZERO {
-                        sprite.pos += collision.displacement;
+                        passenger.pos += collision.displacement;
                         should_detach = true;
                         return true;
                     }
