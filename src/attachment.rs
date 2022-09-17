@@ -61,7 +61,7 @@ impl Attachment {
         force_detach: bool,
     ) -> bool {
         if let Some(entity) = self.attached_entity(&entities) {
-            self.update_while_attached(entity, level, passenger, force_detach);
+            self.update_while_attached(&entity.sprite, level, passenger, force_detach);
             true
         } else {
             false
@@ -70,13 +70,13 @@ impl Attachment {
 
     fn update_while_attached(
         &mut self,
-        carrier: &Entity,
+        carrier: &SpriteComponent,
         level: &Level,
         passenger: &mut SpriteComponent,
         force_detach: bool,
     ) {
         let prev_bbox = passenger.bbox();
-        carry_entity(&carrier.sprite, passenger);
+        carry_entity(&carrier, passenger);
 
         let mut should_detach = force_detach;
 
