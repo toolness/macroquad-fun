@@ -2,6 +2,7 @@ use crate::drawing::draw_rect_lines;
 use crate::entity::Entity;
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
+use crate::player::{did_fall_off_level, should_switch_levels};
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
@@ -46,7 +47,7 @@ impl LevelRuntime {
         self.entities.insert(id, entity);
     }
 
-    pub fn change_level(&mut self, level: &'static Level) {
+    fn change_level(&mut self, level: &'static Level) {
         self.level = level;
         self.entities.clear();
         self.camera.cut();
@@ -76,9 +77,12 @@ impl LevelRuntime {
     pub fn advance_one_frame(&mut self) -> FrameResult {
         self.time.update();
 
-        if let Some(new_level) = self.player.maybe_switch_levels(&self.level) {
+        if let Some((new_level, new_pos)) =
+            should_switch_levels(&self.player.sprite_component(), &self.level)
+        {
+            self.player.teleport(new_pos);
             self.change_level(new_level);
-        } else if self.player.fell_off_level(&self.level) {
+        } else if did_fall_off_level(&self.player.sprite_component(), &self.level) {
             return FrameResult::PlayerDied;
         }
 

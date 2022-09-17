@@ -165,22 +165,27 @@ impl Player {
         }
     }
 
-    pub fn fell_off_level(&self, level: &Level) -> bool {
-        self.sprite.bbox().top() - level.pixel_bounds().bottom() > config().fall_off_level_threshold
+    pub fn teleport(&mut self, pos: Vec2) {
+        self.sprite.pos = pos;
+        self.attachment.reset();
     }
+}
 
-    pub fn maybe_switch_levels(&mut self, level: &Level) -> Option<&'static Level> {
-        let world = world();
-        if !level.contains_majority_of(&self.sprite.bbox()) {
-            let world_pos = level.to_world_coords(&self.sprite.pos);
-            if let Some((new_level, new_pos)) =
-                world.find_level_containing_majority_of(&world_pos, &self.sprite.relative_bbox)
-            {
-                self.sprite.pos = new_pos;
-                self.attachment.reset();
-                return Some(new_level);
-            }
+pub fn did_fall_off_level(sprite: &SpriteComponent, level: &Level) -> bool {
+    sprite.bbox().top() - level.pixel_bounds().bottom() > config().fall_off_level_threshold
+}
+
+pub fn should_switch_levels(
+    sprite: &SpriteComponent,
+    level: &Level,
+) -> Option<(&'static Level, Vec2)> {
+    let world = world();
+    if !level.contains_majority_of(&sprite.bbox()) {
+        let world_pos = level.to_world_coords(&sprite.pos);
+        let result = world.find_level_containing_majority_of(&world_pos, &sprite.relative_bbox);
+        if result.is_some() {
+            return result;
         }
-        None
     }
+    None
 }
