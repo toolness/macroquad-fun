@@ -41,7 +41,7 @@ impl Player {
         }
     }
 
-    pub fn sprite_component(&self) -> &SpriteComponent {
+    pub fn sprite(&self) -> &SpriteComponent {
         &self.sprite
     }
 
@@ -145,10 +145,10 @@ impl Player {
                 .maybe_attach_to_entity(&entities, &self.sprite, &mut self.velocity);
         }
 
-        self.sprite.renderer = Some(self.sprite());
+        self.sprite.renderer = Some(self.sprite_renderer());
     }
 
-    fn sprite(&self) -> &'static SpriteRenderer {
+    fn sprite_renderer(&self) -> &'static SpriteRenderer {
         let sprites = game_sprites();
         if self.is_in_air {
             if self.velocity.y >= 0. {

@@ -71,7 +71,7 @@ fn update_mushroom(
 ) {
     match &mushroom.state {
         MushroomState::Dead => {
-            if player.sprite_component().bbox().overlaps(&sprite.bbox()) {
+            if player.sprite().bbox().overlaps(&sprite.bbox()) {
                 mushroom.state = MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
             }
         }
