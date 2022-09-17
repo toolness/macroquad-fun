@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
@@ -51,16 +53,29 @@ fn maybe_reverse_direction_x(velocity: &mut Vec2, displacement: &Vec2) {
     }
 }
 
-pub fn update_mushroom(
-    entity: &mut Entity,
+pub fn mushroom_movement_system(
+    entities: &mut HashMap<u64, Entity>,
     player: &Player,
     level: &Level,
     time: &GameTime,
-) -> Option<()> {
-    let mushroom = entity.mushroom.as_mut()?;
-    let velocity = &mut entity.velocity;
-    let sprite = &mut entity.sprite;
+) {
+    for entity in entities.values_mut() {
+        if let Some(mushroom) = entity.mushroom.as_mut() {
+            let velocity = &mut entity.velocity;
+            let sprite = &mut entity.sprite;
+            update_mushroom(mushroom, velocity, sprite, player, level, time);
+        }
+    }
+}
 
+fn update_mushroom(
+    mushroom: &mut MushroomComponent,
+    velocity: &mut Vec2,
+    sprite: &mut SpriteComponent,
+    player: &Player,
+    level: &Level,
+    time: &GameTime,
+) {
     match &mushroom.state {
         MushroomState::Dead => {
             if player.sprite_component().bbox().overlaps(&sprite.bbox()) {
@@ -99,11 +114,10 @@ pub fn update_mushroom(
                 }
                 false
             });
-            entity.sprite.is_facing_left = entity.velocity.x < 0.;
+            sprite.is_facing_left = velocity.x < 0.;
         }
     }
-    mushroom.set_current_frame_number(time, &mut entity.sprite);
-    Some(())
+    mushroom.set_current_frame_number(time, sprite);
 }
 
 impl MushroomComponent {

@@ -1,7 +1,7 @@
 use crate::drawing::draw_rect_lines;
 use crate::entity::Entity;
 use crate::flying_eye::{create_flying_eye, update_flying_eye};
-use crate::mushroom::{create_mushrom, update_mushroom};
+use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
@@ -87,9 +87,9 @@ impl LevelRuntime {
         // Draw environment.
         self.level.draw(&self.camera.rect());
 
+        mushroom_movement_system(&mut self.entities, &self.player, &self.level, &self.time);
         for entity in self.entities.values_mut() {
             update_flying_eye(entity, &self.level, &self.time);
-            update_mushroom(entity, &self.player, &self.level, &self.time);
         }
 
         self.player
