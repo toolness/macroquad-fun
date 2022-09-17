@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
+    attachment::Attachment,
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
     flying_eye::FlyingEye,
@@ -21,8 +22,7 @@ pub struct Player {
     velocity: Vec2,
     x_impulse: f32,
     run_manager: RunManager,
-    attached_to_flying_eye_id: Option<u64>,
-    detached_from_flying_eye_id: Option<u64>,
+    attachment: Attachment,
 }
 
 impl Player {
@@ -37,63 +37,12 @@ impl Player {
             velocity: Vec2::new(0., 0.),
             x_impulse: 0.,
             run_manager: RunManager::new(),
-            attached_to_flying_eye_id: None,
-            detached_from_flying_eye_id: None,
+            attachment: Default::default(),
         }
     }
 
     pub fn entity(&self) -> &SpriteEntity {
         &self.entity
-    }
-
-    fn maybe_attach_to_flying_eye(&mut self, flying_eyes: &HashMap<u64, FlyingEye>) {
-        let bbox = &self.entity.bbox();
-        for (&id, flying_eye) in flying_eyes.iter() {
-            if flying_eye.entity().bbox().overlaps(&bbox)
-                && self.detached_from_flying_eye_id != Some(id)
-            {
-                self.attached_to_flying_eye_id = Some(id);
-                self.velocity = Vec2::ZERO;
-                break;
-            }
-        }
-    }
-
-    fn attached_flying_eye<'a>(
-        &self,
-        flying_eyes: &'a HashMap<u64, FlyingEye>,
-    ) -> Option<&'a FlyingEye> {
-        if let Some(id) = self.attached_to_flying_eye_id {
-            flying_eyes.get(&id)
-        } else {
-            None
-        }
-    }
-
-    fn update_while_attached(&mut self, flying_eye: &FlyingEye, level: &Level) {
-        let prev_bbox = self.entity.bbox();
-        flying_eye.carry_entity(&mut self.entity);
-
-        let mut should_detach = is_key_pressed(KeyCode::Space);
-
-        collision_resolution_loop(|| {
-            let bbox = self.entity.bbox();
-            for collider in level.iter_colliders(&bbox) {
-                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                    if collision.displacement != Vec2::ZERO {
-                        self.entity.pos += collision.displacement;
-                        should_detach = true;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        });
-
-        if should_detach {
-            self.detached_from_flying_eye_id = self.attached_to_flying_eye_id.take();
-            assert!(self.detached_from_flying_eye_id.is_some());
-        }
     }
 
     pub fn process_input_and_update(
@@ -102,8 +51,12 @@ impl Player {
         flying_eyes: &HashMap<u64, FlyingEye>,
         time: &GameTime,
     ) {
-        if let Some(flying_eye) = self.attached_flying_eye(&flying_eyes) {
-            self.update_while_attached(&flying_eye, &level);
+        if self.attachment.update(
+            flying_eyes,
+            level,
+            &mut self.entity,
+            is_key_pressed(KeyCode::Space),
+        ) {
             return;
         }
         let time_since_last_frame = time.time_since_last_frame;
@@ -168,7 +121,7 @@ impl Player {
         if is_on_any_surface_this_frame {
             // The player just landed (or remains on the ground).
             self.is_in_air = false;
-            self.detached_from_flying_eye_id = None;
+            self.attachment.reset();
         } else if !self.is_in_air {
             // The player just fell off a ledge.
             self.is_in_air = true;
@@ -179,7 +132,11 @@ impl Player {
         }
 
         if self.is_in_air {
-            self.maybe_attach_to_flying_eye(&flying_eyes);
+            self.attachment.maybe_attach_to_flying_eye(
+                &flying_eyes,
+                &self.entity,
+                &mut self.velocity,
+            );
         }
 
         self.entity.sprite = Some(self.sprite());
@@ -214,7 +171,7 @@ impl Player {
                 world.find_level_containing_majority_of(&world_pos, &self.entity.relative_bbox)
             {
                 self.entity.pos = new_pos;
-                self.attached_to_flying_eye_id = None;
+                self.attachment.reset();
                 return Some(new_level);
             }
         }

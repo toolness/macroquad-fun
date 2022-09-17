@@ -12,6 +12,7 @@ use world::load_world;
 
 mod animator;
 mod aseprite;
+mod attachment;
 mod camera;
 mod collision;
 mod config;
