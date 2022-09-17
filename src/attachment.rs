@@ -76,7 +76,7 @@ impl Attachment {
         force_detach: bool,
     ) {
         let prev_bbox = passenger.bbox();
-        carry_entity(carrier, passenger);
+        carry_entity(&carrier.sprite, passenger);
 
         let mut should_detach = force_detach;
 
