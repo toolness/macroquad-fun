@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
@@ -28,12 +30,12 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
     }
 }
 
-fn maybe_reverse_direction_xy(entity: &mut Entity, displacement: &Vec2) {
-    if are_opposites(displacement.x, entity.velocity.x) {
-        entity.velocity.x = -entity.velocity.x;
+fn maybe_reverse_direction_xy(velocity: &mut Vec2, displacement: &Vec2) {
+    if are_opposites(displacement.x, velocity.x) {
+        velocity.x = -velocity.x;
     }
-    if are_opposites(displacement.y, entity.velocity.y) {
-        entity.velocity.y = -entity.velocity.y;
+    if are_opposites(displacement.y, velocity.y) {
+        velocity.y = -velocity.y;
     }
 }
 
@@ -49,13 +51,29 @@ pub fn carry_entity(carrier: &Entity, passenger: &mut SpriteComponent) {
     passenger.is_facing_left = carrier.sprite.is_facing_left;
 }
 
-pub fn update_flying_eye(entity: &mut Entity, level: &Level, time: &GameTime) -> Option<()> {
-    entity.flying_eye.as_ref()?;
-    let prev_bbox = entity.sprite.bbox();
-    entity.sprite.pos += entity.velocity * time.time_since_last_frame as f32;
+pub fn flying_eye_movement_system(
+    entities: &mut HashMap<u64, Entity>,
+    level: &Level,
+    time: &GameTime,
+) {
+    for entity in entities.values_mut() {
+        if let Some(_flying_eye) = entity.flying_eye.as_mut() {
+            update_flying_eye(&mut entity.velocity, &mut entity.sprite, level, time);
+        }
+    }
+}
+
+fn update_flying_eye(
+    velocity: &mut Vec2,
+    sprite: &mut SpriteComponent,
+    level: &Level,
+    time: &GameTime,
+) {
+    let prev_bbox = sprite.bbox();
+    sprite.pos += *velocity * time.time_since_last_frame as f32;
 
     collision_resolution_loop(|| {
-        let bbox = entity.sprite.bbox();
+        let bbox = sprite.bbox();
 
         for collider in level
             .iter_colliders(&bbox)
@@ -63,8 +81,8 @@ pub fn update_flying_eye(entity: &mut Entity, level: &Level, time: &GameTime) ->
         {
             if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                 if collision.displacement != Vec2::ZERO {
-                    entity.sprite.pos += collision.displacement;
-                    maybe_reverse_direction_xy(entity, &collision.displacement);
+                    sprite.pos += collision.displacement;
+                    maybe_reverse_direction_xy(velocity, &collision.displacement);
                     return true;
                 }
             }
@@ -72,7 +90,6 @@ pub fn update_flying_eye(entity: &mut Entity, level: &Level, time: &GameTime) ->
         false
     });
 
-    entity.sprite.is_facing_left = entity.velocity.x < 0.;
-    entity.sprite.update_looping_frame_number(time);
-    Some(())
+    sprite.is_facing_left = velocity.x < 0.;
+    sprite.update_looping_frame_number(time);
 }
