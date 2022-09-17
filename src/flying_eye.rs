@@ -70,6 +70,7 @@ impl FlyingEye {
             false
         });
         self.entity.is_facing_left = self.velocity.x < 0.;
+        self.entity.update_looping_frame_number(time);
     }
 
     pub fn entity(&self) -> &SpriteEntity {

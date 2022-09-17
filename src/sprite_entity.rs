@@ -13,6 +13,7 @@ pub struct SpriteEntity {
     pub sprite: Option<&'static Sprite>,
     pub is_facing_left: bool,
     pub flip_bbox_when_facing_left: bool,
+    pub current_frame_number: u32,
 }
 
 impl SpriteEntity {
@@ -41,18 +42,18 @@ impl SpriteEntity {
         self
     }
 
-    pub fn draw(&self, time: &GameTime) {
+    pub fn update_looping_frame_number(&mut self, time: &GameTime) {
         if let Some(sprite) = self.sprite {
-            self.draw_frame(time.looping_frame_number(&sprite));
+            self.current_frame_number = time.looping_frame_number(&sprite);
         }
     }
 
-    pub fn draw_frame(&self, frame_number: u32) {
+    pub fn draw_current_frame(&self) {
         if let Some(sprite) = self.sprite {
             sprite.draw_ex(
                 self.pos.x,
                 self.pos.y,
-                frame_number,
+                self.current_frame_number,
                 SpriteDrawParams {
                     flip_x: self.is_facing_left,
                     ..Default::default()

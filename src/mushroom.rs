@@ -43,16 +43,16 @@ impl Mushroom {
         }
     }
 
-    pub fn draw(&self, time: &GameTime) {
+    fn set_current_frame_number(&mut self, time: &GameTime) {
         match &self.state {
             MushroomState::Dead => {
-                self.entity.draw_frame(self.dead_frame);
+                self.entity.current_frame_number = self.dead_frame;
             }
             MushroomState::Rezzing(animator) => {
-                self.entity.draw_frame(animator.get_frame(&time));
+                self.entity.current_frame_number = animator.get_frame(&time);
             }
             MushroomState::Alive => {
-                self.entity.draw(&time);
+                self.entity.update_looping_frame_number(&time);
             }
         }
     }
@@ -106,6 +106,7 @@ impl Mushroom {
                 self.entity.is_facing_left = self.velocity.x < 0.;
             }
         }
+        self.set_current_frame_number(time);
     }
 
     pub fn entity(&self) -> &SpriteEntity {

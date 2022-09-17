@@ -51,14 +51,23 @@ impl Player {
         npcs: &HashMap<u64, Npc>,
         time: &GameTime,
     ) {
-        if self.attachment.update(
+        if !self.attachment.update(
             npcs,
             level,
             &mut self.entity,
             is_key_pressed(KeyCode::Space),
         ) {
-            return;
+            self.unattached_process_input_and_update(level, npcs, time)
         }
+        self.entity.update_looping_frame_number(time);
+    }
+
+    fn unattached_process_input_and_update(
+        &mut self,
+        level: &Level,
+        npcs: &HashMap<u64, Npc>,
+        time: &GameTime,
+    ) {
         let time_since_last_frame = time.time_since_last_frame;
         let config = config();
         self.run_manager.update(

@@ -111,15 +111,15 @@ impl LevelRuntime {
         for npc in self.npcs.values() {
             match npc {
                 Npc::FlyingEye(flying_eye) => {
-                    flying_eye.entity().draw(&self.time);
+                    flying_eye.entity().draw_current_frame();
                 }
                 Npc::Mushroom(mushroom) => {
-                    mushroom.draw(&self.time);
+                    mushroom.entity().draw_current_frame();
                 }
             }
         }
 
-        self.player.entity().draw(&self.time);
+        self.player.entity().draw_current_frame();
 
         draw_level_text(&self.player, &level, &self.camera.rect());
 
