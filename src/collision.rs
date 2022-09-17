@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
 
+use crate::math_util::are_opposites;
+
 pub struct Collision {
     pub side: Side,
     pub displacement: Vec2,
@@ -133,5 +135,18 @@ pub fn collision_resolution_loop<F: FnMut() -> bool>(mut resolve_collisions: F) 
             );
             break;
         }
+    }
+}
+
+pub fn maybe_reverse_direction_x(velocity: &mut Vec2, displacement: &Vec2) {
+    if are_opposites(displacement.x, velocity.x) {
+        velocity.x = -velocity.x;
+    }
+}
+
+pub fn maybe_reverse_direction_xy(velocity: &mut Vec2, displacement: &Vec2) {
+    maybe_reverse_direction_x(velocity, displacement);
+    if are_opposites(displacement.y, velocity.y) {
+        velocity.y = -velocity.y;
     }
 }

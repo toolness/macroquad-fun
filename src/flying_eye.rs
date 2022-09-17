@@ -3,12 +3,11 @@ use std::collections::HashMap;
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
-    collision::{collision_resolution_loop, process_collision},
+    collision::{collision_resolution_loop, maybe_reverse_direction_xy, process_collision},
     config::config,
     entity::Entity,
     game_sprites::game_sprites,
     level::Level,
-    math_util::are_opposites,
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -27,15 +26,6 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
         velocity: base_velocity * config().flying_eye_speed,
         flying_eye: Some(FlyingEyeComponent()),
         ..Default::default()
-    }
-}
-
-fn maybe_reverse_direction_xy(velocity: &mut Vec2, displacement: &Vec2) {
-    if are_opposites(displacement.x, velocity.x) {
-        velocity.x = -velocity.x;
-    }
-    if are_opposites(displacement.y, velocity.y) {
-        velocity.y = -velocity.y;
     }
 }
 

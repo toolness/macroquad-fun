@@ -4,12 +4,11 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     animator::Animator,
-    collision::{collision_resolution_loop, process_collision, Side},
+    collision::{collision_resolution_loop, maybe_reverse_direction_x, process_collision, Side},
     config::config,
     entity::Entity,
     game_sprites::game_sprites,
     level::Level,
-    math_util::are_opposites,
     player::Player,
     sprite_component::SpriteComponent,
     time::GameTime,
@@ -44,12 +43,6 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
             state: MushroomState::Dead,
         }),
         ..Default::default()
-    }
-}
-
-fn maybe_reverse_direction_x(velocity: &mut Vec2, displacement: &Vec2) {
-    if are_opposites(displacement.x, velocity.x) {
-        velocity.x = -velocity.x;
     }
 }
 
