@@ -20,7 +20,6 @@ pub struct Player {
     sprite: SpriteComponent,
     is_in_air: bool,
     velocity: Vec2,
-    x_impulse: f32,
     run: RunComponent,
     attachment: AttachmentComponent,
 }
@@ -35,7 +34,6 @@ impl Player {
             .at_bottom_left(&start_rect),
             is_in_air: false,
             velocity: Vec2::new(0., 0.),
-            x_impulse: 0.,
             run: RunComponent::new(),
             attachment: Default::default(),
         }
@@ -75,7 +73,7 @@ impl Player {
             is_key_down(KeyCode::A),
             is_key_down(KeyCode::D),
         );
-        self.x_impulse = 0.;
+        let mut x_impulse = 0.;
 
         if self.is_in_air {
             if is_key_down(KeyCode::Space) && self.velocity.y < 0. {
@@ -91,12 +89,12 @@ impl Player {
                 self.velocity = Vec2::new(self.run.run_speed(), -config.jump_velocity);
                 self.is_in_air = true
             } else {
-                self.x_impulse = self.run.run_speed();
+                x_impulse = self.run.run_speed();
             }
         }
 
         let prev_bbox = self.sprite.bbox();
-        self.sprite.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
+        self.sprite.pos.x += (self.velocity.x + x_impulse) * time_since_last_frame as f32;
         self.sprite.pos.y += self.velocity.y * time_since_last_frame as f32;
 
         let mut is_on_any_surface_this_frame = false;
@@ -136,8 +134,8 @@ impl Player {
             self.is_in_air = true;
         }
 
-        if !self.is_in_air && self.x_impulse != 0. {
-            self.sprite.is_facing_left = self.x_impulse < 0.;
+        if !self.is_in_air && x_impulse != 0. {
+            self.sprite.is_facing_left = x_impulse < 0.;
         }
 
         if self.is_in_air {
@@ -145,10 +143,10 @@ impl Player {
                 .maybe_attach_to_entity(&entities, &self.sprite, &mut self.velocity);
         }
 
-        self.sprite.renderer = Some(self.sprite_renderer());
+        self.sprite.renderer = Some(self.sprite_renderer(x_impulse));
     }
 
-    fn sprite_renderer(&self) -> &'static SpriteRenderer {
+    fn sprite_renderer(&self, x_impulse: f32) -> &'static SpriteRenderer {
         let sprites = game_sprites();
         if self.is_in_air {
             if self.velocity.y >= 0. {
@@ -157,7 +155,7 @@ impl Player {
                 &sprites.huntress.jump
             }
         } else {
-            if self.x_impulse != 0. {
+            if x_impulse != 0. {
                 &sprites.huntress.run
             } else {
                 &sprites.huntress.idle
