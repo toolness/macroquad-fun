@@ -7,7 +7,7 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct SpriteEntity {
+pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
     pub sprite: Option<&'static Sprite>,
@@ -16,7 +16,7 @@ pub struct SpriteEntity {
     pub current_frame_number: u32,
 }
 
-impl SpriteEntity {
+impl SpriteComponent {
     pub fn bbox(&self) -> Rect {
         if self.flip_bbox_when_facing_left && self.is_facing_left {
             if let Some(sprite) = self.sprite {

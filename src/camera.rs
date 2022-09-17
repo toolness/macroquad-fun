@@ -19,7 +19,7 @@ impl Camera {
     }
 
     pub fn update(&mut self, player: &Player, level: &Level) {
-        let bbox = player.entity().bbox();
+        let bbox = player.sprite_component().bbox();
         let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
         let target_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
         if self.is_panning_next_update {

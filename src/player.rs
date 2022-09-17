@@ -6,18 +6,18 @@ use crate::{
     attachment::Attachment,
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
+    entity::Entity,
     game_sprites::game_sprites,
     level::Level,
-    level_runtime::Npc,
     running::RunManager,
     sprite::Sprite,
-    sprite_entity::SpriteEntity,
+    sprite_component::SpriteComponent,
     time::GameTime,
     world::world,
 };
 
 pub struct Player {
-    entity: SpriteEntity,
+    sprite: SpriteComponent,
     is_in_air: bool,
     velocity: Vec2,
     x_impulse: f32,
@@ -28,7 +28,7 @@ pub struct Player {
 impl Player {
     pub fn new(start_rect: Rect) -> Self {
         Player {
-            entity: SpriteEntity {
+            sprite: SpriteComponent {
                 relative_bbox: game_sprites().huntress.idle_bbox,
                 ..Default::default()
             }
@@ -41,31 +41,31 @@ impl Player {
         }
     }
 
-    pub fn entity(&self) -> &SpriteEntity {
-        &self.entity
+    pub fn sprite_component(&self) -> &SpriteComponent {
+        &self.sprite
     }
 
     pub fn process_input_and_update(
         &mut self,
         level: &Level,
-        npcs: &HashMap<u64, Npc>,
+        entities: &HashMap<u64, Entity>,
         time: &GameTime,
     ) {
         if !self.attachment.update(
-            npcs,
+            entities,
             level,
-            &mut self.entity,
+            &mut self.sprite,
             is_key_pressed(KeyCode::Space),
         ) {
-            self.unattached_process_input_and_update(level, npcs, time)
+            self.unattached_process_input_and_update(level, entities, time)
         }
-        self.entity.update_looping_frame_number(time);
+        self.sprite.update_looping_frame_number(time);
     }
 
     fn unattached_process_input_and_update(
         &mut self,
         level: &Level,
-        npcs: &HashMap<u64, Npc>,
+        entities: &HashMap<u64, Entity>,
         time: &GameTime,
     ) {
         let time_since_last_frame = time.time_since_last_frame;
@@ -95,14 +95,14 @@ impl Player {
             }
         }
 
-        let prev_bbox = self.entity.bbox();
-        self.entity.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
-        self.entity.pos.y += self.velocity.y * time_since_last_frame as f32;
+        let prev_bbox = self.sprite.bbox();
+        self.sprite.pos.x += (self.velocity.x + self.x_impulse) * time_since_last_frame as f32;
+        self.sprite.pos.y += self.velocity.y * time_since_last_frame as f32;
 
         let mut is_on_any_surface_this_frame = false;
 
         collision_resolution_loop(|| {
-            let bbox = self.entity.bbox();
+            let bbox = self.sprite.bbox();
             for collider in level.iter_colliders(&bbox) {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     match collision.side {
@@ -119,7 +119,7 @@ impl Player {
                     }
 
                     if collision.displacement != Vec2::ZERO {
-                        self.entity.pos += collision.displacement;
+                        self.sprite.pos += collision.displacement;
                         return true;
                     }
                 }
@@ -137,15 +137,15 @@ impl Player {
         }
 
         if !self.is_in_air && self.x_impulse != 0. {
-            self.entity.is_facing_left = self.x_impulse < 0.;
+            self.sprite.is_facing_left = self.x_impulse < 0.;
         }
 
         if self.is_in_air {
             self.attachment
-                .maybe_attach_to_npc(&npcs, &self.entity, &mut self.velocity);
+                .maybe_attach_to_entity(&entities, &self.sprite, &mut self.velocity);
         }
 
-        self.entity.sprite = Some(self.sprite());
+        self.sprite.sprite = Some(self.sprite());
     }
 
     fn sprite(&self) -> &'static Sprite {
@@ -166,17 +166,17 @@ impl Player {
     }
 
     pub fn fell_off_level(&self, level: &Level) -> bool {
-        self.entity.bbox().top() - level.pixel_bounds().bottom() > config().fall_off_level_threshold
+        self.sprite.bbox().top() - level.pixel_bounds().bottom() > config().fall_off_level_threshold
     }
 
     pub fn maybe_switch_levels(&mut self, level: &Level) -> Option<&'static Level> {
         let world = world();
-        if !level.contains_majority_of(&self.entity.bbox()) {
-            let world_pos = level.to_world_coords(&self.entity.pos);
+        if !level.contains_majority_of(&self.sprite.bbox()) {
+            let world_pos = level.to_world_coords(&self.sprite.pos);
             if let Some((new_level, new_pos)) =
-                world.find_level_containing_majority_of(&world_pos, &self.entity.relative_bbox)
+                world.find_level_containing_majority_of(&world_pos, &self.sprite.relative_bbox)
             {
-                self.entity.pos = new_pos;
+                self.sprite.pos = new_pos;
                 self.attachment.reset();
                 return Some(new_level);
             }

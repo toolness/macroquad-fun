@@ -4,112 +4,120 @@ use crate::{
     animator::Animator,
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
+    entity::Entity,
     game_sprites::game_sprites,
     level::Level,
     math_util::are_opposites,
     player::Player,
-    sprite_entity::SpriteEntity,
+    sprite_component::SpriteComponent,
     time::GameTime,
 };
 
-enum MushroomState {
+pub struct MushroomComponent {
+    state: MushroomState,
+}
+
+pub enum MushroomState {
     Dead,
     Rezzing(Animator),
     Alive,
 }
 
-pub struct Mushroom {
-    entity: SpriteEntity,
-    state: MushroomState,
-    dead_frame: u32,
-    velocity: Vec2,
+fn dead_frame() -> u32 {
+    game_sprites().mushroom.death.last_frame()
 }
 
-impl Mushroom {
-    pub fn new(start_rect: Rect) -> Self {
-        let sprites = &game_sprites().mushroom;
-        let death_sprite = &sprites.death;
-        Mushroom {
-            entity: SpriteEntity {
-                relative_bbox: sprites.idle_bbox,
-                sprite: Some(&death_sprite),
-                flip_bbox_when_facing_left: true,
-                ..Default::default()
-            }
-            .at_bottom_left(&start_rect),
+pub fn create_mushrom(start_rect: Rect) -> Entity {
+    let sprites = &game_sprites().mushroom;
+    let death_sprite = &sprites.death;
+    Entity {
+        sprite: SpriteComponent {
+            relative_bbox: sprites.idle_bbox,
+            sprite: Some(&death_sprite),
+            flip_bbox_when_facing_left: true,
+            ..Default::default()
+        }
+        .at_bottom_left(&start_rect),
+        mushroom: Some(MushroomComponent {
             state: MushroomState::Dead,
-            dead_frame: death_sprite.last_frame(),
-            velocity: Vec2::new(0., 0.),
-        }
+        }),
+        ..Default::default()
     }
+}
 
-    fn set_current_frame_number(&mut self, time: &GameTime) {
-        match &self.state {
-            MushroomState::Dead => {
-                self.entity.current_frame_number = self.dead_frame;
-            }
-            MushroomState::Rezzing(animator) => {
-                self.entity.current_frame_number = animator.get_frame(&time);
-            }
-            MushroomState::Alive => {
-                self.entity.update_looping_frame_number(&time);
+fn maybe_reverse_direction_x(velocity: &mut Vec2, displacement: &Vec2) {
+    if are_opposites(displacement.x, velocity.x) {
+        velocity.x = -velocity.x;
+    }
+}
+
+pub fn update_mushroom(
+    entity: &mut Entity,
+    player: &Player,
+    level: &Level,
+    time: &GameTime,
+) -> Option<()> {
+    let mushroom = entity.mushroom.as_mut()?;
+    let velocity = &mut entity.velocity;
+    let sprite = &mut entity.sprite;
+
+    match &mushroom.state {
+        MushroomState::Dead => {
+            if player.sprite_component().bbox().overlaps(&sprite.bbox()) {
+                mushroom.state = MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
             }
         }
-    }
-
-    fn maybe_reverse_direction(&mut self, displacement: &Vec2) {
-        if are_opposites(displacement.x, self.velocity.x) {
-            self.velocity.x = -self.velocity.x;
+        MushroomState::Rezzing(animator) => {
+            if animator.is_done(&time) {
+                mushroom.state = MushroomState::Alive;
+                sprite.sprite = Some(&game_sprites().mushroom.run);
+                velocity.x = config().mushroom_speed;
+            }
         }
-    }
+        MushroomState::Alive => {
+            velocity.y += config().gravity * time.time_since_last_frame as f32;
+            let prev_bbox = sprite.bbox();
+            sprite.pos += *velocity * time.time_since_last_frame as f32;
 
-    pub fn update(&mut self, player: &Player, level: &Level, time: &GameTime) {
-        match &self.state {
-            MushroomState::Dead => {
-                if player.entity().bbox().overlaps(&self.entity.bbox()) {
-                    self.state =
-                        MushroomState::Rezzing(Animator::new(self.dead_frame, true, &time));
-                }
-            }
-            MushroomState::Rezzing(animator) => {
-                if animator.is_done(&time) {
-                    self.state = MushroomState::Alive;
-                    self.entity.sprite = Some(&game_sprites().mushroom.run);
-                    self.velocity.x = config().mushroom_speed
-                }
-            }
-            MushroomState::Alive => {
-                self.velocity.y += config().gravity * time.time_since_last_frame as f32;
-                let prev_bbox = self.entity.bbox();
-                self.entity.pos += self.velocity * time.time_since_last_frame as f32;
+            collision_resolution_loop(|| {
+                let bbox = sprite.bbox();
 
-                collision_resolution_loop(|| {
-                    let bbox = self.entity.bbox();
-
-                    for collider in level
-                        .iter_colliders(&bbox)
-                        .chain(level.iter_bounds_as_colliders())
-                    {
-                        if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                            if collision.side == Side::Top {
-                                self.velocity.y = 0.;
-                            }
-                            if collision.displacement != Vec2::ZERO {
-                                self.entity.pos += collision.displacement;
-                                self.maybe_reverse_direction(&collision.displacement);
-                                return true;
-                            }
+                for collider in level
+                    .iter_colliders(&bbox)
+                    .chain(level.iter_bounds_as_colliders())
+                {
+                    if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                        if collision.side == Side::Top {
+                            velocity.y = 0.;
+                        }
+                        if collision.displacement != Vec2::ZERO {
+                            sprite.pos += collision.displacement;
+                            maybe_reverse_direction_x(velocity, &collision.displacement);
+                            return true;
                         }
                     }
-                    false
-                });
-                self.entity.is_facing_left = self.velocity.x < 0.;
+                }
+                false
+            });
+            entity.sprite.is_facing_left = entity.velocity.x < 0.;
+        }
+    }
+    mushroom.set_current_frame_number(time, &mut entity.sprite);
+    Some(())
+}
+
+impl MushroomComponent {
+    fn set_current_frame_number(&self, time: &GameTime, sprite: &mut SpriteComponent) {
+        match &self.state {
+            MushroomState::Dead => {
+                sprite.current_frame_number = dead_frame();
+            }
+            MushroomState::Rezzing(animator) => {
+                sprite.current_frame_number = animator.get_frame(&time);
+            }
+            MushroomState::Alive => {
+                sprite.update_looping_frame_number(&time);
             }
         }
-        self.set_current_frame_number(time);
-    }
-
-    pub fn entity(&self) -> &SpriteEntity {
-        &self.entity
     }
 }

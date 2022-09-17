@@ -1,13 +1,14 @@
 use crate::drawing::draw_rect_lines;
-use crate::mushroom::Mushroom;
-use crate::sprite_entity::SpriteEntity;
+use crate::entity::Entity;
+use crate::flying_eye::{create_flying_eye, update_flying_eye};
+use crate::mushroom::{create_mushrom, update_mushroom};
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
 use macroquad::prelude::*;
 use std::collections::HashMap;
 
-use crate::{flying_eye::FlyingEye, level::Level, player::Player};
+use crate::{level::Level, player::Player};
 
 #[derive(PartialEq)]
 pub enum FrameResult {
@@ -15,21 +16,9 @@ pub enum FrameResult {
     PlayerDied,
 }
 
-pub enum Npc {
-    FlyingEye(FlyingEye),
-    Mushroom(Mushroom),
-}
-
-fn iter_entities<'a>(npcs: &'a HashMap<u64, Npc>) -> impl Iterator<Item = &'a SpriteEntity> {
-    npcs.values().map(|npc| match npc {
-        Npc::FlyingEye(flying_eye) => flying_eye.entity(),
-        Npc::Mushroom(mushroom) => mushroom.entity(),
-    })
-}
-
 pub struct LevelRuntime {
     level: &'static Level,
-    npcs: HashMap<u64, Npc>,
+    entities: HashMap<u64, Entity>,
     player: Player,
     debug_mode: bool,
     camera: Camera,
@@ -42,7 +31,7 @@ impl LevelRuntime {
         let mut instance = LevelRuntime {
             player,
             level,
-            npcs: HashMap::new(),
+            entities: HashMap::new(),
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
@@ -52,14 +41,14 @@ impl LevelRuntime {
         instance
     }
 
-    fn add_npc(&mut self, npc: Npc) {
+    fn add_entity(&mut self, entity: Entity) {
         let id = self.new_id();
-        self.npcs.insert(id, npc);
+        self.entities.insert(id, entity);
     }
 
     pub fn change_level(&mut self, level: &'static Level) {
         self.level = level;
-        self.npcs.clear();
+        self.entities.clear();
         self.camera.cut();
         self.spawn_entities();
     }
@@ -68,10 +57,10 @@ impl LevelRuntime {
         for entity in self.level.entities.iter() {
             match entity.kind {
                 EntityKind::FlyingEye(velocity) => {
-                    self.add_npc(Npc::FlyingEye(FlyingEye::new(entity.rect, velocity)));
+                    self.add_entity(create_flying_eye(entity.rect, velocity));
                 }
                 EntityKind::Mushroom => {
-                    self.add_npc(Npc::Mushroom(Mushroom::new(entity.rect)));
+                    self.add_entity(create_mushrom(entity.rect));
                 }
                 _ => {}
             }
@@ -98,27 +87,21 @@ impl LevelRuntime {
         // Draw environment.
         self.level.draw(&self.camera.rect());
 
-        for npc in self.npcs.values_mut() {
-            match npc {
-                Npc::FlyingEye(flying_eye) => {
-                    flying_eye.update(&self.level, &self.time);
-                }
-                Npc::Mushroom(mushroom) => {
-                    mushroom.update(&self.player, &self.level, &self.time);
-                }
-            }
+        for entity in self.entities.values_mut() {
+            update_flying_eye(entity, &self.level, &self.time);
+            update_mushroom(entity, &self.player, &self.level, &self.time);
         }
 
         self.player
-            .process_input_and_update(&self.level, &self.npcs, &self.time);
+            .process_input_and_update(&self.level, &self.entities, &self.time);
 
         // Draw entities.
 
-        for npc in iter_entities(&self.npcs) {
-            npc.draw_current_frame();
+        for entity in self.entities.values() {
+            entity.sprite.draw_current_frame();
         }
 
-        self.player.entity().draw_current_frame();
+        self.player.sprite_component().draw_current_frame();
 
         draw_level_text(&self.player, &self.level, &self.camera.rect());
 
@@ -137,17 +120,17 @@ impl LevelRuntime {
 
     fn draw_debug_layer(&self) {
         let level = self.level;
-        self.player.entity().draw_debug_rects();
+        self.player.sprite_component().draw_debug_rects();
         for collider in level.iter_colliders(&level.pixel_bounds()) {
             collider.draw_debug_rect(PURPLE);
         }
         draw_rect_lines(
-            &level.get_bounding_cell_rect(&self.player.entity().bbox()),
+            &level.get_bounding_cell_rect(&self.player.sprite_component().bbox()),
             1.,
             WHITE,
         );
-        for entity in iter_entities(&self.npcs) {
-            entity.draw_debug_rects();
+        for entity in self.entities.values() {
+            entity.sprite.draw_debug_rects();
         }
         let text = format!("fps: {}", get_fps());
         draw_text(
