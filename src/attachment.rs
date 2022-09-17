@@ -24,16 +24,13 @@ impl Attachment {
         velocity: &mut Vec2,
     ) {
         let bbox = &entity.bbox();
-        for (&id, npc) in npcs.iter() {
-            if let Npc::FlyingEye(flying_eye) = npc {
-                if flying_eye.entity().bbox().overlaps(&bbox)
-                    && self.detached_from_npc_id != Some(id)
-                {
-                    self.attached_to_npc_id = Some(id);
-                    velocity.x = 0.;
-                    velocity.y = 0.;
-                    break;
-                }
+
+        for (&id, flying_eye) in filter_flying_eyes(npcs) {
+            if flying_eye.entity().bbox().overlaps(&bbox) && self.detached_from_npc_id != Some(id) {
+                self.attached_to_npc_id = Some(id);
+                velocity.x = 0.;
+                velocity.y = 0.;
+                break;
             }
         }
     }
@@ -98,4 +95,16 @@ impl Attachment {
             assert!(self.detached_from_npc_id.is_some());
         }
     }
+}
+
+fn filter_flying_eyes<'a>(
+    npcs: &'a HashMap<u64, Npc>,
+) -> impl Iterator<Item = (&'a u64, &'a FlyingEye)> {
+    npcs.iter().filter_map(|(id, npc)| {
+        if let Npc::FlyingEye(flying_eye) = npc {
+            Some((id, flying_eye))
+        } else {
+            None
+        }
+    })
 }
