@@ -111,7 +111,7 @@ impl AttachmentComponent {
         passenger_sprite: &mut SpriteComponent,
         passenger_physics: &mut PhysicsComponent,
     ) {
-        if passenger_physics.was_displaced_this_frame {
+        if passenger_physics.latest_frame.was_displaced {
             self.num_frames_displaced += 1;
             if self.num_frames_displaced > 2 {
                 self.detach(passenger_physics);

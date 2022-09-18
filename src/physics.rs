@@ -27,8 +27,13 @@ pub struct PhysicsComponent {
     pub defies_gravity: bool,
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
-    pub is_on_any_surface_this_frame: bool,
-    pub was_displaced_this_frame: bool,
+    pub latest_frame: PhysicsFrameResults,
+}
+
+#[derive(Default)]
+pub struct PhysicsFrameResults {
+    pub is_on_any_surface: bool,
+    pub was_displaced: bool,
 }
 
 pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
@@ -45,8 +50,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
         }
 
         let prev_bbox = sprite.bbox();
-        let mut is_on_any_surface_this_frame = false;
-        let mut was_displaced_this_frame = false;
+        let mut results: PhysicsFrameResults = Default::default();
 
         sprite.pos += physics.velocity * time_since_last_frame;
         sprite.pos.x += physics.x_impulse * time_since_last_frame;
@@ -69,7 +73,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                     match collision.side {
                         Side::Top => {
-                            is_on_any_surface_this_frame = true;
+                            results.is_on_any_surface = true;
                             if !physics.defies_gravity {
                                 physics.velocity.y = 0.;
                             }
@@ -91,7 +95,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
 
                     if collision.displacement != Vec2::ZERO {
                         sprite.pos += collision.displacement;
-                        was_displaced_this_frame = true;
+                        results.was_displaced = true;
                         match physics.collision_behavior {
                             PhysicsCollisionBehavior::ReverseDirectionX => {
                                 maybe_reverse_direction_x(
@@ -114,7 +118,6 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
             false
         });
 
-        physics.is_on_any_surface_this_frame = is_on_any_surface_this_frame;
-        physics.was_displaced_this_frame = was_displaced_this_frame;
+        physics.latest_frame = results;
     }
 }

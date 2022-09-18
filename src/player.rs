@@ -66,7 +66,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     let player = player_entity.player.as_mut().unwrap();
     let attachment = &mut player_entity.attachment.as_mut().unwrap();
 
-    if physics.is_on_any_surface_this_frame {
+    if physics.latest_frame.is_on_any_surface {
         // The player just landed (or remains on the ground).
         player.is_in_air = false;
         attachment.reset();
