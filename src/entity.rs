@@ -23,4 +23,28 @@ pub struct Entity {
     pub attachment: Option<AttachmentComponent>,
 }
 
+pub const PLAYER_ENTITY_ID: u64 = 0;
+
+pub trait EntityMapHelpers {
+    fn with_player(player: Entity) -> Self;
+    fn player(&self) -> &Entity;
+    fn player_mut(&mut self) -> &mut Entity;
+}
+
 pub type EntityMap = HashMap<u64, Entity>;
+
+impl EntityMapHelpers for EntityMap {
+    fn player(&self) -> &Entity {
+        &self[&PLAYER_ENTITY_ID]
+    }
+
+    fn player_mut(&mut self) -> &mut Entity {
+        self.get_mut(&PLAYER_ENTITY_ID).unwrap()
+    }
+
+    fn with_player(player: Entity) -> Self {
+        let mut map = EntityMap::new();
+        map.insert(PLAYER_ENTITY_ID, player);
+        map
+    }
+}

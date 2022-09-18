@@ -1,12 +1,11 @@
 use crate::attachment::attachment_system;
 use crate::drawing::draw_rect_lines;
-use crate::entity::{Entity, EntityMap};
+use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::player::{
     did_fall_off_level, process_player_input_and_update, should_switch_levels, teleport_entity,
 };
-use crate::sprite_component::SpriteComponent;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
@@ -29,19 +28,16 @@ pub struct LevelRuntime {
     time: GameTime,
 }
 
-pub const PLAYER_ENTITY_ID: u64 = 0;
-
 impl LevelRuntime {
     pub fn new(player: Entity, level: &'static Level) -> Self {
         let mut instance = LevelRuntime {
             level,
-            entities: EntityMap::new(),
+            entities: EntityMap::with_player(player),
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
             time: GameTime::new(),
         };
-        instance.entities.insert(PLAYER_ENTITY_ID, player);
         instance.change_level(&level);
         instance
     }
@@ -93,13 +89,13 @@ impl LevelRuntime {
         self.time.update();
 
         if !self.maybe_switch_level()
-            && did_fall_off_level(player_sprite(&self.entities), &self.level)
+            && did_fall_off_level(&self.entities.player().sprite, &self.level)
         {
             return FrameResult::PlayerDied;
         }
 
         self.camera
-            .update(player_sprite(&self.entities), &self.level);
+            .update(&self.entities.player().sprite, &self.level);
 
         attachment_system(&mut self.entities, &self.level);
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
@@ -116,10 +112,11 @@ impl LevelRuntime {
             }
         }
 
-        player_sprite(&self.entities).draw_current_frame();
+        // Always draw the player in front of everything else.
+        self.entities.player().sprite.draw_current_frame();
 
         draw_level_text(
-            player_sprite(&self.entities),
+            &self.entities.player().sprite,
             &self.level,
             &self.camera.rect(),
         );
@@ -143,7 +140,7 @@ impl LevelRuntime {
             collider.draw_debug_rect(PURPLE);
         }
         draw_rect_lines(
-            &level.get_bounding_cell_rect(&player_sprite(&self.entities).bbox()),
+            &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
             1.,
             WHITE,
         );
@@ -159,8 +156,4 @@ impl LevelRuntime {
             WHITE,
         );
     }
-}
-
-fn player_sprite<'a>(entities: &'a EntityMap) -> &'a SpriteComponent {
-    &entities[&PLAYER_ENTITY_ID].sprite
 }
