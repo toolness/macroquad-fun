@@ -28,6 +28,7 @@ pub struct PhysicsComponent {
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
 
+    /// Results of the latest iteration of the physics loop.
     /// This should really be read-only, but it's easiest to just make it public.
     pub latest_frame: PhysicsFrameResults,
 }
