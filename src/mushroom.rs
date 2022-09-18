@@ -51,11 +51,12 @@ pub fn mushroom_movement_system(
     level: &Level,
     time: &GameTime,
 ) {
+    let player_bbox = player_sprite.bbox();
     for entity in entities.values_mut() {
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.velocity;
             let sprite = &mut entity.sprite;
-            update_mushroom(mushroom, velocity, sprite, player_sprite, level, time);
+            update_mushroom(mushroom, velocity, sprite, &player_bbox, level, time);
         }
     }
 }
@@ -64,13 +65,13 @@ fn update_mushroom(
     mushroom: &mut MushroomComponent,
     velocity: &mut Vec2,
     sprite: &mut SpriteComponent,
-    player_sprite: &SpriteComponent,
+    player_bbox: &Rect,
     level: &Level,
     time: &GameTime,
 ) {
     match &mushroom.state {
         MushroomState::Dead => {
-            if player_sprite.bbox().overlaps(&sprite.bbox()) {
+            if player_bbox.overlaps(&sprite.bbox()) {
                 mushroom.state = MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
             }
         }
