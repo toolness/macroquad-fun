@@ -3,9 +3,10 @@ use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 use crate::{
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
-    entity::Entity,
+    entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
+    level_runtime::PLAYER_ENTITY_ID,
     running::RunComponent,
     sprite_component::SpriteComponent,
     sprite_renderer::SpriteRenderer,
@@ -39,7 +40,8 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     }
 }
 
-pub fn process_player_input_and_update(player: &mut Entity, level: &Level, time: &GameTime) {
+pub fn process_player_input_and_update(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+    let player = entities.get_mut(&PLAYER_ENTITY_ID).unwrap();
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
         if is_key_pressed(KeyCode::Space) {

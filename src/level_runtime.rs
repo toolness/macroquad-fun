@@ -103,13 +103,8 @@ impl LevelRuntime {
 
         attachment_system(&mut self.entities, &self.level);
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
-
         mushroom_movement_system(&mut self.entities, &self.level, &self.time);
-
-        // TODO: Don't remove the player from our entities.
-        let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
-        process_player_input_and_update(&mut player, &self.level, &self.time);
-        self.entities.insert(PLAYER_ENTITY_ID, player);
+        process_player_input_and_update(&mut self.entities, &self.level, &self.time);
 
         // Draw environment.
         self.level.draw(&self.camera.rect());
