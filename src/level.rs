@@ -272,6 +272,20 @@ impl Level {
         }
     }
 
+    pub fn iter_colliders_ex<'a>(
+        &'a self,
+        bounding_rect: &Rect,
+        include_bounds: bool,
+    ) -> impl Iterator<Item = Collider> + 'a {
+        let base = self.iter_colliders(bounding_rect);
+
+        if include_bounds {
+            base.chain(self.iter_bounds_as_colliders())
+        } else {
+            base.chain(BoundsColliderIterator::empty())
+        }
+    }
+
     pub fn iter_colliders(&self, bounding_rect: &Rect) -> GridColliderIterator {
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
         let x_start = extents.left() as i64;

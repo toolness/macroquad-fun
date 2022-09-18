@@ -7,7 +7,7 @@ use crate::{
     },
     config::config,
     entity::EntityMap,
-    level::{BoundsColliderIterator, Level},
+    level::Level,
     time::GameTime,
 };
 
@@ -66,15 +66,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
         collision_resolution_loop(|| {
             let bbox = sprite.bbox();
 
-            let colliders = {
-                let base = level.iter_colliders(&bbox);
-
-                if physics.defies_level_bounds {
-                    base.chain(BoundsColliderIterator::empty())
-                } else {
-                    base.chain(level.iter_bounds_as_colliders())
-                }
-            };
+            let colliders = level.iter_colliders_ex(&bbox, !physics.defies_level_bounds);
 
             for collider in colliders {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
