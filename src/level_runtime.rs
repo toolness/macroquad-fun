@@ -6,6 +6,7 @@ use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::player::{
     did_fall_off_level, process_player_input_and_update, should_switch_levels, teleport_entity,
 };
+use crate::sprite_component::SpriteComponent;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
@@ -92,13 +93,13 @@ impl LevelRuntime {
         self.time.update();
 
         if !self.maybe_switch_level()
-            && did_fall_off_level(&self.entities[&PLAYER_ENTITY_ID].sprite, &self.level)
+            && did_fall_off_level(player_sprite(&self.entities), &self.level)
         {
             return FrameResult::PlayerDied;
         }
 
         self.camera
-            .update(&self.entities[&PLAYER_ENTITY_ID].sprite, &self.level);
+            .update(player_sprite(&self.entities), &self.level);
 
         attachment_system(&mut self.entities, &self.level);
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
@@ -119,10 +120,10 @@ impl LevelRuntime {
             }
         }
 
-        self.entities[&PLAYER_ENTITY_ID].sprite.draw_current_frame();
+        player_sprite(&self.entities).draw_current_frame();
 
         draw_level_text(
-            &self.entities[&PLAYER_ENTITY_ID].sprite,
+            player_sprite(&self.entities),
             &self.level,
             &self.camera.rect(),
         );
@@ -146,7 +147,7 @@ impl LevelRuntime {
             collider.draw_debug_rect(PURPLE);
         }
         draw_rect_lines(
-            &level.get_bounding_cell_rect(&self.entities[&PLAYER_ENTITY_ID].sprite.bbox()),
+            &level.get_bounding_cell_rect(&player_sprite(&self.entities).bbox()),
             1.,
             WHITE,
         );
@@ -162,4 +163,8 @@ impl LevelRuntime {
             WHITE,
         );
     }
+}
+
+fn player_sprite<'a>(entities: &'a EntityMap) -> &'a SpriteComponent {
+    &entities[&PLAYER_ENTITY_ID].sprite
 }
