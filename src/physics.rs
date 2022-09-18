@@ -30,6 +30,7 @@ pub struct PhysicsComponent {
     pub collision_behavior: PhysicsCollisionBehavior,
     pub is_in_air: bool,
     pub is_on_any_surface_this_frame: bool,
+    pub was_displaced_this_frame: bool,
 }
 
 pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
@@ -47,6 +48,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
 
         let prev_bbox = sprite.bbox();
         let mut is_on_any_surface_this_frame = false;
+        let mut was_displaced_this_frame = false;
 
         sprite.pos += physics.velocity * time_since_last_frame;
         sprite.pos.x += physics.x_impulse * time_since_last_frame;
@@ -92,6 +94,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
 
                     if collision.displacement != Vec2::ZERO {
                         sprite.pos += collision.displacement;
+                        was_displaced_this_frame = true;
                         match physics.collision_behavior {
                             PhysicsCollisionBehavior::ReverseDirectionX => {
                                 maybe_reverse_direction_x(
@@ -115,5 +118,6 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
         });
 
         physics.is_on_any_surface_this_frame = is_on_any_surface_this_frame;
+        physics.was_displaced_this_frame = was_displaced_this_frame;
     }
 }

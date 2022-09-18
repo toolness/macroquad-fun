@@ -1,21 +1,23 @@
 use macroquad::prelude::Vec2;
 
 use crate::{
-    collision::{collision_resolution_loop, process_collision},
+    config::config,
     entity::{Entity, EntityMap, EntityMapHelpers},
-    flying_eye::carry_entity,
-    level::Level,
+    physics::PhysicsComponent,
     sprite_component::SpriteComponent,
 };
+
+const CARRY_Y_OFFSET: f32 = 10.0;
 
 #[derive(Default)]
 pub struct AttachmentComponent {
     attached_to_entity_id: Option<u64>,
     detached_from_entity_id: Option<u64>,
+    num_frames_displaced: u32,
     pub should_attach: bool,
 }
 
-pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
+pub fn attachment_system(entities: &mut EntityMap) {
     let entities_to_process: Vec<u64> = entities
         .iter()
         .filter_map(|(&id, entity)| {
@@ -33,7 +35,12 @@ pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
             let sprite = &mut entity.sprite;
             let attachment = entity.attachment.as_mut().unwrap();
             if let Some(carrier_entity) = attachment.attached_entity(entities) {
-                attachment.update_while_attached(&carrier_entity.sprite, level, sprite);
+                attachment.update_while_attached(
+                    &carrier_entity.sprite,
+                    &carrier_entity.physics,
+                    sprite,
+                    &mut entity.physics,
+                );
             } else if attachment.should_attach {
                 attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics.velocity);
             }
@@ -60,6 +67,7 @@ impl AttachmentComponent {
                 && self.detached_from_entity_id != Some(id)
             {
                 self.attached_to_entity_id = Some(id);
+                self.num_frames_displaced = 0;
                 velocity.x = 0.;
                 velocity.y = 0.;
                 break;
@@ -71,9 +79,11 @@ impl AttachmentComponent {
         self.attached_to_entity_id.is_some()
     }
 
-    pub fn detach(&mut self) {
+    pub fn detach(&mut self, physics: &mut PhysicsComponent) {
         self.detached_from_entity_id = self.attached_to_entity_id.take();
         assert!(self.detached_from_entity_id.is_some());
+        physics.velocity = Vec2::ZERO;
+        physics.defies_gravity = false;
     }
 
     fn attached_entity<'a>(&self, entities: &'a EntityMap) -> Option<&'a Entity> {
@@ -91,31 +101,29 @@ impl AttachmentComponent {
 
     fn update_while_attached(
         &mut self,
-        carrier: &SpriteComponent,
-        level: &Level,
-        passenger: &mut SpriteComponent,
+        carrier_sprite: &SpriteComponent,
+        carrier_physics: &PhysicsComponent,
+        passenger_sprite: &mut SpriteComponent,
+        passenger_physics: &mut PhysicsComponent,
     ) {
-        let prev_bbox = passenger.bbox();
-        carry_entity(&carrier, passenger);
-
-        let mut should_detach = false;
-
-        collision_resolution_loop(|| {
-            let bbox = passenger.bbox();
-            for collider in level.iter_colliders(&bbox) {
-                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                    if collision.displacement != Vec2::ZERO {
-                        passenger.pos += collision.displacement;
-                        should_detach = true;
-                        return true;
-                    }
-                }
+        if passenger_physics.was_displaced_this_frame {
+            self.num_frames_displaced += 1;
+            if self.num_frames_displaced > 2 {
+                self.detach(passenger_physics);
+                return;
             }
-            return false;
-        });
-
-        if should_detach {
-            self.detach();
+        } else {
+            self.num_frames_displaced = 0;
         }
+
+        let config = config();
+        let bbox = carrier_sprite.bbox();
+        let passenger_bbox = passenger_sprite.bbox();
+        let y_diff = bbox.bottom() - config.sprite_scale * CARRY_Y_OFFSET - passenger_bbox.top();
+        let x_diff = bbox.left() - passenger_bbox.left();
+        passenger_sprite.pos += Vec2::new(x_diff, y_diff);
+        passenger_sprite.is_facing_left = carrier_sprite.is_facing_left;
+        passenger_physics.velocity = carrier_physics.velocity;
+        passenger_physics.defies_gravity = true;
     }
 }

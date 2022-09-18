@@ -29,6 +29,7 @@ pub fn create_player(start_rect: Rect) -> Entity {
         attachment: Some(Default::default()),
         physics: PhysicsComponent {
             collision_behavior: PhysicsCollisionBehavior::Stop,
+            defies_level_bounds: true,
             ..Default::default()
         },
         ..Default::default()
@@ -47,7 +48,7 @@ pub fn process_player_input(entities: &mut EntityMap, time: &GameTime) {
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
         if is_key_pressed(KeyCode::Space) {
-            attachment.detach();
+            attachment.detach(&mut player.physics);
         }
     } else {
         unattached_player_process_input(player, time);
