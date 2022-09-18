@@ -2,11 +2,10 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     animator::Animator,
-    collision::{collision_resolution_loop, maybe_reverse_direction_x, process_collision, Side},
     config::config,
     entity::{Entity, EntityMap, EntityMapHelpers},
     game_sprites::game_sprites,
-    level::Level,
+    physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -39,17 +38,21 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         mushroom: Some(MushroomComponent {
             state: MushroomState::Dead,
         }),
+        physics: PhysicsComponent {
+            collision_behavior: PhysicsCollisionBehavior::ReverseDirectionX,
+            ..Default::default()
+        },
         ..Default::default()
     }
 }
 
-pub fn mushroom_movement_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
     let player_bbox = entities.player().sprite.bbox();
     for entity in entities.values_mut() {
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;
-            update_mushroom(mushroom, velocity, sprite, &player_bbox, level, time);
+            update_mushroom(mushroom, velocity, sprite, &player_bbox, time);
         }
     }
 }
@@ -59,7 +62,6 @@ fn update_mushroom(
     velocity: &mut Vec2,
     sprite: &mut SpriteComponent,
     player_bbox: &Rect,
-    level: &Level,
     time: &GameTime,
 ) {
     match &mushroom.state {
@@ -76,30 +78,6 @@ fn update_mushroom(
             }
         }
         MushroomState::Alive => {
-            velocity.y += config().gravity * time.time_since_last_frame as f32;
-            let prev_bbox = sprite.bbox();
-            sprite.pos += *velocity * time.time_since_last_frame as f32;
-
-            collision_resolution_loop(|| {
-                let bbox = sprite.bbox();
-
-                for collider in level
-                    .iter_colliders(&bbox)
-                    .chain(level.iter_bounds_as_colliders())
-                {
-                    if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                        if collision.side == Side::Top {
-                            velocity.y = 0.;
-                        }
-                        if collision.displacement != Vec2::ZERO {
-                            sprite.pos += collision.displacement;
-                            maybe_reverse_direction_x(velocity, &collision.displacement);
-                            return true;
-                        }
-                    }
-                }
-                false
-            });
             sprite.is_facing_left = velocity.x < 0.;
         }
     }

@@ -2,12 +2,10 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     attachment::AttachableComponent,
-    collision::{collision_resolution_loop, maybe_reverse_direction_xy, process_collision},
     config::config,
     entity::{Entity, EntityMap},
     game_sprites::game_sprites,
-    level::Level,
-    physics::PhysicsComponent,
+    physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -25,6 +23,8 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
         .at_top_left(&start_rect),
         physics: PhysicsComponent {
             velocity: base_velocity * config().flying_eye_speed,
+            defies_gravity: true,
+            collision_behavior: PhysicsCollisionBehavior::ReverseDirectionXY,
             ..Default::default()
         },
         flying_eye: Some(FlyingEyeComponent()),
@@ -45,46 +45,11 @@ pub fn carry_entity(carrier: &SpriteComponent, passenger: &mut SpriteComponent) 
     passenger.is_facing_left = carrier.is_facing_left;
 }
 
-pub fn flying_eye_movement_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+pub fn flying_eye_movement_system(entities: &mut EntityMap, time: &GameTime) {
     for entity in entities.values_mut() {
         if entity.flying_eye.is_some() {
-            update_flying_eye(
-                &mut entity.physics.velocity,
-                &mut entity.sprite,
-                level,
-                time,
-            );
+            entity.sprite.is_facing_left = entity.physics.velocity.x < 0.;
+            entity.sprite.update_looping_frame_number(time);
         }
     }
-}
-
-fn update_flying_eye(
-    velocity: &mut Vec2,
-    sprite: &mut SpriteComponent,
-    level: &Level,
-    time: &GameTime,
-) {
-    let prev_bbox = sprite.bbox();
-    sprite.pos += *velocity * time.time_since_last_frame as f32;
-
-    collision_resolution_loop(|| {
-        let bbox = sprite.bbox();
-
-        for collider in level
-            .iter_colliders(&bbox)
-            .chain(level.iter_bounds_as_colliders())
-        {
-            if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                if collision.displacement != Vec2::ZERO {
-                    sprite.pos += collision.displacement;
-                    maybe_reverse_direction_xy(velocity, &collision.displacement);
-                    return true;
-                }
-            }
-        }
-        false
-    });
-
-    sprite.is_facing_left = velocity.x < 0.;
-    sprite.update_looping_frame_number(time);
 }

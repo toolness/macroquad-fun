@@ -320,6 +320,15 @@ pub struct BoundsColliderIterator {
     position: u8,
 }
 
+impl BoundsColliderIterator {
+    pub fn empty() -> Self {
+        BoundsColliderIterator {
+            bounds: Default::default(),
+            position: 4,
+        }
+    }
+}
+
 impl Iterator for BoundsColliderIterator {
     type Item = Collider;
 

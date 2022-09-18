@@ -3,8 +3,10 @@ use crate::drawing::draw_rect_lines;
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
+use crate::physics::physics_system;
 use crate::player::{
-    did_fall_off_level, process_player_input_and_update, should_switch_levels, teleport_entity,
+    did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
+    teleport_entity,
 };
 use crate::text::draw_level_text;
 use crate::time::GameTime;
@@ -97,10 +99,12 @@ impl LevelRuntime {
         self.camera
             .update(&self.entities.player().sprite, &self.level);
 
+        process_player_input(&mut self.entities, &self.time);
+        physics_system(&mut self.entities, &self.level, &self.time);
         attachment_system(&mut self.entities, &self.level);
-        flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
-        mushroom_movement_system(&mut self.entities, &self.level, &self.time);
-        process_player_input_and_update(&mut self.entities, &self.level, &self.time);
+        flying_eye_movement_system(&mut self.entities, &self.time);
+        mushroom_movement_system(&mut self.entities, &self.time);
+        player_update_system(&mut self.entities);
 
         // Draw environment.
         self.level.draw(&self.camera.rect());

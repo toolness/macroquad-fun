@@ -1,11 +1,11 @@
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
-    collision::{collision_resolution_loop, process_collision, Side},
     config::config,
     entity::{Entity, EntityMap, EntityMapHelpers},
     game_sprites::game_sprites,
     level::Level,
+    physics::{PhysicsCollisionBehavior, PhysicsComponent},
     running::RunComponent,
     sprite_component::SpriteComponent,
     sprite_renderer::SpriteRenderer,
@@ -27,6 +27,10 @@ pub fn create_player(start_rect: Rect) -> Entity {
         player: Some(PlayerComponent { is_in_air: false }),
         run: Some(RunComponent::new()),
         attachment: Some(Default::default()),
+        physics: PhysicsComponent {
+            collision_behavior: PhysicsCollisionBehavior::Stop,
+            ..Default::default()
+        },
         ..Default::default()
     }
 }
@@ -38,7 +42,7 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     }
 }
 
-pub fn process_player_input_and_update(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+pub fn process_player_input(entities: &mut EntityMap, time: &GameTime) {
     let player = entities.player_mut();
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
@@ -46,83 +50,19 @@ pub fn process_player_input_and_update(entities: &mut EntityMap, level: &Level, 
             attachment.detach();
         }
     } else {
-        unattached_player_process_input_and_update(player, level, time);
+        unattached_player_process_input(player, time);
     }
     player.sprite.update_looping_frame_number(time);
 }
 
-fn unattached_player_process_input_and_update(
-    player_entity: &mut Entity,
-    level: &Level,
-    time: &GameTime,
-) {
-    let time_since_last_frame = time.time_since_last_frame;
-    let config = config();
-    let velocity = &mut player_entity.physics.velocity;
+pub fn player_update_system(entities: &mut EntityMap) {
+    let player_entity = entities.player_mut();
+    let physics = &mut player_entity.physics;
     let sprite = &mut player_entity.sprite;
-    let run = player_entity.run.as_mut().unwrap();
     let player = player_entity.player.as_mut().unwrap();
     let attachment = &mut player_entity.attachment.as_mut().unwrap();
-    run.update(
-        time_since_last_frame,
-        is_key_down(KeyCode::A),
-        is_key_down(KeyCode::D),
-    );
-    let mut x_impulse = 0.;
 
-    if player.is_in_air {
-        if is_key_down(KeyCode::Space) && velocity.y < 0. {
-            velocity.y -= config.long_jump_keypress_extra_force * time_since_last_frame as f32;
-        }
-        velocity.y += config.gravity * time_since_last_frame as f32;
-        if run.is_running() {
-            velocity.x = run.run_speed();
-        }
-    } else {
-        if is_key_pressed(KeyCode::Space) {
-            let new_velocity = Vec2::new(run.run_speed(), -config.jump_velocity);
-            velocity.x = new_velocity.x;
-            velocity.y = new_velocity.y;
-            player.is_in_air = true
-        } else {
-            x_impulse = run.run_speed();
-        }
-    }
-
-    let prev_bbox = sprite.bbox();
-    sprite.pos.x += (velocity.x + x_impulse) * time_since_last_frame as f32;
-    sprite.pos.y += velocity.y * time_since_last_frame as f32;
-
-    let mut is_on_any_surface_this_frame = false;
-
-    collision_resolution_loop(|| {
-        let bbox = sprite.bbox();
-        for collider in level.iter_colliders(&bbox) {
-            if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                match collision.side {
-                    Side::Top => {
-                        is_on_any_surface_this_frame = true;
-                        velocity.x = 0.;
-                        velocity.y = 0.;
-                    }
-                    Side::Bottom => {
-                        velocity.y = 0.;
-                    }
-                    Side::Left | Side::Right => {
-                        velocity.x = 0.;
-                    }
-                }
-
-                if collision.displacement != Vec2::ZERO {
-                    sprite.pos += collision.displacement;
-                    return true;
-                }
-            }
-        }
-        false
-    });
-
-    if is_on_any_surface_this_frame {
+    if physics.is_on_any_surface_this_frame {
         // The player just landed (or remains on the ground).
         player.is_in_air = false;
         attachment.reset();
@@ -131,12 +71,48 @@ fn unattached_player_process_input_and_update(
         player.is_in_air = true;
     }
 
-    if !player.is_in_air && x_impulse != 0. {
-        sprite.is_facing_left = x_impulse < 0.;
+    if !player.is_in_air && physics.prev_x_impulse != 0. {
+        sprite.is_facing_left = physics.prev_x_impulse < 0.;
     }
 
     attachment.should_attach = player.is_in_air;
-    sprite.renderer = Some(sprite_renderer(player.is_in_air, velocity, x_impulse));
+    sprite.renderer = Some(sprite_renderer(
+        player.is_in_air,
+        &physics.velocity,
+        physics.prev_x_impulse,
+    ));
+}
+
+fn unattached_player_process_input(player_entity: &mut Entity, time: &GameTime) {
+    let time_since_last_frame = time.time_since_last_frame;
+    let config = config();
+    let physics = &mut player_entity.physics;
+    let run = player_entity.run.as_mut().unwrap();
+    let player = player_entity.player.as_mut().unwrap();
+    run.update(
+        time_since_last_frame,
+        is_key_down(KeyCode::A),
+        is_key_down(KeyCode::D),
+    );
+
+    if player.is_in_air {
+        if is_key_down(KeyCode::Space) && physics.velocity.y < 0. {
+            physics.velocity.y -=
+                config.long_jump_keypress_extra_force * time_since_last_frame as f32;
+        }
+        if run.is_running() {
+            physics.velocity.x = run.run_speed();
+        }
+    } else {
+        if is_key_pressed(KeyCode::Space) {
+            let new_velocity = Vec2::new(run.run_speed(), -config.jump_velocity);
+            physics.velocity.x = new_velocity.x;
+            physics.velocity.y = new_velocity.y;
+            player.is_in_air = true
+        } else {
+            physics.x_impulse = run.run_speed();
+        }
+    }
 }
 
 fn sprite_renderer(is_in_air: bool, velocity: &Vec2, x_impulse: f32) -> &'static SpriteRenderer {
