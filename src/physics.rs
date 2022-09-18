@@ -23,7 +23,11 @@ pub enum PhysicsCollisionBehavior {
 #[derive(Default)]
 pub struct PhysicsComponent {
     pub velocity: Vec2,
+
+    /// Extra amount of x-velocity for the next iteration of the physics loop.
+    /// Reset to 0 at the end of the iteration.
     pub x_impulse: f32,
+
     pub defies_gravity: bool,
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
