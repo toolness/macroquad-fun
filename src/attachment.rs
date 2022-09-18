@@ -68,6 +68,8 @@ impl AttachmentComponent {
             if carrier.attachable.is_none() {
                 continue;
             }
+            // TODO: Check to see if the passenger will fit on the carrier
+            // without running into level geometry.
             if carrier.sprite.bbox().overlaps(&passenger_bbox)
                 && self.detached_from_entity_id != Some(id)
             {
