@@ -16,31 +16,27 @@ pub struct AttachmentComponent {
 }
 
 pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
-    let mut attached_entities: Vec<u64> = Vec::with_capacity(entities.len());
-    let mut maybe_attach_entities: Vec<u64> = Vec::with_capacity(entities.len());
-    for (id, entity) in entities.iter() {
-        if let Some(attachment) = entity.attachment.as_ref() {
-            if attachment.is_attached() {
-                attached_entities.push(*id);
-            } else if attachment.should_attach {
-                maybe_attach_entities.push(*id);
+    let entities_to_process: Vec<u64> = entities
+        .iter()
+        .filter_map(|(&id, entity)| {
+            if let Some(attachment) = entity.attachment.as_ref() {
+                if attachment.is_attached() || attachment.should_attach {
+                    return Some(id);
+                }
             }
+            return None;
+        })
+        .collect();
+
+    for id in entities_to_process {
+        let mut entity = entities.remove(&id).unwrap();
+        let sprite = &mut entity.sprite;
+        let attachment = entity.attachment.as_mut().unwrap();
+        if let Some(carrier_entity) = attachment.attached_entity(entities) {
+            attachment.update_while_attached(&carrier_entity.sprite, level, sprite);
+        } else if attachment.should_attach {
+            attachment.maybe_attach_to_entity(entities, sprite, &mut entity.velocity);
         }
-    }
-    for id in attached_entities {
-        let mut entity = entities.remove(&id).unwrap();
-        let sprite = &mut entity.sprite;
-        let attachment = entity.attachment.as_mut().unwrap();
-        let carrier_sprite = &attachment.attached_entity(entities).unwrap().sprite;
-        attachment.update_while_attached(carrier_sprite, level, sprite);
-        entities.insert(id, entity);
-    }
-    for id in maybe_attach_entities {
-        let mut entity = entities.remove(&id).unwrap();
-        let velocity = &mut entity.velocity;
-        let sprite = &mut entity.sprite;
-        let attachment = entity.attachment.as_mut().unwrap();
-        attachment.maybe_attach_to_entity(entities, sprite, velocity);
         entities.insert(id, entity);
     }
 }
