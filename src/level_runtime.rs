@@ -100,7 +100,7 @@ impl LevelRuntime {
             .update(&self.entities.player().sprite, &self.level);
 
         process_player_input(&mut self.entities, &self.time);
-        attachment_system(&mut self.entities);
+        attachment_system(&mut self.entities, &self.level);
         physics_system(&mut self.entities, &self.level, &self.time);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);

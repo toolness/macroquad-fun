@@ -1,8 +1,9 @@
-use macroquad::prelude::Vec2;
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     config::config,
     entity::{Entity, EntityMap, EntityMapHelpers},
+    level::Level,
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
 };
@@ -17,7 +18,7 @@ pub struct AttachmentComponent {
     pub should_attach: bool,
 }
 
-pub fn attachment_system(entities: &mut EntityMap) {
+pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
     let entities_to_process: Vec<u64> = entities
         .iter()
         .filter_map(|(&id, entity)| {
@@ -42,7 +43,7 @@ pub fn attachment_system(entities: &mut EntityMap) {
                     &mut entity.physics,
                 );
             } else if attachment.should_attach {
-                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics);
+                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
             }
         });
     }
@@ -56,6 +57,7 @@ impl AttachmentComponent {
         entities: &EntityMap,
         passenger_sprite: &SpriteComponent,
         passenger_physics: &mut PhysicsComponent,
+        level: &Level,
     ) {
         let passenger_bbox = &passenger_sprite.bbox();
 
@@ -68,16 +70,22 @@ impl AttachmentComponent {
             if carrier.attachable.is_none() {
                 continue;
             }
-            // TODO: Check to see if the passenger will fit on the carrier
-            // without running into level geometry.
             if carrier.sprite.bbox().overlaps(&passenger_bbox)
                 && self.detached_from_entity_id != Some(id)
             {
-                self.attached_to_entity_id = Some(id);
-                self.num_frames_displaced = 0;
-                passenger_physics.velocity.x = 0.;
-                passenger_physics.velocity.y = 0.;
-                break;
+                // Check to see if the passenger will fit on the carrier
+                // without running into level geometry.
+                let passenger_bbox = passenger_sprite.bbox();
+                let delta = get_passenger_displacement(&carrier.sprite.bbox(), &passenger_bbox);
+                let projected_passenger_bbox = passenger_bbox.offset(delta);
+
+                if level.is_area_vacant(&projected_passenger_bbox) {
+                    self.attached_to_entity_id = Some(id);
+                    self.num_frames_displaced = 0;
+                    passenger_physics.velocity.x = 0.;
+                    passenger_physics.velocity.y = 0.;
+                    break;
+                }
             }
         }
     }
@@ -123,14 +131,19 @@ impl AttachmentComponent {
             self.num_frames_displaced = 0;
         }
 
-        let config = config();
-        let bbox = carrier_sprite.bbox();
-        let passenger_bbox = passenger_sprite.bbox();
-        let y_diff = bbox.bottom() - config.sprite_scale * CARRY_Y_OFFSET - passenger_bbox.top();
-        let x_diff = bbox.left() - passenger_bbox.left();
-        passenger_sprite.pos += Vec2::new(x_diff, y_diff);
+        let delta = get_passenger_displacement(&carrier_sprite.bbox(), &passenger_sprite.bbox());
+        passenger_sprite.pos += delta;
         passenger_sprite.is_facing_left = carrier_sprite.is_facing_left;
         passenger_physics.velocity = carrier_physics.velocity;
         passenger_physics.defies_gravity = true;
     }
+}
+
+fn get_passenger_displacement(carrier_bbox: &Rect, passenger_bbox: &Rect) -> Vec2 {
+    let config = config();
+    let y_diff =
+        carrier_bbox.bottom() - config.sprite_scale * CARRY_Y_OFFSET - passenger_bbox.top();
+    let x_diff = carrier_bbox.left() - passenger_bbox.left();
+
+    Vec2::new(x_diff, y_diff)
 }

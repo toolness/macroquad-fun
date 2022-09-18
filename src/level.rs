@@ -302,6 +302,15 @@ impl Level {
         }
     }
 
+    pub fn is_area_vacant(&self, bounding_rect: &Rect) -> bool {
+        for collider in self.iter_colliders(bounding_rect) {
+            if collider.rect.overlaps(bounding_rect) {
+                return false;
+            }
+        }
+        true
+    }
+
     pub fn get_text(&self, rect: &Rect) -> Option<&Vec<String>> {
         for entity in self.entities.iter() {
             if let EntityKind::Text(text) = &entity.kind {
