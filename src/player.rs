@@ -13,8 +13,10 @@ use crate::{
     world::world,
 };
 
+#[derive(Default)]
 pub struct PlayerComponent {
     is_in_air: bool,
+    run_direction: f32,
 }
 
 pub fn create_player(start_rect: Rect) -> Entity {
@@ -24,7 +26,9 @@ pub fn create_player(start_rect: Rect) -> Entity {
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
-        player: Some(PlayerComponent { is_in_air: false }),
+        player: Some(PlayerComponent {
+            ..Default::default()
+        }),
         run: Some(RunComponent::new()),
         attachment: Some(Default::default()),
         physics: PhysicsComponent {
@@ -53,10 +57,9 @@ pub fn process_player_input(entities: &mut EntityMap, time: &GameTime) {
     } else {
         unattached_player_process_input(player, time);
     }
-    player.sprite.update_looping_frame_number(time);
 }
 
-pub fn player_update_system(entities: &mut EntityMap) {
+pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     let player_entity = entities.player_mut();
     let physics = &mut player_entity.physics;
     let sprite = &mut player_entity.sprite;
@@ -72,16 +75,17 @@ pub fn player_update_system(entities: &mut EntityMap) {
         player.is_in_air = true;
     }
 
-    if !player.is_in_air && physics.prev_x_impulse != 0. {
-        sprite.is_facing_left = physics.prev_x_impulse < 0.;
+    if !player.is_in_air && player.run_direction != 0. {
+        sprite.is_facing_left = player.run_direction < 0.;
     }
 
     attachment.should_attach = player.is_in_air;
     sprite.renderer = Some(sprite_renderer(
         player.is_in_air,
         &physics.velocity,
-        physics.prev_x_impulse,
+        player.run_direction,
     ));
+    sprite.update_looping_frame_number(time);
 }
 
 fn unattached_player_process_input(player_entity: &mut Entity, time: &GameTime) {
@@ -114,9 +118,14 @@ fn unattached_player_process_input(player_entity: &mut Entity, time: &GameTime) 
             physics.x_impulse = run.run_speed();
         }
     }
+    player.run_direction = physics.x_impulse;
 }
 
-fn sprite_renderer(is_in_air: bool, velocity: &Vec2, x_impulse: f32) -> &'static SpriteRenderer {
+fn sprite_renderer(
+    is_in_air: bool,
+    velocity: &Vec2,
+    run_direction: f32,
+) -> &'static SpriteRenderer {
     let sprites = game_sprites();
     if is_in_air {
         if velocity.y >= 0. {
@@ -125,7 +134,7 @@ fn sprite_renderer(is_in_air: bool, velocity: &Vec2, x_impulse: f32) -> &'static
             &sprites.huntress.jump
         }
     } else {
-        if x_impulse != 0. {
+        if run_direction != 0. {
             &sprites.huntress.run
         } else {
             &sprites.huntress.idle

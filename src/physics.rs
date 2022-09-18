@@ -24,7 +24,6 @@ pub enum PhysicsCollisionBehavior {
 pub struct PhysicsComponent {
     pub velocity: Vec2,
     pub x_impulse: f32,
-    pub prev_x_impulse: f32,
     pub defies_gravity: bool,
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
@@ -51,7 +50,6 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
 
         sprite.pos += physics.velocity * time_since_last_frame;
         sprite.pos.x += physics.x_impulse * time_since_last_frame;
-        physics.prev_x_impulse = physics.x_impulse;
         physics.x_impulse = 0.;
 
         collision_resolution_loop(|| {

@@ -104,7 +104,7 @@ impl LevelRuntime {
         physics_system(&mut self.entities, &self.level, &self.time);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
-        player_update_system(&mut self.entities);
+        player_update_system(&mut self.entities, &self.time);
 
         // Draw environment.
         self.level.draw(&self.camera.rect());
