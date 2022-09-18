@@ -29,7 +29,7 @@ pub struct LevelRuntime {
     time: GameTime,
 }
 
-const PLAYER_ENTITY_ID: u64 = 0;
+pub const PLAYER_ENTITY_ID: u64 = 0;
 
 impl LevelRuntime {
     pub fn new(player: Entity, level: &'static Level) -> Self {
@@ -104,9 +104,10 @@ impl LevelRuntime {
         attachment_system(&mut self.entities, &self.level);
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
 
+        mushroom_movement_system(&mut self.entities, &self.level, &self.time);
+
         // TODO: Don't remove the player from our entities.
         let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
-        mushroom_movement_system(&mut self.entities, &player.sprite, &self.level, &self.time);
         process_player_input_and_update(&mut player, &self.level, &self.time);
         self.entities.insert(PLAYER_ENTITY_ID, player);
 

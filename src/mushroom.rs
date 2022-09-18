@@ -7,6 +7,7 @@ use crate::{
     entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
+    level_runtime::PLAYER_ENTITY_ID,
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -43,13 +44,8 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
     }
 }
 
-pub fn mushroom_movement_system(
-    entities: &mut EntityMap,
-    player_sprite: &SpriteComponent,
-    level: &Level,
-    time: &GameTime,
-) {
-    let player_bbox = player_sprite.bbox();
+pub fn mushroom_movement_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+    let player_bbox = entities[&PLAYER_ENTITY_ID].sprite.bbox();
     for entity in entities.values_mut() {
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.velocity;
