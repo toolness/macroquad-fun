@@ -42,7 +42,7 @@ pub fn attachment_system(entities: &mut EntityMap) {
                     &mut entity.physics,
                 );
             } else if attachment.should_attach {
-                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics.velocity);
+                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics);
             }
         });
     }
@@ -54,10 +54,15 @@ impl AttachmentComponent {
     fn maybe_attach_to_entity(
         &mut self,
         entities: &EntityMap,
-        passenger: &SpriteComponent,
-        velocity: &mut Vec2,
+        passenger_sprite: &SpriteComponent,
+        passenger_physics: &mut PhysicsComponent,
     ) {
-        let passenger_bbox = &passenger.bbox();
+        let passenger_bbox = &passenger_sprite.bbox();
+
+        if passenger_physics.defies_gravity {
+            // Right now we only support gravity-obeying passengers.
+            return;
+        }
 
         for (&id, carrier) in entities.iter() {
             if carrier.attachable.is_none() {
@@ -68,8 +73,8 @@ impl AttachmentComponent {
             {
                 self.attached_to_entity_id = Some(id);
                 self.num_frames_displaced = 0;
-                velocity.x = 0.;
-                velocity.y = 0.;
+                passenger_physics.velocity.x = 0.;
+                passenger_physics.velocity.y = 0.;
                 break;
             }
         }
