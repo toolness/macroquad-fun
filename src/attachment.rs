@@ -12,12 +12,43 @@ use crate::{
 pub struct AttachmentComponent {
     attached_to_entity_id: Option<u64>,
     detached_from_entity_id: Option<u64>,
+    pub should_attach: bool,
+}
+
+pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
+    let mut attached_entities: Vec<u64> = Vec::with_capacity(entities.len());
+    let mut maybe_attach_entities: Vec<u64> = Vec::with_capacity(entities.len());
+    for (id, entity) in entities.iter() {
+        if let Some(attachment) = entity.attachment.as_ref() {
+            if attachment.is_attached() {
+                attached_entities.push(*id);
+            } else if attachment.should_attach {
+                maybe_attach_entities.push(*id);
+            }
+        }
+    }
+    for id in attached_entities {
+        let mut entity = entities.remove(&id).unwrap();
+        let sprite = &mut entity.sprite;
+        let attachment = entity.attachment.as_mut().unwrap();
+        let carrier_sprite = &attachment.attached_entity(entities).unwrap().sprite;
+        attachment.update_while_attached(carrier_sprite, level, sprite);
+        entities.insert(id, entity);
+    }
+    for id in maybe_attach_entities {
+        let mut entity = entities.remove(&id).unwrap();
+        let velocity = &mut entity.velocity;
+        let sprite = &mut entity.sprite;
+        let attachment = entity.attachment.as_mut().unwrap();
+        attachment.maybe_attach_to_entity(entities, sprite, velocity);
+        entities.insert(id, entity);
+    }
 }
 
 pub struct AttachableComponent();
 
 impl AttachmentComponent {
-    pub fn maybe_attach_to_entity(
+    fn maybe_attach_to_entity(
         &mut self,
         entities: &EntityMap,
         passenger: &SpriteComponent,
@@ -40,6 +71,15 @@ impl AttachmentComponent {
         }
     }
 
+    pub fn is_attached(&self) -> bool {
+        self.attached_to_entity_id.is_some()
+    }
+
+    pub fn detach(&mut self) {
+        self.detached_from_entity_id = self.attached_to_entity_id.take();
+        assert!(self.detached_from_entity_id.is_some());
+    }
+
     fn attached_entity<'a>(&self, entities: &'a EntityMap) -> Option<&'a Entity> {
         if let Some(id) = self.attached_to_entity_id {
             entities.get(&id)
@@ -53,32 +93,16 @@ impl AttachmentComponent {
         self.detached_from_entity_id = None;
     }
 
-    pub fn update(
-        &mut self,
-        entities: &EntityMap,
-        level: &Level,
-        passenger: &mut SpriteComponent,
-        force_detach: bool,
-    ) -> bool {
-        if let Some(entity) = self.attached_entity(&entities) {
-            self.update_while_attached(&entity.sprite, level, passenger, force_detach);
-            true
-        } else {
-            false
-        }
-    }
-
     fn update_while_attached(
         &mut self,
         carrier: &SpriteComponent,
         level: &Level,
         passenger: &mut SpriteComponent,
-        force_detach: bool,
     ) {
         let prev_bbox = passenger.bbox();
         carry_entity(&carrier, passenger);
 
-        let mut should_detach = force_detach;
+        let mut should_detach = false;
 
         collision_resolution_loop(|| {
             let bbox = passenger.bbox();
@@ -95,8 +119,7 @@ impl AttachmentComponent {
         });
 
         if should_detach {
-            self.detached_from_entity_id = self.attached_to_entity_id.take();
-            assert!(self.detached_from_entity_id.is_some());
+            self.detach();
         }
     }
 }

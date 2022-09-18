@@ -1,3 +1,4 @@
+use crate::attachment::attachment_system;
 use crate::drawing::draw_rect_lines;
 use crate::entity::{Entity, EntityMap};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
@@ -97,6 +98,7 @@ impl LevelRuntime {
             &self.time,
         );
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
+        attachment_system(&mut self.entities, &self.level);
 
         process_player_input_and_update(&mut self.player, &self.level, &self.entities, &self.time);
 

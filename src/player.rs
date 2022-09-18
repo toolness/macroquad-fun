@@ -45,13 +45,13 @@ pub fn process_player_input_and_update(
     entities: &EntityMap,
     time: &GameTime,
 ) {
-    if !player.attachment.as_mut().unwrap().update(
-        entities,
-        level,
-        &mut player.sprite,
-        is_key_pressed(KeyCode::Space),
-    ) {
-        unattached_player_process_input_and_update(player, level, entities, time)
+    let attachment = player.attachment.as_mut().unwrap();
+    if attachment.is_attached() {
+        if is_key_pressed(KeyCode::Space) {
+            attachment.detach();
+        }
+    } else {
+        unattached_player_process_input_and_update(player, level, entities, time);
     }
     player.sprite.update_looping_frame_number(time);
 }
@@ -141,10 +141,7 @@ fn unattached_player_process_input_and_update(
         sprite.is_facing_left = x_impulse < 0.;
     }
 
-    if player.is_in_air {
-        attachment.maybe_attach_to_entity(&entities, sprite, velocity);
-    }
-
+    attachment.should_attach = player.is_in_air;
     sprite.renderer = Some(sprite_renderer(player.is_in_air, velocity, x_impulse));
 }
 
