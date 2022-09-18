@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use macroquad::prelude::Vec2;
 
 use crate::{
     collision::{collision_resolution_loop, process_collision},
-    entity::Entity,
+    entity::{Entity, EntityMap},
     flying_eye::carry_entity,
     level::Level,
     sprite_component::SpriteComponent,
@@ -21,7 +19,7 @@ pub struct AttachableComponent();
 impl AttachmentComponent {
     pub fn maybe_attach_to_entity(
         &mut self,
-        entities: &HashMap<u64, Entity>,
+        entities: &EntityMap,
         passenger: &SpriteComponent,
         velocity: &mut Vec2,
     ) {
@@ -42,7 +40,7 @@ impl AttachmentComponent {
         }
     }
 
-    fn attached_entity<'a>(&self, entities: &'a HashMap<u64, Entity>) -> Option<&'a Entity> {
+    fn attached_entity<'a>(&self, entities: &'a EntityMap) -> Option<&'a Entity> {
         if let Some(id) = self.attached_to_entity_id {
             entities.get(&id)
         } else {
@@ -57,7 +55,7 @@ impl AttachmentComponent {
 
     pub fn update(
         &mut self,
-        entities: &HashMap<u64, Entity>,
+        entities: &EntityMap,
         level: &Level,
         passenger: &mut SpriteComponent,
         force_detach: bool,

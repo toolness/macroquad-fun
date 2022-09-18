@@ -1,5 +1,5 @@
 use crate::drawing::draw_rect_lines;
-use crate::entity::Entity;
+use crate::entity::{Entity, EntityMap};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::player::{
@@ -9,7 +9,6 @@ use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
 use macroquad::prelude::*;
-use std::collections::HashMap;
 
 use crate::level::Level;
 
@@ -21,7 +20,7 @@ pub enum FrameResult {
 
 pub struct LevelRuntime {
     level: &'static Level,
-    entities: HashMap<u64, Entity>,
+    entities: EntityMap,
     player: Entity,
     debug_mode: bool,
     camera: Camera,
@@ -34,7 +33,7 @@ impl LevelRuntime {
         let mut instance = LevelRuntime {
             player,
             level,
-            entities: HashMap::new(),
+            entities: EntityMap::new(),
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),

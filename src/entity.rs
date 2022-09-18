@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use macroquad::prelude::Vec2;
 
 use crate::{
@@ -20,3 +22,5 @@ pub struct Entity {
     pub run: Option<RunComponent>,
     pub attachment: Option<AttachmentComponent>,
 }
+
+pub type EntityMap = HashMap<u64, Entity>;

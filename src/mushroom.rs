@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     animator::Animator,
     collision::{collision_resolution_loop, maybe_reverse_direction_x, process_collision, Side},
     config::config,
-    entity::Entity,
+    entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
     sprite_component::SpriteComponent,
@@ -46,7 +44,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
 }
 
 pub fn mushroom_movement_system(
-    entities: &mut HashMap<u64, Entity>,
+    entities: &mut EntityMap,
     player_sprite: &SpriteComponent,
     level: &Level,
     time: &GameTime,

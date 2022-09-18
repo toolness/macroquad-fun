@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     attachment::AttachableComponent,
     collision::{collision_resolution_loop, maybe_reverse_direction_xy, process_collision},
     config::config,
-    entity::Entity,
+    entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
     sprite_component::SpriteComponent,
@@ -43,11 +41,7 @@ pub fn carry_entity(carrier: &SpriteComponent, passenger: &mut SpriteComponent) 
     passenger.is_facing_left = carrier.is_facing_left;
 }
 
-pub fn flying_eye_movement_system(
-    entities: &mut HashMap<u64, Entity>,
-    level: &Level,
-    time: &GameTime,
-) {
+pub fn flying_eye_movement_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
     for entity in entities.values_mut() {
         if entity.flying_eye.is_some() {
             update_flying_eye(&mut entity.velocity, &mut entity.sprite, level, time);

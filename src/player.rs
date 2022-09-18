@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
-    entity::Entity,
+    entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
     running::RunComponent,
@@ -44,7 +42,7 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
 pub fn process_player_input_and_update(
     player: &mut Entity,
     level: &Level,
-    entities: &HashMap<u64, Entity>,
+    entities: &EntityMap,
     time: &GameTime,
 ) {
     if !player.attachment.as_mut().unwrap().update(
@@ -61,7 +59,7 @@ pub fn process_player_input_and_update(
 fn unattached_player_process_input_and_update(
     player_entity: &mut Entity,
     level: &Level,
-    entities: &HashMap<u64, Entity>,
+    entities: &EntityMap,
     time: &GameTime,
 ) {
     let time_since_last_frame = time.time_since_last_frame;
