@@ -3,7 +3,7 @@ use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 use crate::{
     collision::{collision_resolution_loop, process_collision, Side},
     config::config,
-    entity::{Entity, EntityMap},
+    entity::Entity,
     game_sprites::game_sprites,
     level::Level,
     running::RunComponent,
@@ -39,19 +39,14 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     }
 }
 
-pub fn process_player_input_and_update(
-    player: &mut Entity,
-    level: &Level,
-    entities: &EntityMap,
-    time: &GameTime,
-) {
+pub fn process_player_input_and_update(player: &mut Entity, level: &Level, time: &GameTime) {
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
         if is_key_pressed(KeyCode::Space) {
             attachment.detach();
         }
     } else {
-        unattached_player_process_input_and_update(player, level, entities, time);
+        unattached_player_process_input_and_update(player, level, time);
     }
     player.sprite.update_looping_frame_number(time);
 }
@@ -59,7 +54,6 @@ pub fn process_player_input_and_update(
 fn unattached_player_process_input_and_update(
     player_entity: &mut Entity,
     level: &Level,
-    entities: &EntityMap,
     time: &GameTime,
 ) {
     let time_since_last_frame = time.time_since_last_frame;

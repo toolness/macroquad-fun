@@ -77,17 +77,27 @@ impl LevelRuntime {
         id
     }
 
+    fn maybe_switch_level(&mut self) -> bool {
+        let player = self.entities.get_mut(&PLAYER_ENTITY_ID).unwrap();
+        if let Some((new_level, new_pos)) = should_switch_levels(&player.sprite, &self.level) {
+            teleport_entity(player, new_pos);
+            self.change_level(new_level);
+            true
+        } else {
+            false
+        }
+    }
+
     pub fn advance_one_frame(&mut self) -> FrameResult {
         self.time.update();
 
-        let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
-
-        if let Some((new_level, new_pos)) = should_switch_levels(&player.sprite, &self.level) {
-            teleport_entity(&mut player, new_pos);
-            self.change_level(new_level);
-        } else if did_fall_off_level(&player.sprite, &self.level) {
+        if !self.maybe_switch_level()
+            && did_fall_off_level(&self.entities[&PLAYER_ENTITY_ID].sprite, &self.level)
+        {
             return FrameResult::PlayerDied;
         }
+
+        let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
 
         self.camera.update(&player.sprite, &self.level);
 
@@ -97,7 +107,7 @@ impl LevelRuntime {
         mushroom_movement_system(&mut self.entities, &player.sprite, &self.level, &self.time);
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
 
-        process_player_input_and_update(&mut player, &self.level, &self.entities, &self.time);
+        process_player_input_and_update(&mut player, &self.level, &self.time);
 
         // Draw entities.
 
