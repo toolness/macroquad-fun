@@ -100,35 +100,38 @@ impl LevelRuntime {
         self.camera
             .update(&self.entities[&PLAYER_ENTITY_ID].sprite, &self.level);
 
+        attachment_system(&mut self.entities, &self.level);
+        flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
+
+        // TODO: Don't remove the player from our entities.
+        let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
+        mushroom_movement_system(&mut self.entities, &player.sprite, &self.level, &self.time);
+        process_player_input_and_update(&mut player, &self.level, &self.time);
+        self.entities.insert(PLAYER_ENTITY_ID, player);
+
         // Draw environment.
         self.level.draw(&self.camera.rect());
 
-        let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
-
-        mushroom_movement_system(&mut self.entities, &player.sprite, &self.level, &self.time);
-        flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
-
-        process_player_input_and_update(&mut player, &self.level, &self.time);
-
         // Draw entities.
-
-        for entity in self.entities.values() {
-            entity.sprite.draw_current_frame();
+        for (&id, entity) in self.entities.iter() {
+            if id != PLAYER_ENTITY_ID {
+                entity.sprite.draw_current_frame();
+            }
         }
 
-        player.sprite.draw_current_frame();
+        self.entities[&PLAYER_ENTITY_ID].sprite.draw_current_frame();
 
-        draw_level_text(&player.sprite, &self.level, &self.camera.rect());
+        draw_level_text(
+            &self.entities[&PLAYER_ENTITY_ID].sprite,
+            &self.level,
+            &self.camera.rect(),
+        );
 
         // Process miscellaneous system input.
 
         if is_key_pressed(KeyCode::GraveAccent) {
             self.debug_mode = !self.debug_mode;
         }
-
-        self.entities.insert(PLAYER_ENTITY_ID, player);
-
-        attachment_system(&mut self.entities, &self.level);
 
         if self.debug_mode {
             self.draw_debug_layer();
