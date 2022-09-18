@@ -22,17 +22,17 @@ pub enum FrameResult {
 pub struct LevelRuntime {
     level: &'static Level,
     entities: EntityMap,
-    player: Entity,
     debug_mode: bool,
     camera: Camera,
     next_id: u64,
     time: GameTime,
 }
 
+const PLAYER_ENTITY_ID: u64 = 0;
+
 impl LevelRuntime {
     pub fn new(player: Entity, level: &'static Level) -> Self {
         let mut instance = LevelRuntime {
-            player,
             level,
             entities: EntityMap::new(),
             next_id: 1,
@@ -40,6 +40,7 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
         };
+        instance.entities.insert(PLAYER_ENTITY_ID, player);
         instance.change_level(&level);
         instance
     }
@@ -51,7 +52,7 @@ impl LevelRuntime {
 
     fn change_level(&mut self, level: &'static Level) {
         self.level = level;
-        self.entities.clear();
+        self.entities.retain(|&key, _value| key == PLAYER_ENTITY_ID);
         self.camera.cut();
         self.spawn_entities();
     }
@@ -79,28 +80,24 @@ impl LevelRuntime {
     pub fn advance_one_frame(&mut self) -> FrameResult {
         self.time.update();
 
-        if let Some((new_level, new_pos)) = should_switch_levels(&self.player.sprite, &self.level) {
-            teleport_entity(&mut self.player, new_pos);
+        let mut player = self.entities.remove(&PLAYER_ENTITY_ID).unwrap();
+
+        if let Some((new_level, new_pos)) = should_switch_levels(&player.sprite, &self.level) {
+            teleport_entity(&mut player, new_pos);
             self.change_level(new_level);
-        } else if did_fall_off_level(&self.player.sprite, &self.level) {
+        } else if did_fall_off_level(&player.sprite, &self.level) {
             return FrameResult::PlayerDied;
         }
 
-        self.camera.update(&self.player.sprite, &self.level);
+        self.camera.update(&player.sprite, &self.level);
 
         // Draw environment.
         self.level.draw(&self.camera.rect());
 
-        mushroom_movement_system(
-            &mut self.entities,
-            &self.player.sprite,
-            &self.level,
-            &self.time,
-        );
+        mushroom_movement_system(&mut self.entities, &player.sprite, &self.level, &self.time);
         flying_eye_movement_system(&mut self.entities, &self.level, &self.time);
-        attachment_system(&mut self.entities, &self.level);
 
-        process_player_input_and_update(&mut self.player, &self.level, &self.entities, &self.time);
+        process_player_input_and_update(&mut player, &self.level, &self.entities, &self.time);
 
         // Draw entities.
 
@@ -108,15 +105,19 @@ impl LevelRuntime {
             entity.sprite.draw_current_frame();
         }
 
-        self.player.sprite.draw_current_frame();
+        player.sprite.draw_current_frame();
 
-        draw_level_text(&self.player.sprite, &self.level, &self.camera.rect());
+        draw_level_text(&player.sprite, &self.level, &self.camera.rect());
 
         // Process miscellaneous system input.
 
         if is_key_pressed(KeyCode::GraveAccent) {
             self.debug_mode = !self.debug_mode;
         }
+
+        self.entities.insert(PLAYER_ENTITY_ID, player);
+
+        attachment_system(&mut self.entities, &self.level);
 
         if self.debug_mode {
             self.draw_debug_layer();
@@ -127,12 +128,11 @@ impl LevelRuntime {
 
     fn draw_debug_layer(&self) {
         let level = self.level;
-        self.player.sprite.draw_debug_rects();
         for collider in level.iter_colliders(&level.pixel_bounds()) {
             collider.draw_debug_rect(PURPLE);
         }
         draw_rect_lines(
-            &level.get_bounding_cell_rect(&self.player.sprite.bbox()),
+            &level.get_bounding_cell_rect(&self.entities[&PLAYER_ENTITY_ID].sprite.bbox()),
             1.,
             WHITE,
         );
