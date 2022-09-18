@@ -35,7 +35,7 @@ pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
             if let Some(carrier_entity) = attachment.attached_entity(entities) {
                 attachment.update_while_attached(&carrier_entity.sprite, level, sprite);
             } else if attachment.should_attach {
-                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.velocity);
+                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics.velocity);
             }
         });
     }

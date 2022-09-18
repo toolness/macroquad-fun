@@ -25,6 +25,7 @@ mod level;
 mod level_runtime;
 mod math_util;
 mod mushroom;
+mod physics;
 mod player;
 mod running;
 mod sprite_component;

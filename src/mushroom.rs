@@ -47,7 +47,7 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, level: &Level, time: &
     let player_bbox = entities.player().sprite.bbox();
     for entity in entities.values_mut() {
         if let Some(mushroom) = entity.mushroom.as_mut() {
-            let velocity = &mut entity.velocity;
+            let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;
             update_mushroom(mushroom, velocity, sprite, &player_bbox, level, time);
         }

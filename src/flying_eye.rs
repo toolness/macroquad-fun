@@ -7,6 +7,7 @@ use crate::{
     entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
+    physics::PhysicsComponent,
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -22,7 +23,10 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
             ..Default::default()
         }
         .at_top_left(&start_rect),
-        velocity: base_velocity * config().flying_eye_speed,
+        physics: PhysicsComponent {
+            velocity: base_velocity * config().flying_eye_speed,
+            ..Default::default()
+        },
         flying_eye: Some(FlyingEyeComponent()),
         attachable: Some(AttachableComponent()),
         ..Default::default()
@@ -44,7 +48,12 @@ pub fn carry_entity(carrier: &SpriteComponent, passenger: &mut SpriteComponent) 
 pub fn flying_eye_movement_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
     for entity in entities.values_mut() {
         if entity.flying_eye.is_some() {
-            update_flying_eye(&mut entity.velocity, &mut entity.sprite, level, time);
+            update_flying_eye(
+                &mut entity.physics.velocity,
+                &mut entity.sprite,
+                level,
+                time,
+            );
         }
     }
 }

@@ -25,7 +25,6 @@ pub fn create_player(start_rect: Rect) -> Entity {
         }
         .at_bottom_left(&start_rect),
         player: Some(PlayerComponent { is_in_air: false }),
-        velocity: Vec2::new(0., 0.),
         run: Some(RunComponent::new()),
         attachment: Some(Default::default()),
         ..Default::default()
@@ -59,7 +58,7 @@ fn unattached_player_process_input_and_update(
 ) {
     let time_since_last_frame = time.time_since_last_frame;
     let config = config();
-    let velocity = &mut player_entity.velocity;
+    let velocity = &mut player_entity.physics.velocity;
     let sprite = &mut player_entity.sprite;
     let run = player_entity.run.as_mut().unwrap();
     let player = player_entity.player.as_mut().unwrap();

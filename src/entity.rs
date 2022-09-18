@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use macroquad::prelude::Vec2;
-
 use crate::{
     attachment::{AttachableComponent, AttachmentComponent},
     flying_eye::FlyingEyeComponent,
     mushroom::MushroomComponent,
+    physics::PhysicsComponent,
     player::PlayerComponent,
     running::RunComponent,
     sprite_component::SpriteComponent,
@@ -14,7 +13,7 @@ use crate::{
 #[derive(Default)]
 pub struct Entity {
     pub sprite: SpriteComponent,
-    pub velocity: Vec2,
+    pub physics: PhysicsComponent,
     pub mushroom: Option<MushroomComponent>,
     pub flying_eye: Option<FlyingEyeComponent>,
     pub attachable: Option<AttachableComponent>,
