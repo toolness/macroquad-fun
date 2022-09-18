@@ -2,7 +2,7 @@ use macroquad::prelude::Vec2;
 
 use crate::{
     collision::{collision_resolution_loop, process_collision},
-    entity::{Entity, EntityMap},
+    entity::{Entity, EntityMap, EntityMapHelpers},
     flying_eye::carry_entity,
     level::Level,
     sprite_component::SpriteComponent,
@@ -29,15 +29,15 @@ pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
         .collect();
 
     for id in entities_to_process {
-        let mut entity = entities.remove(&id).unwrap();
-        let sprite = &mut entity.sprite;
-        let attachment = entity.attachment.as_mut().unwrap();
-        if let Some(carrier_entity) = attachment.attached_entity(entities) {
-            attachment.update_while_attached(&carrier_entity.sprite, level, sprite);
-        } else if attachment.should_attach {
-            attachment.maybe_attach_to_entity(entities, sprite, &mut entity.velocity);
-        }
-        entities.insert(id, entity);
+        entities.with_entity_removed(id, |entity, entities| {
+            let sprite = &mut entity.sprite;
+            let attachment = entity.attachment.as_mut().unwrap();
+            if let Some(carrier_entity) = attachment.attached_entity(entities) {
+                attachment.update_while_attached(&carrier_entity.sprite, level, sprite);
+            } else if attachment.should_attach {
+                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.velocity);
+            }
+        });
     }
 }
 
