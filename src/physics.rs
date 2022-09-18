@@ -28,7 +28,6 @@ pub struct PhysicsComponent {
     pub defies_gravity: bool,
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
-    pub is_in_air: bool,
     pub is_on_any_surface_this_frame: bool,
     pub was_displaced_this_frame: bool,
 }
