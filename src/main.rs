@@ -17,6 +17,7 @@ mod camera;
 mod collision;
 mod config;
 mod drawing;
+mod dynamic_platform;
 mod entity;
 mod flying_eye;
 mod game_sprites;

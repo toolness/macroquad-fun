@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     attachment::{AttachableComponent, AttachmentComponent},
+    dynamic_platform::DynamicPlatformComponent,
     flying_eye::FlyingEyeComponent,
     mushroom::MushroomComponent,
     physics::PhysicsComponent,
@@ -20,6 +21,7 @@ pub struct Entity {
     pub player: Option<PlayerComponent>,
     pub run: Option<RunComponent>,
     pub attachment: Option<AttachmentComponent>,
+    pub dynamic_platform: Option<DynamicPlatformComponent>,
 }
 
 pub const PLAYER_ENTITY_ID: u64 = 0;

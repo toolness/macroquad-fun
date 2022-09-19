@@ -24,6 +24,7 @@ pub struct FlyingEyeSprites {
 pub struct MushroomSprites {
     pub death: SpriteRenderer,
     pub idle_bbox: Rect,
+    pub platform_bbox: Rect,
     pub run: SpriteRenderer,
 }
 
@@ -49,6 +50,7 @@ async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
 }
 
 pub async fn load_game_sprites() -> Result<()> {
+    let mushroom_idle_slices = load_aseprite_slices("media/Mushroom/Idle.json").await?;
     let sprites = GameSprites {
         huntress: HuntressSprites {
             idle: SpriteRenderer::new(load_texture("media/Huntress/Idle.png").await?, 8),
@@ -69,10 +71,8 @@ pub async fn load_game_sprites() -> Result<()> {
         },
         mushroom: MushroomSprites {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
-            idle_bbox: get_slice(
-                &load_aseprite_slices("media/Mushroom/Idle.json").await?,
-                "idle_bounding_box",
-            )?,
+            idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
+            platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
