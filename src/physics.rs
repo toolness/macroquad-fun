@@ -66,6 +66,7 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
         collision_resolution_loop(|| {
             let bbox = sprite.bbox();
 
+            // TODO: Also look at collisions on dynamic platforms!
             let colliders = level.iter_colliders_ex(&bbox, !physics.defies_level_bounds);
 
             for collider in colliders {
