@@ -17,17 +17,21 @@ pub struct SpriteComponent {
 }
 
 impl SpriteComponent {
-    pub fn bbox(&self) -> Rect {
+    pub fn calculate_absolute_bounding_box(&self, relative_bbox: &Rect) -> Rect {
         if self.flip_bbox_when_facing_left && self.is_facing_left {
             if let Some(sprite) = self.renderer {
-                let center_offset = sprite.frame_width() / 2. - self.relative_bbox.w / 2.;
+                let center_offset = sprite.frame_width() / 2. - relative_bbox.w / 2.;
                 let flipped_x = (self.relative_bbox.x - center_offset) * -1. + center_offset;
-                let mut flipped_relative_bbox = self.relative_bbox;
+                let mut flipped_relative_bbox = *relative_bbox;
                 flipped_relative_bbox.x = flipped_x;
                 return flipped_relative_bbox.offset(self.pos);
             }
         }
-        self.relative_bbox.offset(self.pos)
+        relative_bbox.offset(self.pos)
+    }
+
+    pub fn bbox(&self) -> Rect {
+        self.calculate_absolute_bounding_box(&self.relative_bbox)
     }
 
     pub fn at_bottom_left(mut self, rect: &Rect) -> Self {

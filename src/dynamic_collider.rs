@@ -12,7 +12,7 @@ pub fn compute_collider(
     dynamic_collider: &DynamicColliderComponent,
 ) -> Collider {
     Collider {
-        rect: dynamic_collider.relative_collider.rect.offset(sprite.pos),
+        rect: sprite.calculate_absolute_bounding_box(&dynamic_collider.relative_collider.rect),
         ..dynamic_collider.relative_collider
     }
 }
