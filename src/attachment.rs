@@ -18,20 +18,31 @@ pub struct AttachmentComponent {
     pub should_attach: bool,
 }
 
-pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
-    let entities_to_process: Vec<u64> = entities
-        .iter()
-        .filter_map(|(&id, entity)| {
-            if let Some(attachment) = entity.attachment.as_ref() {
-                if attachment.is_attached() || attachment.should_attach {
-                    return Some(id);
-                }
-            }
-            return None;
-        })
-        .collect();
+static mut REUSABLE_BUFFER: Option<Vec<u64>> = None;
 
-    for id in entities_to_process {
+fn get_reusable_buffer() -> &'static mut Vec<u64> {
+    let buffer = unsafe {
+        if REUSABLE_BUFFER.is_none() {
+            REUSABLE_BUFFER = Some(Vec::new());
+        }
+        REUSABLE_BUFFER.as_mut().unwrap()
+    };
+    buffer.clear();
+    buffer
+}
+
+pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
+    let entities_to_process = get_reusable_buffer();
+    entities_to_process.extend(entities.iter().filter_map(|(&id, entity)| {
+        if let Some(attachment) = entity.attachment.as_ref() {
+            if attachment.is_attached() || attachment.should_attach {
+                return Some(id);
+            }
+        }
+        return None;
+    }));
+
+    for &mut id in entities_to_process {
         entities.with_entity_removed(id, |entity, entities| {
             let sprite = &mut entity.sprite;
             let attachment = entity.attachment.as_mut().unwrap();
