@@ -1,5 +1,5 @@
 use macroquad::prelude::Rect;
 
-pub struct DynamicPlatformComponent {
+pub struct DynamicColliderComponent {
     pub bbox: Rect,
 }

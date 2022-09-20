@@ -3,7 +3,7 @@ use macroquad::prelude::{Rect, Vec2};
 use crate::{
     animator::Animator,
     config::config,
-    dynamic_platform::DynamicPlatformComponent,
+    dynamic_collider::DynamicColliderComponent,
     entity::{Entity, EntityMap, EntityMapHelpers},
     game_sprites::game_sprites,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
@@ -53,12 +53,12 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;
-            let dynamic_platform = &mut entity.dynamic_platform;
+            let dynamic_collider = &mut entity.dynamic_collider;
             update_mushroom(
                 mushroom,
                 velocity,
                 sprite,
-                dynamic_platform,
+                dynamic_collider,
                 &player_bbox,
                 time,
             );
@@ -70,7 +70,7 @@ fn update_mushroom(
     mushroom: &mut MushroomComponent,
     velocity: &mut Vec2,
     sprite: &mut SpriteComponent,
-    dynamic_platform: &mut Option<DynamicPlatformComponent>,
+    dynamic_collider: &mut Option<DynamicColliderComponent>,
     player_bbox: &Rect,
     time: &GameTime,
 ) {
@@ -85,7 +85,7 @@ fn update_mushroom(
                 mushroom.state = MushroomState::Alive;
                 sprite.renderer = Some(&game_sprites().mushroom.run);
                 velocity.x = config().mushroom_speed;
-                let _ = dynamic_platform.insert(DynamicPlatformComponent {
+                let _ = dynamic_collider.insert(DynamicColliderComponent {
                     bbox: game_sprites().mushroom.platform_bbox,
                 });
             }
