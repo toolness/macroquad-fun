@@ -1,5 +1,6 @@
 use crate::attachment::AttachmentSystem;
 use crate::drawing::draw_rect_lines;
+use crate::dynamic_collider::draw_dynamic_collider_debug_rects;
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -145,6 +146,7 @@ impl LevelRuntime {
         for collider in level.iter_colliders(&level.pixel_bounds()) {
             collider.draw_debug_rect(PURPLE);
         }
+        draw_dynamic_collider_debug_rects(&self.entities);
         draw_rect_lines(
             &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
             1.,
