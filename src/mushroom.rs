@@ -2,6 +2,7 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     animator::Animator,
+    collision::Collider,
     config::config,
     dynamic_collider::DynamicColliderComponent,
     entity::{Entity, EntityMap, EntityMapHelpers},
@@ -86,7 +87,12 @@ fn update_mushroom(
                 sprite.renderer = Some(&game_sprites().mushroom.run);
                 velocity.x = config().mushroom_speed;
                 let _ = dynamic_collider.insert(DynamicColliderComponent {
-                    bbox: game_sprites().mushroom.platform_bbox,
+                    relative_collider: Collider {
+                        rect: game_sprites().mushroom.platform_bbox,
+                        enable_top: true,
+                        ..Default::default()
+                    },
+                    ..Default::default()
                 });
             }
         }

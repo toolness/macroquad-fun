@@ -1,5 +1,6 @@
-use macroquad::prelude::Rect;
+use crate::collision::Collider;
 
+#[derive(Default)]
 pub struct DynamicColliderComponent {
-    pub bbox: Rect,
+    pub relative_collider: Collider,
 }
