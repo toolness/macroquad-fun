@@ -10,54 +10,56 @@ use crate::{
 
 const CARRY_Y_OFFSET: f32 = 10.0;
 
+pub struct AttachmentSystem {
+    // This solely exists as an instance variable so we can amortize
+    // allocations across frames.
+    entities_to_process: Vec<u64>,
+}
+
+impl AttachmentSystem {
+    pub fn new() -> Self {
+        AttachmentSystem {
+            entities_to_process: vec![],
+        }
+    }
+
+    pub fn run(&mut self, entities: &mut EntityMap, level: &Level) {
+        self.entities_to_process.clear();
+        self.entities_to_process
+            .extend(entities.iter().filter_map(|(&id, entity)| {
+                if let Some(attachment) = entity.attachment.as_ref() {
+                    if attachment.is_attached() || attachment.should_attach {
+                        return Some(id);
+                    }
+                }
+                return None;
+            }));
+
+        for &id in self.entities_to_process.iter() {
+            entities.with_entity_removed(id, |entity, entities| {
+                let sprite = &mut entity.sprite;
+                let attachment = entity.attachment.as_mut().unwrap();
+                if let Some(carrier_entity) = attachment.attached_entity(entities) {
+                    attachment.update_while_attached(
+                        &carrier_entity.sprite,
+                        &carrier_entity.physics,
+                        sprite,
+                        &mut entity.physics,
+                    );
+                } else if attachment.should_attach {
+                    attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
+                }
+            });
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct AttachmentComponent {
     attached_to_entity_id: Option<u64>,
     detached_from_entity_id: Option<u64>,
     num_frames_displaced: u32,
     pub should_attach: bool,
-}
-
-static mut REUSABLE_BUFFER: Option<Vec<u64>> = None;
-
-fn get_reusable_buffer() -> &'static mut Vec<u64> {
-    let buffer = unsafe {
-        if REUSABLE_BUFFER.is_none() {
-            REUSABLE_BUFFER = Some(Vec::new());
-        }
-        REUSABLE_BUFFER.as_mut().unwrap()
-    };
-    buffer.clear();
-    buffer
-}
-
-pub fn attachment_system(entities: &mut EntityMap, level: &Level) {
-    let entities_to_process = get_reusable_buffer();
-    entities_to_process.extend(entities.iter().filter_map(|(&id, entity)| {
-        if let Some(attachment) = entity.attachment.as_ref() {
-            if attachment.is_attached() || attachment.should_attach {
-                return Some(id);
-            }
-        }
-        return None;
-    }));
-
-    for &mut id in entities_to_process {
-        entities.with_entity_removed(id, |entity, entities| {
-            let sprite = &mut entity.sprite;
-            let attachment = entity.attachment.as_mut().unwrap();
-            if let Some(carrier_entity) = attachment.attached_entity(entities) {
-                attachment.update_while_attached(
-                    &carrier_entity.sprite,
-                    &carrier_entity.physics,
-                    sprite,
-                    &mut entity.physics,
-                );
-            } else if attachment.should_attach {
-                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
-            }
-        });
-    }
 }
 
 pub struct AttachableComponent();

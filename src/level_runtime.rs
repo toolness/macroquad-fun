@@ -1,4 +1,4 @@
-use crate::attachment::attachment_system;
+use crate::attachment::AttachmentSystem;
 use crate::drawing::draw_rect_lines;
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
@@ -28,6 +28,7 @@ pub struct LevelRuntime {
     camera: Camera,
     next_id: u64,
     time: GameTime,
+    attachment_system: AttachmentSystem,
 }
 
 impl LevelRuntime {
@@ -39,6 +40,7 @@ impl LevelRuntime {
             debug_mode: false,
             camera: Camera::new(),
             time: GameTime::new(),
+            attachment_system: AttachmentSystem::new(),
         };
         instance.change_level(&level);
         instance
@@ -100,7 +102,7 @@ impl LevelRuntime {
             .update(&self.entities.player().sprite, &self.level);
 
         process_player_input(&mut self.entities, &self.time);
-        attachment_system(&mut self.entities, &self.level);
+        self.attachment_system.run(&mut self.entities, &self.level);
         physics_system(&mut self.entities, &self.level, &self.time);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
