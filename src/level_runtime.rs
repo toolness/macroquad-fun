@@ -1,7 +1,8 @@
 use crate::attachment::AttachmentSystem;
+use crate::collision::Collider;
 use crate::drawing::draw_rect_lines;
-use crate::dynamic_collider::draw_dynamic_collider_debug_rects;
-use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
+use crate::dynamic_collider::{compute_dynamic_colliders, draw_dynamic_collider_debug_rects};
+use crate::entity::{Entity, EntityMap, EntityMapHelpers, ENTITY_CAPACITY, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::physics_system;
@@ -30,6 +31,7 @@ pub struct LevelRuntime {
     next_id: u64,
     time: GameTime,
     attachment_system: AttachmentSystem,
+    dynamic_colliders: Vec<Collider>,
 }
 
 impl LevelRuntime {
@@ -42,6 +44,7 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
             attachment_system: AttachmentSystem::new(),
+            dynamic_colliders: Vec::with_capacity(ENTITY_CAPACITY),
         };
         instance.change_level(&level);
         instance
@@ -90,6 +93,12 @@ impl LevelRuntime {
         }
     }
 
+    fn recompute_dynamic_colliders(&mut self) {
+        self.dynamic_colliders.clear();
+        self.dynamic_colliders
+            .extend(compute_dynamic_colliders(&self.entities));
+    }
+
     pub fn advance_one_frame(&mut self) -> FrameResult {
         self.time.update();
 
@@ -104,7 +113,13 @@ impl LevelRuntime {
 
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system.run(&mut self.entities, &self.level);
-        physics_system(&mut self.entities, &self.level, &self.time);
+        self.recompute_dynamic_colliders();
+        physics_system(
+            &mut self.entities,
+            &self.level,
+            &self.time,
+            &self.dynamic_colliders,
+        );
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
         player_update_system(&mut self.entities, &self.time);

@@ -7,7 +7,7 @@ pub struct Collision {
     pub displacement: Vec2,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Collider {
     pub rect: Rect,
     pub enable_top: bool,

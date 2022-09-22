@@ -3,7 +3,7 @@ use macroquad::prelude::Vec2;
 use crate::{
     collision::{
         collision_resolution_loop, maybe_reverse_direction_x, maybe_reverse_direction_xy,
-        process_collision, Side,
+        process_collision, Collider, Side,
     },
     config::config,
     entity::EntityMap,
@@ -43,7 +43,12 @@ pub struct PhysicsFrameResults {
     pub was_displaced: bool,
 }
 
-pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+pub fn physics_system(
+    entities: &mut EntityMap,
+    level: &Level,
+    time: &GameTime,
+    dynamic_colliders: &Vec<Collider>,
+) {
     let gravity = config().gravity;
     let time_since_last_frame = time.time_since_last_frame as f32;
     let gravity_this_frame = gravity * time_since_last_frame;
@@ -66,8 +71,9 @@ pub fn physics_system(entities: &mut EntityMap, level: &Level, time: &GameTime) 
         collision_resolution_loop(|| {
             let bbox = sprite.bbox();
 
-            // TODO: Also look at collisions on dynamic platforms!
-            let colliders = level.iter_colliders_ex(&bbox, !physics.defies_level_bounds);
+            let colliders = level
+                .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
+                .chain(dynamic_colliders.iter().copied());
 
             for collider in colliders {
                 if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
