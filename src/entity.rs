@@ -33,6 +33,8 @@ pub trait EntityMapHelpers {
     fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F);
 }
 
+pub const ENTITY_CAPACITY: usize = 200;
+
 pub type EntityMap = HashMap<u64, Entity>;
 
 impl EntityMapHelpers for EntityMap {
@@ -45,7 +47,7 @@ impl EntityMapHelpers for EntityMap {
     }
 
     fn with_player(player: Entity) -> Self {
-        let mut map = EntityMap::new();
+        let mut map = EntityMap::with_capacity(ENTITY_CAPACITY);
         map.insert(PLAYER_ENTITY_ID, player);
         map
     }
