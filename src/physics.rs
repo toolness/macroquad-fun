@@ -81,10 +81,10 @@ pub fn physics_system(
                         Side::Top => {
                             results.is_on_any_surface = true;
                             if !physics.defies_gravity {
-                                physics.velocity.y = 0.;
+                                physics.velocity.y = collider.velocity.y;
                             }
                             if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                physics.velocity.x = 0.;
+                                physics.velocity.x = collider.velocity.x;
                             }
                         }
                         Side::Bottom => {

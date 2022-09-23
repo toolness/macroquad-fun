@@ -14,6 +14,7 @@ pub struct Collider {
     pub enable_bottom: bool,
     pub enable_right: bool,
     pub enable_left: bool,
+    pub velocity: Vec2,
 }
 
 #[derive(PartialEq)]

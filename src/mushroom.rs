@@ -90,6 +90,7 @@ fn update_mushroom(
                     relative_collider: Collider {
                         rect: game_sprites().mushroom.platform_bbox,
                         enable_top: true,
+                        velocity: *velocity,
                         ..Default::default()
                     },
                     ..Default::default()
@@ -98,6 +99,9 @@ fn update_mushroom(
         }
         MushroomState::Alive => {
             sprite.is_facing_left = velocity.x < 0.;
+            if let Some(dynamic_collider) = dynamic_collider {
+                dynamic_collider.relative_collider.velocity = *velocity;
+            }
         }
     }
     mushroom.set_current_frame_number(time, sprite);

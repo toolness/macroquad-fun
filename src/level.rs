@@ -421,6 +421,7 @@ impl<'a> Iterator for GridColliderIterator<'a> {
                         self.level.grid_size,
                         self.level.grid_size,
                     ),
+                    velocity: Vec2::ZERO,
                 };
                 self.advance();
                 return Some(collider);
