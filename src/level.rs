@@ -99,10 +99,6 @@ pub enum EntityKind {
 impl Level {
     pub fn from_ldtk(level: &ldtk::Level) -> Result<Self> {
         let mut colliders: Option<Vec<ColliderType>> = None;
-        let mut width: i64 = 0;
-        let mut height: i64 = 0;
-        let mut unscaled_grid_size: i64 = 0;
-        let mut grid_size: f32 = 0.;
         let scale = config().sprite_scale;
         let world_rect = Rect::new(
             level.world_x as f32 * scale,
@@ -114,12 +110,15 @@ impl Level {
         let mut entities = vec![];
         let mut opt_tiles: Option<Vec<Option<Tile>>> = None;
         let mut opt_background_tiles: Option<Vec<Option<Tile>>> = None;
+        let first_layer = &layers
+            .get(0)
+            .expect("Level should have at least one layer!");
+        let width: i64 = first_layer.c_wid;
+        let height: i64 = first_layer.c_hei;
+        let unscaled_grid_size: i64 = first_layer.grid_size;
+        let grid_size: f32 = first_layer.grid_size as f32 * scale;
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
-                width = layer.c_wid;
-                height = layer.c_hei;
-                unscaled_grid_size = layer.grid_size;
-                grid_size = layer.grid_size as f32 * scale;
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
             } else if layer.identifier == "Entities" {
                 for entity in layer.entity_instances.iter() {
@@ -145,7 +144,8 @@ impl Level {
                         )),
                         "Mushroom" => EntityKind::Mushroom,
                         "MovingPlatform" => {
-                            EntityKind::MovingPlatform(entity.get_point_field_instance("endpoint")?)
+                            let end_point = entity.get_point_field_instance("endpoint")?;
+                            EntityKind::MovingPlatform(end_point * grid_size)
                         }
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);

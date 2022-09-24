@@ -4,6 +4,7 @@ use crate::{
     attachment::{AttachableComponent, AttachmentComponent},
     dynamic_collider::DynamicColliderComponent,
     flying_eye::FlyingEyeComponent,
+    moving_platform::MovingPlatformComponent,
     mushroom::MushroomComponent,
     physics::PhysicsComponent,
     player::PlayerComponent,
@@ -22,6 +23,7 @@ pub struct Entity {
     pub run: Option<RunComponent>,
     pub attachment: Option<AttachmentComponent>,
     pub dynamic_collider: Option<DynamicColliderComponent>,
+    pub moving_platform: Option<MovingPlatformComponent>,
 }
 
 pub const PLAYER_ENTITY_ID: u64 = 0;
