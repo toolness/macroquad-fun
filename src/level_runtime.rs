@@ -43,6 +43,8 @@ pub struct LevelRuntime {
     attachment_system: AttachmentSystem,
     dynamic_colliders: Vec<Collider>,
     debug_text_lines: Option<String>,
+    last_fps_update_time: f64,
+    fps: i32,
 }
 
 impl LevelRuntime {
@@ -57,6 +59,8 @@ impl LevelRuntime {
             attachment_system: AttachmentSystem::new(),
             dynamic_colliders: Vec::with_capacity(ENTITY_CAPACITY),
             debug_text_lines: None,
+            last_fps_update_time: 0.,
+            fps: 0,
         };
         instance.change_level(&level);
         instance
@@ -180,7 +184,16 @@ impl LevelRuntime {
             .debug_text_lines
             .get_or_insert_with(|| String::with_capacity(DEBUG_TEXT_CAPACITY));
         text.clear();
-        writeln!(text, "fps: {}", get_fps())?;
+
+        // Macroquad's get_fps() fluctuates ridiculously which makes it difficult
+        // to read, so we'll limit how often it changes.
+        let now = get_time();
+        if now - self.last_fps_update_time >= 1. || self.fps == 0 {
+            self.fps = get_fps();
+            self.last_fps_update_time = now;
+        }
+
+        writeln!(text, "fps: {}", self.fps)?;
         writeln!(text, "entities: {}", self.entities.len())?;
         Ok(())
     }
