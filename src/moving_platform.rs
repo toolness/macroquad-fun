@@ -10,7 +10,6 @@ use crate::{
     entity::{Entity, EntityMap},
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
-    time::GameTime,
 };
 
 pub struct MovingPlatformComponent {
@@ -29,14 +28,25 @@ impl MovingPlatformComponent {
     }
 }
 
-pub fn moving_platform_system(entities: &mut EntityMap, time: &GameTime) {
+pub fn moving_platform_system(entities: &mut EntityMap) {
     let config = config();
     for entity in entities.values_mut() {
         if let Some(moving_platform) = entity.moving_platform.as_mut() {
             let target = moving_platform.target();
             let direction_to_target = target - entity.sprite.pos;
-            entity.physics.velocity =
-                direction_to_target.normalize() * config.moving_platform_speed;
+            if entity.physics.velocity == Vec2::ZERO {
+                entity.physics.velocity =
+                    direction_to_target.normalize() * config.moving_platform_speed;
+            } else {
+                let is_moving_towards_target =
+                    entity.physics.velocity.dot(direction_to_target) > 0.;
+                if !is_moving_towards_target {
+                    entity.sprite.pos = target;
+                    entity.physics.velocity = Vec2::ZERO;
+                    moving_platform.is_moving_towards_start =
+                        !moving_platform.is_moving_towards_start;
+                }
+            }
         }
     }
 }

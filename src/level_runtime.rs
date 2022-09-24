@@ -122,7 +122,7 @@ impl LevelRuntime {
 
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system.run(&mut self.entities, &self.level);
-        moving_platform_system(&mut self.entities, &self.time);
+        moving_platform_system(&mut self.entities);
         self.recompute_dynamic_colliders();
         physics_system(
             &mut self.entities,
