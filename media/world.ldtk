@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 15,
+	"nextUid": 18,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -343,6 +343,64 @@
 			"pivotX": 0,
 			"pivotY": 0,
 			"fieldDefs": []
+		},
+		{
+			"identifier": "MovingPlatform",
+			"uid": 15,
+			"tags": [],
+			"width": 16,
+			"height": 16,
+			"resizableX": true,
+			"resizableY": true,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#EFE606",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": [
+				{
+					"identifier": "endpoint",
+					"__type": "Point",
+					"uid": 16,
+					"type": "F_Point",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "PointPath",
+					"editorDisplayPos": "Above",
+					"editorAlwaysShow": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefTags": [],
+					"tilesetUid": null
+				}
+			]
 		}
 	], "tilesets": [
 		{
@@ -384,7 +442,7 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "11", "averageColors": "f878f666" }
+			"cachedPixelData": { "opaqueTiles": "11", "averageColors": "f878f333" }
 		}
 	], "enums": [], "externalEnums": [], "levelFields": [] },
 	"levels": [
@@ -451,20 +509,6 @@
 							}] }]
 						},
 						{
-							"__identifier": "PlayerStart",
-							"__grid": [2,8],
-							"__pivot": [0,0],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#94D9B3",
-							"iid": "5c14f190-2a00-11ed-9f19-c3110edff891",
-							"width": 16,
-							"height": 16,
-							"defUid": 3,
-							"px": [32,128],
-							"fieldInstances": []
-						},
-						{
 							"__identifier": "FlyingEye",
 							"__grid": [1,1],
 							"__pivot": [0,0],
@@ -507,6 +551,20 @@
 							"height": 16,
 							"defUid": 13,
 							"px": [80,128],
+							"fieldInstances": []
+						},
+						{
+							"__identifier": "PlayerStart",
+							"__grid": [2,8],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#94D9B3",
+							"iid": "b4593de0-2a00-11ed-98ce-0ba78186be01",
+							"width": 16,
+							"height": 16,
+							"defUid": 3,
+							"px": [32,128],
 							"fieldInstances": []
 						}
 					]
@@ -1064,7 +1122,25 @@
 					"seed": 2307159,
 					"overrideTilesetUid": null,
 					"gridTiles": [],
-					"entityInstances": []
+					"entityInstances": [
+						{
+							"__identifier": "MovingPlatform",
+							"__grid": [3,9],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#EFE606",
+							"iid": "0d7bc110-2a00-11ed-98ce-91133b289050",
+							"width": 48,
+							"height": 16,
+							"defUid": 15,
+							"px": [48,144],
+							"fieldInstances": [{ "__identifier": "endpoint", "__value": { "cx": 4, "cy": 12 }, "__type": "Point", "__tile": null, "defUid": 16, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["4,12"]
+							}] }]
+						}
+					]
 				},
 				{
 					"__identifier": "IntGrid",
@@ -1085,13 +1161,13 @@
 					"visible": true,
 					"optionalRules": [],
 					"intGridCsv": [
-						1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,
+						0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
+						0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0
 					],
 					"autoLayerTiles": [],
@@ -1126,15 +1202,20 @@
 						{ "px": [0,0], "src": [0,0], "f": 0, "t": 0, "d": [0] },
 						{ "px": [16,0], "src": [0,0], "f": 0, "t": 0, "d": [1] },
 						{ "px": [32,0], "src": [0,0], "f": 0, "t": 0, "d": [2] },
-						{ "px": [48,0], "src": [0,0], "f": 0, "t": 0, "d": [3] },
-						{ "px": [64,0], "src": [0,0], "f": 0, "t": 0, "d": [4] },
-						{ "px": [64,16], "src": [0,0], "f": 0, "t": 0, "d": [20] },
-						{ "px": [64,32], "src": [0,0], "f": 0, "t": 0, "d": [36] },
-						{ "px": [64,48], "src": [0,0], "f": 0, "t": 0, "d": [52] },
 						{ "px": [0,64], "src": [0,0], "f": 0, "t": 0, "d": [64] },
 						{ "px": [16,64], "src": [0,0], "f": 0, "t": 0, "d": [65] },
 						{ "px": [32,64], "src": [0,0], "f": 0, "t": 0, "d": [66] },
-						{ "px": [64,64], "src": [0,0], "f": 0, "t": 0, "d": [68] }
+						{ "px": [0,80], "src": [0,0], "f": 0, "t": 0, "d": [80] },
+						{ "px": [0,96], "src": [0,0], "f": 0, "t": 0, "d": [96] },
+						{ "px": [0,112], "src": [0,0], "f": 0, "t": 0, "d": [112] },
+						{ "px": [0,128], "src": [0,0], "f": 0, "t": 0, "d": [128] },
+						{ "px": [0,144], "src": [0,0], "f": 0, "t": 0, "d": [144] },
+						{ "px": [0,160], "src": [0,0], "f": 0, "t": 0, "d": [160] },
+						{ "px": [0,176], "src": [0,0], "f": 0, "t": 0, "d": [176] },
+						{ "px": [0,192], "src": [0,0], "f": 0, "t": 0, "d": [192] },
+						{ "px": [0,208], "src": [0,0], "f": 0, "t": 0, "d": [208] },
+						{ "px": [0,224], "src": [0,0], "f": 0, "t": 0, "d": [224] },
+						{ "px": [0,240], "src": [0,0], "f": 0, "t": 0, "d": [240] }
 					],
 					"entityInstances": []
 				},
