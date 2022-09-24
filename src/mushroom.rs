@@ -86,15 +86,12 @@ fn update_mushroom(
                 mushroom.state = MushroomState::Alive;
                 sprite.renderer = Some(&game_sprites().mushroom.run);
                 velocity.x = config().mushroom_speed;
-                let _ = dynamic_collider.insert(DynamicColliderComponent {
-                    relative_collider: Collider {
-                        rect: game_sprites().mushroom.platform_bbox,
-                        enable_top: true,
-                        velocity: *velocity,
-                        ..Default::default()
-                    },
+                let _ = dynamic_collider.insert(DynamicColliderComponent::new(Collider {
+                    rect: game_sprites().mushroom.platform_bbox,
+                    enable_top: true,
+                    velocity: *velocity,
                     ..Default::default()
-                });
+                }));
             }
         }
         MushroomState::Alive => {

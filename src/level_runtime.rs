@@ -1,7 +1,9 @@
 use crate::attachment::AttachmentSystem;
 use crate::collision::Collider;
 use crate::drawing::draw_rect_lines;
-use crate::dynamic_collider::{compute_dynamic_colliders, draw_dynamic_collider_debug_rects};
+use crate::dynamic_collider::{
+    draw_dynamic_collider_debug_rects, get_dynamic_colliders, update_dynamic_colliders,
+};
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, ENTITY_CAPACITY, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -94,9 +96,10 @@ impl LevelRuntime {
     }
 
     fn recompute_dynamic_colliders(&mut self) {
+        update_dynamic_colliders(&mut self.entities);
         self.dynamic_colliders.clear();
         self.dynamic_colliders
-            .extend(compute_dynamic_colliders(&self.entities));
+            .extend(get_dynamic_colliders(&self.entities));
     }
 
     pub fn advance_one_frame(&mut self) -> FrameResult {
