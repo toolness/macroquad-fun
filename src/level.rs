@@ -93,6 +93,7 @@ pub enum EntityKind {
     Text(Vec<String>),
     FlyingEye(Vec2),
     Mushroom,
+    MovingPlatform(Vec2),
 }
 
 impl Level {
@@ -143,6 +144,9 @@ impl Level {
                             entity.get_float_field_instance("y_velocity")? as f32,
                         )),
                         "Mushroom" => EntityKind::Mushroom,
+                        "MovingPlatform" => {
+                            EntityKind::MovingPlatform(entity.get_point_field_instance("endpoint")?)
+                        }
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
                             continue;

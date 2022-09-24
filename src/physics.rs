@@ -68,61 +68,63 @@ pub fn physics_system(
         sprite.pos.x += physics.x_impulse * time_since_last_frame;
         physics.x_impulse = 0.;
 
-        collision_resolution_loop(|| {
-            let bbox = sprite.bbox();
+        if physics.collision_behavior != PhysicsCollisionBehavior::None {
+            collision_resolution_loop(|| {
+                let bbox = sprite.bbox();
 
-            let colliders = level
-                .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
-                .chain(dynamic_colliders.iter().copied());
+                let colliders = level
+                    .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
+                    .chain(dynamic_colliders.iter().copied());
 
-            for collider in colliders {
-                if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                    match collision.side {
-                        Side::Top => {
-                            results.is_on_any_surface = true;
-                            if !physics.defies_gravity {
-                                physics.velocity.y = collider.velocity.y;
+                for collider in colliders {
+                    if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                        match collision.side {
+                            Side::Top => {
+                                results.is_on_any_surface = true;
+                                if !physics.defies_gravity {
+                                    physics.velocity.y = collider.velocity.y;
+                                }
+                                if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
+                                    physics.velocity.x = collider.velocity.x;
+                                }
                             }
-                            if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                physics.velocity.x = collider.velocity.x;
+                            Side::Bottom => {
+                                if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
+                                    physics.velocity.y = 0.;
+                                }
+                            }
+                            Side::Left | Side::Right => {
+                                if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
+                                    physics.velocity.x = 0.;
+                                }
                             }
                         }
-                        Side::Bottom => {
-                            if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                physics.velocity.y = 0.;
-                            }
-                        }
-                        Side::Left | Side::Right => {
-                            if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                physics.velocity.x = 0.;
-                            }
-                        }
-                    }
 
-                    if collision.displacement != Vec2::ZERO {
-                        sprite.pos += collision.displacement;
-                        results.was_displaced = true;
-                        match physics.collision_behavior {
-                            PhysicsCollisionBehavior::ReverseDirectionX => {
-                                maybe_reverse_direction_x(
-                                    &mut physics.velocity,
-                                    &collision.displacement,
-                                );
+                        if collision.displacement != Vec2::ZERO {
+                            sprite.pos += collision.displacement;
+                            results.was_displaced = true;
+                            match physics.collision_behavior {
+                                PhysicsCollisionBehavior::ReverseDirectionX => {
+                                    maybe_reverse_direction_x(
+                                        &mut physics.velocity,
+                                        &collision.displacement,
+                                    );
+                                }
+                                PhysicsCollisionBehavior::ReverseDirectionXY => {
+                                    maybe_reverse_direction_xy(
+                                        &mut physics.velocity,
+                                        &collision.displacement,
+                                    );
+                                }
+                                _ => {}
                             }
-                            PhysicsCollisionBehavior::ReverseDirectionXY => {
-                                maybe_reverse_direction_xy(
-                                    &mut physics.velocity,
-                                    &collision.displacement,
-                                );
-                            }
-                            _ => {}
+                            return true;
                         }
-                        return true;
                     }
                 }
-            }
-            false
-        });
+                false
+            });
+        }
 
         physics.latest_frame = results;
     }

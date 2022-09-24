@@ -6,6 +6,7 @@ use crate::dynamic_collider::{
 };
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, ENTITY_CAPACITY, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
+use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::physics_system;
 use crate::player::{
@@ -72,6 +73,9 @@ impl LevelRuntime {
                 }
                 EntityKind::Mushroom => {
                     self.add_entity(create_mushrom(entity.rect));
+                }
+                EntityKind::MovingPlatform(endpoint) => {
+                    self.add_entity(create_moving_platform(entity.rect, endpoint));
                 }
                 _ => {}
             }

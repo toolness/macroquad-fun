@@ -25,6 +25,7 @@ mod ldtk;
 mod level;
 mod level_runtime;
 mod math_util;
+mod moving_platform;
 mod mushroom;
 mod physics;
 mod player;

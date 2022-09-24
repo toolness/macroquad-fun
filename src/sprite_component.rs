@@ -1,4 +1,7 @@
-use macroquad::prelude::{Rect, Vec2, GREEN, PURPLE};
+use macroquad::{
+    prelude::{Color, Rect, Vec2, GREEN, PURPLE, WHITE},
+    shapes::draw_rectangle,
+};
 
 use crate::{
     drawing::draw_rect_lines,
@@ -11,6 +14,7 @@ pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
     pub renderer: Option<&'static SpriteRenderer>,
+    pub color: Option<Color>,
     pub is_facing_left: bool,
     pub flip_bbox_when_facing_left: bool,
     pub current_frame_number: u32,
@@ -53,6 +57,7 @@ impl SpriteComponent {
     }
 
     pub fn draw_current_frame(&self) {
+        let color = self.color.unwrap_or(WHITE);
         if let Some(sprite) = self.renderer {
             sprite.draw_ex(
                 self.pos.x,
@@ -60,8 +65,17 @@ impl SpriteComponent {
                 self.current_frame_number,
                 SpriteDrawParams {
                     flip_x: self.is_facing_left,
+                    color,
                     ..Default::default()
                 },
+            );
+        } else {
+            draw_rectangle(
+                self.pos.x,
+                self.pos.y,
+                self.relative_bbox.w,
+                self.relative_bbox.h,
+                color,
             );
         }
     }

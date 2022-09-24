@@ -3,6 +3,7 @@
 extern crate serde_derive;
 
 use anyhow::{anyhow, Result};
+use macroquad::prelude::Vec2;
 
 #[derive(Deserialize)]
 pub struct Coordinate {
@@ -130,6 +131,36 @@ pub struct EntityInstance {
 }
 
 impl EntityInstance {
+    pub fn get_point_field_instance(&self, identifier: &str) -> Result<Vec2> {
+        for field in self.field_instances.iter() {
+            if field.identifier == identifier {
+                if let Some(serde_json::Value::Object(value)) = &field.value {
+                    match (value.get("cx"), value.get("cy")) {
+                        (
+                            Some(serde_json::Value::Number(x)),
+                            Some(serde_json::Value::Number(y)),
+                        ) => match (x.as_f64(), y.as_f64()) {
+                            (Some(x), Some(y)) => {
+                                return Ok(Vec2::new(x as f32, y as f32));
+                            }
+                            _ => {}
+                        },
+                        _ => {}
+                    }
+                }
+                return Err(anyhow!(
+                    "Expected field instance with identifier '{}' to be a point",
+                    identifier
+                ));
+            }
+        }
+
+        Err(anyhow!(
+            "Unable to find field instance with identifier '{}'",
+            identifier
+        ))
+    }
+
     pub fn get_float_field_instance(&self, identifier: &str) -> Result<f64> {
         for field in self.field_instances.iter() {
             if field.identifier == identifier {
