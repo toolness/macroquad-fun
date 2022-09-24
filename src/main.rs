@@ -29,6 +29,7 @@ mod moving_platform;
 mod mushroom;
 mod physics;
 mod player;
+mod route;
 mod running;
 mod sprite_component;
 mod sprite_renderer;

@@ -9,15 +9,14 @@ use crate::dynamic_collider::{
 };
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, ENTITY_CAPACITY, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
-use crate::moving_platform::{
-    create_moving_platform, draw_moving_platform_debug_targets, moving_platform_system,
-};
+use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::physics_system;
 use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
     teleport_entity,
 };
+use crate::route::{draw_route_debug_targets, route_system};
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
@@ -134,7 +133,7 @@ impl LevelRuntime {
 
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system.run(&mut self.entities, &self.level);
-        moving_platform_system(&mut self.entities);
+        route_system(&mut self.entities);
         self.recompute_dynamic_colliders();
         physics_system(
             &mut self.entities,
@@ -217,7 +216,7 @@ impl LevelRuntime {
             collider.draw_debug_rect(PURPLE);
         }
         draw_dynamic_collider_debug_rects(&self.entities);
-        draw_moving_platform_debug_targets(&self.entities);
+        draw_route_debug_targets(&self.entities);
         draw_rect_lines(
             &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
             1.,
