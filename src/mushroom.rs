@@ -2,9 +2,8 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     animator::Animator,
-    collision::Collider,
     config::config,
-    dynamic_collider::DynamicColliderComponent,
+    dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::{Entity, EntityMap, EntityMapHelpers},
     game_sprites::game_sprites,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
@@ -86,19 +85,15 @@ fn update_mushroom(
                 mushroom.state = MushroomState::Alive;
                 sprite.renderer = Some(&game_sprites().mushroom.run);
                 velocity.x = config().mushroom_speed;
-                let _ = dynamic_collider.insert(DynamicColliderComponent::new(Collider {
+                let _ = dynamic_collider.insert(DynamicColliderComponent::new(RelativeCollider {
                     rect: game_sprites().mushroom.platform_bbox,
                     enable_top: true,
-                    velocity: *velocity,
                     ..Default::default()
                 }));
             }
         }
         MushroomState::Alive => {
             sprite.is_facing_left = velocity.x < 0.;
-            if let Some(dynamic_collider) = dynamic_collider {
-                dynamic_collider.relative_collider.velocity = *velocity;
-            }
         }
     }
     mushroom.set_current_frame_number(time, sprite);

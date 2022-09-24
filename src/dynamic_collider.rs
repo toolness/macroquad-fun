@@ -1,15 +1,24 @@
-use macroquad::prelude::PURPLE;
+use macroquad::prelude::{Rect, PURPLE};
 
 use crate::{collision::Collider, entity::EntityMap};
 
 #[derive(Default)]
+pub struct RelativeCollider {
+    pub rect: Rect,
+    pub enable_top: bool,
+    pub enable_bottom: bool,
+    pub enable_right: bool,
+    pub enable_left: bool,
+}
+
+#[derive(Default)]
 pub struct DynamicColliderComponent {
-    pub relative_collider: Collider,
+    relative_collider: RelativeCollider,
     computed_collider: Option<Collider>,
 }
 
 impl DynamicColliderComponent {
-    pub fn new(relative_collider: Collider) -> Self {
+    pub fn new(relative_collider: RelativeCollider) -> Self {
         DynamicColliderComponent {
             relative_collider,
             ..Default::default()
@@ -30,11 +39,15 @@ pub fn update_dynamic_colliders(entities: &mut EntityMap) {
                     rect
                 }
             };
+            let relative = &dynamic_collider.relative_collider;
             dynamic_collider.computed_collider = Some(Collider {
                 rect,
                 prev_rect,
                 velocity: entity.physics.velocity,
-                ..dynamic_collider.relative_collider
+                enable_top: relative.enable_top,
+                enable_bottom: relative.enable_bottom,
+                enable_right: relative.enable_right,
+                enable_left: relative.enable_left,
             });
         }
     }
