@@ -11,5 +11,6 @@
     "flying_eye_speed": 50.0,
     "mushroom_speed": 25.0,
     "fall_off_level_threshold": 300.0,
-    "moving_platform_speed": 10.0
+    "moving_platform_speed": 10.0,
+    "coyote_time_ms": 30.0
 }

@@ -16,6 +16,7 @@ use crate::{
 #[derive(Default)]
 pub struct PlayerComponent {
     is_in_air: bool,
+    coyote_time_start: Option<f64>,
     run_direction: f32,
 }
 
@@ -69,10 +70,22 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     if physics.latest_frame.is_on_any_surface {
         // The player just landed (or remains on the ground).
         player.is_in_air = false;
+        player.coyote_time_start = None;
         attachment.reset();
     } else if !player.is_in_air {
-        // The player just fell off a ledge.
-        player.is_in_air = true;
+        if let Some(coyote_start_time) = &player.coyote_time_start {
+            if time.now - coyote_start_time > config().coyote_time_ms / 1000. {
+                // The player fell off a ledge, and is out of coyote time.
+                player.is_in_air = true;
+                player.coyote_time_start = None;
+            }
+        } else {
+            // Aside from the usual benefits of coyote time, this also
+            // de-jitters weird situations where the player is on a
+            // moving platform that has technically moved underneath them
+            // for a single frame.
+            player.coyote_time_start = Some(time.now);
+        }
     }
 
     if !player.is_in_air && player.run_direction != 0. {
