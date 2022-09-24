@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use crate::attachment::AttachmentSystem;
 use crate::collision::Collider;
 use crate::drawing::draw_rect_lines;
@@ -18,9 +20,12 @@ use crate::player::{
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::{camera::Camera, level::EntityKind};
+use anyhow::Result;
 use macroquad::prelude::*;
 
 use crate::level::Level;
+
+const DEBUG_TEXT_CAPACITY: usize = 3000;
 
 #[derive(PartialEq)]
 pub enum FrameResult {
@@ -37,6 +42,7 @@ pub struct LevelRuntime {
     time: GameTime,
     attachment_system: AttachmentSystem,
     dynamic_colliders: Vec<Collider>,
+    debug_text_lines: Option<String>,
 }
 
 impl LevelRuntime {
@@ -50,6 +56,7 @@ impl LevelRuntime {
             time: GameTime::new(),
             attachment_system: AttachmentSystem::new(),
             dynamic_colliders: Vec::with_capacity(ENTITY_CAPACITY),
+            debug_text_lines: None,
         };
         instance.change_level(&level);
         instance
@@ -160,10 +167,22 @@ impl LevelRuntime {
         }
 
         if self.debug_mode {
+            self.generate_debug_text()
+                .expect("Generating debug text should work!");
             self.draw_debug_layer();
         }
 
         return FrameResult::Ok;
+    }
+
+    fn generate_debug_text(&mut self) -> Result<()> {
+        let text = self
+            .debug_text_lines
+            .get_or_insert_with(|| String::with_capacity(DEBUG_TEXT_CAPACITY));
+        text.clear();
+        writeln!(text, "fps: {}", get_fps())?;
+        writeln!(text, "entities: {}", self.entities.len())?;
+        Ok(())
     }
 
     fn draw_debug_layer(&self) {
@@ -181,13 +200,16 @@ impl LevelRuntime {
         for entity in self.entities.values() {
             entity.sprite.draw_debug_rects();
         }
-        let text = format!("fps: {}", get_fps());
-        draw_text(
-            &text,
-            self.camera.rect().x + 32.,
-            self.camera.rect().y + 32.,
-            32.0,
-            WHITE,
-        );
+
+        if let Some(text) = &self.debug_text_lines {
+            let font_size = 32.;
+            let margin = 32.;
+            let x = self.camera.rect().x + margin;
+            let mut y = self.camera.rect().y + margin;
+            for line in text.split("\n") {
+                draw_text(line, x, y, font_size, YELLOW);
+                y += font_size;
+            }
+        }
     }
 }
