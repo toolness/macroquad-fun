@@ -33,6 +33,7 @@ pub fn update_dynamic_colliders(entities: &mut EntityMap) {
             dynamic_collider.computed_collider = Some(Collider {
                 rect,
                 prev_rect,
+                velocity: entity.physics.velocity,
                 ..dynamic_collider.relative_collider
             });
         }
