@@ -2,6 +2,7 @@ use std::fmt::Write;
 
 use crate::attachment::AttachmentSystem;
 use crate::collision::Collider;
+use crate::config::config;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::{
     draw_dynamic_collider_debug_rects, get_dynamic_colliders, update_dynamic_colliders,
@@ -194,7 +195,19 @@ impl LevelRuntime {
         }
 
         writeln!(text, "fps: {}", self.fps)?;
-        writeln!(text, "entities: {}", self.entities.len())?;
+        let entity_size = std::mem::size_of::<Entity>();
+        writeln!(
+            text,
+            "entities: {} ({} bytes each)",
+            self.entities.len(),
+            entity_size,
+        )?;
+        writeln!(
+            text,
+            "entity map capacity: {} ({} bytes total)",
+            self.entities.capacity(),
+            self.entities.capacity() * entity_size,
+        )?;
         Ok(())
     }
 
@@ -215,7 +228,7 @@ impl LevelRuntime {
         }
 
         if let Some(text) = &self.debug_text_lines {
-            let font_size = 32.;
+            let font_size = config().debug_text_size;
             let margin = 32.;
             let x = self.camera.rect().x + margin;
             let mut y = self.camera.rect().y + margin;

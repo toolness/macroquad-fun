@@ -19,6 +19,7 @@ pub struct Config {
     pub screen_height: f32,
     pub fall_off_level_threshold: f32,
     pub coyote_time_ms: f64,
+    pub debug_text_size: f32,
 }
 
 pub async fn load_config(path: &str) -> Result<()> {
