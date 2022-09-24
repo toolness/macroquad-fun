@@ -10,6 +10,7 @@ pub struct Collision {
 #[derive(Default, Clone, Copy)]
 pub struct Collider {
     pub rect: Rect,
+    pub prev_rect: Rect,
     pub enable_top: bool,
     pub enable_bottom: bool,
     pub enable_right: bool,
@@ -83,7 +84,7 @@ pub fn process_collision(
     if let Some(intersection) = collider_rect.intersect(*actor_bbox) {
         if collider.enable_top
             && intersection.top() <= collider_rect.top()
-            && actor_prev_bbox.bottom() <= collider_rect.top()
+            && actor_prev_bbox.bottom() <= collider.prev_rect.top()
         {
             // The top of the collider is being intersected with.
             let y_diff = actor_bbox.bottom() - collider_rect.top();
@@ -93,7 +94,7 @@ pub fn process_collision(
             });
         } else if collider.enable_bottom
             && intersection.bottom() >= collider_rect.bottom()
-            && actor_prev_bbox.top() >= collider_rect.bottom()
+            && actor_prev_bbox.top() >= collider.prev_rect.bottom()
         {
             // The bottom side of the collider is being intersected with.
             let y_diff = collider_rect.bottom() - actor_bbox.top();

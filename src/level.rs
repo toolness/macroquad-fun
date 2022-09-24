@@ -410,17 +410,19 @@ impl<'a> Iterator for GridColliderIterator<'a> {
             if self.level.is_occupied_at(self.x, self.y) {
                 let x = self.x;
                 let y = self.y;
+                let rect = Rect::new(
+                    x as f32 * self.level.grid_size,
+                    y as f32 * self.level.grid_size,
+                    self.level.grid_size,
+                    self.level.grid_size,
+                );
                 let collider = Collider {
                     enable_top: !self.level.is_occupied_at(x, y - 1),
                     enable_bottom: !self.level.is_occupied_at(x, y + 1),
                     enable_left: !self.level.is_occupied_at(x - 1, y),
                     enable_right: !self.level.is_occupied_at(x + 1, y),
-                    rect: Rect::new(
-                        x as f32 * self.level.grid_size,
-                        y as f32 * self.level.grid_size,
-                        self.level.grid_size,
-                        self.level.grid_size,
-                    ),
+                    rect,
+                    prev_rect: rect,
                     velocity: Vec2::ZERO,
                 };
                 self.advance();
