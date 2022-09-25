@@ -298,11 +298,7 @@ impl Level {
         let y_end = extents.bottom() as i64;
         GridColliderIterator {
             level: &self,
-            x_start,
-            x_end,
-            y_end,
-            x: x_start,
-            y: y_start,
+            range: XYRangeIterator::new(x_start, y_start, x_end, y_end),
         }
     }
 
@@ -471,11 +467,7 @@ mod xyrangeiterator_tests {
 
 pub struct GridColliderIterator<'a> {
     level: &'a Level,
-    x_start: i64,
-    x_end: i64,
-    y_end: i64,
-    x: i64,
-    y: i64,
+    range: XYRangeIterator,
 }
 
 impl<'a> Iterator for GridColliderIterator<'a> {
@@ -483,42 +475,30 @@ impl<'a> Iterator for GridColliderIterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.y > self.y_end {
+            if let Some((x, y)) = self.range.next() {
+                if self.level.is_occupied_at(x, y) {
+                    let rect = Rect::new(
+                        x as f32 * self.level.grid_size,
+                        y as f32 * self.level.grid_size,
+                        self.level.grid_size,
+                        self.level.grid_size,
+                    );
+                    let collider = Collider {
+                        enable_top: !self.level.is_occupied_at(x, y - 1),
+                        enable_bottom: !self.level.is_occupied_at(x, y + 1),
+                        enable_left: !self.level.is_occupied_at(x - 1, y),
+                        enable_right: !self.level.is_occupied_at(x + 1, y),
+                        rect,
+                        prev_rect: rect,
+                        velocity: Vec2::ZERO,
+                    };
+                    return Some(collider);
+                } else {
+                    continue;
+                }
+            } else {
                 return None;
             }
-            if self.level.is_occupied_at(self.x, self.y) {
-                let x = self.x;
-                let y = self.y;
-                let rect = Rect::new(
-                    x as f32 * self.level.grid_size,
-                    y as f32 * self.level.grid_size,
-                    self.level.grid_size,
-                    self.level.grid_size,
-                );
-                let collider = Collider {
-                    enable_top: !self.level.is_occupied_at(x, y - 1),
-                    enable_bottom: !self.level.is_occupied_at(x, y + 1),
-                    enable_left: !self.level.is_occupied_at(x - 1, y),
-                    enable_right: !self.level.is_occupied_at(x + 1, y),
-                    rect,
-                    prev_rect: rect,
-                    velocity: Vec2::ZERO,
-                };
-                self.advance();
-                return Some(collider);
-            }
-            self.advance();
-        }
-    }
-}
-
-impl<'a> GridColliderIterator<'a> {
-    fn advance(&mut self) {
-        if self.x < self.x_end {
-            self.x += 1;
-        } else {
-            self.x = self.x_start;
-            self.y += 1;
         }
     }
 }
