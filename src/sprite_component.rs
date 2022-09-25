@@ -64,25 +64,30 @@ impl SpriteComponent {
     }
 
     pub fn draw_current_frame(&self) {
-        if let Renderer::Sprite(sprite) = self.renderer {
-            sprite.draw_ex(
-                self.pos.x,
-                self.pos.y,
-                self.current_frame_number,
-                SpriteDrawParams {
-                    flip_x: self.is_facing_left,
-                    color: self.color.unwrap_or(WHITE),
-                    ..Default::default()
-                },
-            );
-        } else if let Some(color) = self.color {
-            draw_rectangle(
-                self.pos.x,
-                self.pos.y,
-                self.relative_bbox.w,
-                self.relative_bbox.h,
-                color,
-            );
+        match self.renderer {
+            Renderer::Sprite(sprite) => {
+                sprite.draw_ex(
+                    self.pos.x,
+                    self.pos.y,
+                    self.current_frame_number,
+                    SpriteDrawParams {
+                        flip_x: self.is_facing_left,
+                        color: self.color.unwrap_or(WHITE),
+                        ..Default::default()
+                    },
+                );
+            }
+            Renderer::Rectangle => {
+                if let Some(color) = self.color {
+                    draw_rectangle(
+                        self.pos.x,
+                        self.pos.y,
+                        self.relative_bbox.w,
+                        self.relative_bbox.h,
+                        color,
+                    );
+                }
+            }
         }
     }
 
