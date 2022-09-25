@@ -270,6 +270,10 @@ impl Level {
 
     fn get_tile_at(&self, tiles: &Vec<Option<Tile>>, x: i64, y: i64) -> Option<Tile> {
         if self.is_grid_coordinate_outside_of_bounds(x, y) {
+            // Our code should be written in a way that we're preferably
+            // never passed a tile that's out of bounds, but just in case
+            // we do...
+            println!("Warning: get_tile_at({}, {}) is out of bounds.", x, y);
             None
         } else {
             tiles[self.get_index(x, y)]
