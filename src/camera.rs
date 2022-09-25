@@ -1,6 +1,8 @@
 use macroquad::prelude::{clamp, set_camera, Camera2D, Rect, Vec2};
 
-use crate::{config::config, level::Level, sprite_component::SpriteComponent};
+use crate::{
+    config::config, level::Level, math_util::floor_rect, sprite_component::SpriteComponent,
+};
 
 #[derive(Default)]
 pub struct Camera {
@@ -31,12 +33,7 @@ impl Camera {
             self.is_panning_next_update = true;
         }
         // Clamp to integers to avoid weird visual artifacts.
-        let int_rect = Rect::new(
-            self.current_rect.x.floor(),
-            self.current_rect.y.floor(),
-            self.current_rect.w.floor(),
-            self.current_rect.h.floor(),
-        );
+        let int_rect = floor_rect(&self.current_rect);
         set_camera(&Camera2D::from_display_rect(int_rect));
     }
 
