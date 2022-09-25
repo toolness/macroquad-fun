@@ -57,7 +57,6 @@ impl SpriteComponent {
     }
 
     pub fn draw_current_frame(&self) {
-        let color = self.color.unwrap_or(WHITE);
         if let Some(sprite) = self.renderer {
             sprite.draw_ex(
                 self.pos.x,
@@ -65,11 +64,11 @@ impl SpriteComponent {
                 self.current_frame_number,
                 SpriteDrawParams {
                     flip_x: self.is_facing_left,
-                    color,
+                    color: self.color.unwrap_or(WHITE),
                     ..Default::default()
                 },
             );
-        } else {
+        } else if let Some(color) = self.color {
             draw_rectangle(
                 self.pos.x,
                 self.pos.y,
