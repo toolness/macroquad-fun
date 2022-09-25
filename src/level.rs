@@ -216,7 +216,13 @@ impl Level {
         *coords + self.world_rect.point()
     }
 
-    fn draw_tiles(&self, tiles: &Vec<Option<Tile>>, tileset: Texture2D, bounding_rect: &Rect) {
+    fn draw_tiles(
+        &self,
+        tiles: &Vec<Option<Tile>>,
+        tileset: Texture2D,
+        bounding_rect: &Rect,
+        offset: &Vec2,
+    ) {
         let tileset_rect = Rect {
             x: 0.,
             y: 0.,
@@ -230,8 +236,8 @@ impl Level {
                 if let Some(tile) = tiles[self.get_index(x, y)] {
                     draw_texture_ex(
                         tileset,
-                        x as f32 * self.grid_size,
-                        y as f32 * self.grid_size,
+                        x as f32 * self.grid_size + offset.x,
+                        y as f32 * self.grid_size + offset.y,
                         WHITE,
                         DrawTextureParams {
                             dest_size: Some(scaled_tile_size),
@@ -246,8 +252,8 @@ impl Level {
 
     pub fn draw(&self, bounding_rect: &Rect) {
         let tileset = game_sprites().tileset;
-        self.draw_tiles(&self.background_tiles, tileset, &bounding_rect);
-        self.draw_tiles(&self.tiles, tileset, &bounding_rect);
+        self.draw_tiles(&self.background_tiles, tileset, &bounding_rect, &Vec2::ZERO);
+        self.draw_tiles(&self.tiles, tileset, &bounding_rect, &Vec2::ZERO);
     }
 
     fn get_index(&self, x: i64, y: i64) -> usize {
