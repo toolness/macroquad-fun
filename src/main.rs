@@ -36,6 +36,7 @@ mod sprite_renderer;
 mod text;
 mod time;
 mod world;
+mod xy_range_iterator;
 
 #[macroquad::main("Fun")]
 async fn main() {
