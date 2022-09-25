@@ -25,8 +25,8 @@ impl From<Rect> for XYRangeIterator {
         XYRangeIterator::new(
             extents.left() as i64,
             extents.top() as i64,
-            extents.right() as i64,
-            extents.bottom() as i64,
+            extents.right() as i64 - 1,
+            extents.bottom() as i64 - 1,
         )
     }
 }

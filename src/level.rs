@@ -324,13 +324,9 @@ impl Level {
 
     pub fn iter_colliders(&self, bounding_rect: &Rect) -> GridColliderIterator {
         let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
-        let x_start = extents.left() as i64;
-        let x_end = extents.right() as i64;
-        let y_start = extents.top() as i64;
-        let y_end = extents.bottom() as i64;
         GridColliderIterator {
             level: &self,
-            range: XYRangeIterator::new(x_start, y_start, x_end, y_end),
+            range: extents.into(),
         }
     }
 
