@@ -70,6 +70,11 @@ pub struct Level {
     /// Tiles layer in LDtk.
     pub background_tiles: Vec<Option<Tile>>,
 
+    /// Tiles to use to draw the contents of entities, based on the entities' starting
+    /// positions, for each grid cell, in row-major order. Corresponds to a Tiles layer
+    /// in LDtk.
+    pub entity_tiles: Vec<Option<Tile>>,
+
     /// Various other entities in the level.
     pub entities: Vec<Entity>,
 }
@@ -111,6 +116,7 @@ impl Level {
         let mut entities = vec![];
         let mut opt_tiles: Option<Vec<Option<Tile>>> = None;
         let mut opt_background_tiles: Option<Vec<Option<Tile>>> = None;
+        let mut opt_entity_tiles: Option<Vec<Option<Tile>>> = None;
         let first_layer = &layers
             .get(0)
             .expect("Level should have at least one layer!");
@@ -159,6 +165,8 @@ impl Level {
                 opt_tiles = Some(load_tile_layer(&layer));
             } else if layer.identifier == "BackgroundTiles" {
                 opt_background_tiles = Some(load_tile_layer(&layer));
+            } else if layer.identifier == "EntityTiles" {
+                opt_entity_tiles = Some(load_tile_layer(&layer));
             } else {
                 eprintln!("Unexpected layer found: {}", layer.identifier);
             }
@@ -174,6 +182,7 @@ impl Level {
             tiles: opt_tiles.ok_or(anyhow!("Couldn't find tiles"))?,
             background_tiles: opt_background_tiles
                 .ok_or(anyhow!("Couldn't find background tiles"))?,
+            entity_tiles: opt_entity_tiles.ok_or(anyhow!("Couldn't find entity titles"))?,
             entities,
         })
     }
