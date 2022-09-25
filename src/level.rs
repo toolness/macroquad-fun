@@ -250,7 +250,8 @@ impl Level {
 
     pub fn draw_entity_tiles(&self, bounding_rect: &Rect, point: &Vec2) {
         let tileset = game_sprites().tileset;
-        let final_point = (*point - bounding_rect.point()).floor();
+        // We're using floor() here to avoid weird visual artifacts between tiles.
+        let final_point = (*point).floor() - bounding_rect.point();
         self.draw_tiles(&self.entity_tiles, tileset, &bounding_rect, &final_point);
     }
 
