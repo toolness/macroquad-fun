@@ -7,7 +7,7 @@ use crate::{
     level::Level,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     running::RunComponent,
-    sprite_component::SpriteComponent,
+    sprite_component::{Renderer, SpriteComponent},
     sprite_renderer::SpriteRenderer,
     time::GameTime,
     world::world,
@@ -93,7 +93,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     }
 
     attachment.should_attach = player.is_in_air;
-    sprite.renderer = Some(sprite_renderer(
+    sprite.renderer = Renderer::Sprite(sprite_renderer(
         player.is_in_air,
         &physics.velocity,
         player.run_direction,
