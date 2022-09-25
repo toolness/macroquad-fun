@@ -230,22 +230,20 @@ impl Level {
             h: self.unscaled_grid_size as f32,
         };
         let scaled_tile_size = Vec2::new(self.grid_size, self.grid_size);
-        let extents = self.get_bounding_cell_rect_in_grid(&bounding_rect);
-        for y in extents.top() as i64..extents.bottom() as i64 {
-            for x in extents.left() as i64..extents.right() as i64 {
-                if let Some(tile) = tiles[self.get_index(x, y)] {
-                    draw_texture_ex(
-                        tileset,
-                        x as f32 * self.grid_size + offset.x,
-                        y as f32 * self.grid_size + offset.y,
-                        WHITE,
-                        DrawTextureParams {
-                            dest_size: Some(scaled_tile_size),
-                            source: Some(tileset_rect.offset(tile.tileset_px)),
-                            ..Default::default()
-                        },
-                    );
-                }
+        let extents: XYRangeIterator = self.get_bounding_cell_rect_in_grid(&bounding_rect).into();
+        for (x, y) in extents {
+            if let Some(tile) = self.get_tile_at(tiles, x, y) {
+                draw_texture_ex(
+                    tileset,
+                    x as f32 * self.grid_size + offset.x,
+                    y as f32 * self.grid_size + offset.y,
+                    WHITE,
+                    DrawTextureParams {
+                        dest_size: Some(scaled_tile_size),
+                        source: Some(tileset_rect.offset(tile.tileset_px)),
+                        ..Default::default()
+                    },
+                );
             }
         }
     }
@@ -260,8 +258,20 @@ impl Level {
         (y * self.width + x) as usize
     }
 
+    fn is_grid_coordinate_outside_of_bounds(&self, x: i64, y: i64) -> bool {
+        x < 0 || x >= self.width || y < 0 || y >= self.height
+    }
+
+    fn get_tile_at(&self, tiles: &Vec<Option<Tile>>, x: i64, y: i64) -> Option<Tile> {
+        if self.is_grid_coordinate_outside_of_bounds(x, y) {
+            None
+        } else {
+            tiles[self.get_index(x, y)]
+        }
+    }
+
     fn is_occupied_at(&self, x: i64, y: i64) -> bool {
-        if x < 0 || x >= self.width || y < 0 || y >= self.height {
+        if self.is_grid_coordinate_outside_of_bounds(x, y) {
             return false;
         }
         self.colliders[self.get_index(x, y)] != ColliderType::Empty

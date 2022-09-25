@@ -1,3 +1,5 @@
+use macroquad::prelude::Rect;
+
 pub struct XYRangeIterator {
     x_start: i64,
     x_end: i64,
@@ -15,6 +17,17 @@ impl XYRangeIterator {
             x: x1 - 1,
             y: y1,
         }
+    }
+}
+
+impl From<Rect> for XYRangeIterator {
+    fn from(extents: Rect) -> Self {
+        XYRangeIterator::new(
+            extents.left() as i64,
+            extents.top() as i64,
+            extents.right() as i64,
+            extents.bottom() as i64,
+        )
     }
 }
 
