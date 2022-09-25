@@ -5,6 +5,7 @@ use macroquad::{
 
 use crate::{
     drawing::draw_rect_lines,
+    level::Level,
     sprite_renderer::{SpriteDrawParams, SpriteRenderer},
     time::GameTime,
 };
@@ -14,6 +15,7 @@ pub enum Renderer {
     #[default]
     Rectangle,
     Sprite(&'static SpriteRenderer),
+    EntityTiles(Rect),
 }
 
 #[derive(Default)]
@@ -63,7 +65,7 @@ impl SpriteComponent {
         }
     }
 
-    pub fn draw_current_frame(&self) {
+    pub fn draw_current_frame(&self, level: &Level) {
         match self.renderer {
             Renderer::Sprite(sprite) => {
                 sprite.draw_ex(
@@ -88,6 +90,7 @@ impl SpriteComponent {
                     );
                 }
             }
+            Renderer::EntityTiles(rect) => level.draw_entity_tiles(&rect, &self.bbox().point()),
         }
     }
 

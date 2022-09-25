@@ -1,4 +1,4 @@
-use macroquad::prelude::{Rect, Vec2, BLUE};
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     config::config,
@@ -6,7 +6,7 @@ use crate::{
     entity::Entity,
     physics::PhysicsComponent,
     route::RouteComponent,
-    sprite_component::SpriteComponent,
+    sprite_component::{Renderer, SpriteComponent},
 };
 
 pub fn create_moving_platform(start_rect: Rect, end_point: Vec2) -> Entity {
@@ -16,7 +16,7 @@ pub fn create_moving_platform(start_rect: Rect, end_point: Vec2) -> Entity {
         sprite: SpriteComponent {
             pos: start_rect.point(),
             relative_bbox,
-            color: Some(BLUE),
+            renderer: Renderer::EntityTiles(start_rect),
             ..Default::default()
         },
         physics: PhysicsComponent {

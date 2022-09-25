@@ -151,12 +151,15 @@ impl LevelRuntime {
         // Draw entities.
         for (&id, entity) in self.entities.iter() {
             if id != PLAYER_ENTITY_ID {
-                entity.sprite.draw_current_frame();
+                entity.sprite.draw_current_frame(&self.level);
             }
         }
 
         // Always draw the player in front of everything else.
-        self.entities.player().sprite.draw_current_frame();
+        self.entities
+            .player()
+            .sprite
+            .draw_current_frame(&self.level);
 
         draw_level_text(
             &self.entities.player().sprite,
