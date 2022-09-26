@@ -7,7 +7,7 @@ use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::{
     draw_dynamic_collider_debug_rects, get_dynamic_colliders, update_dynamic_colliders,
 };
-use crate::entity::{Entity, EntityMap, EntityMapHelpers, ENTITY_CAPACITY, PLAYER_ENTITY_ID};
+use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -27,6 +27,7 @@ use macroquad::prelude::*;
 use crate::level::Level;
 
 const DEBUG_TEXT_CAPACITY: usize = 3000;
+const ENTITY_CAPACITY: usize = 200;
 
 #[derive(PartialEq)]
 pub enum FrameResult {
@@ -53,14 +54,14 @@ impl LevelRuntime {
     pub fn new(player: Entity, level: &'static Level) -> Self {
         let mut instance = LevelRuntime {
             level,
-            entities: EntityMap::with_player(player),
+            entities: EntityMap::new_ex(player, ENTITY_CAPACITY),
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
             time: GameTime::new(),
-            attachment_system: AttachmentSystem::new(),
+            attachment_system: AttachmentSystem::with_capacity(ENTITY_CAPACITY),
             dynamic_colliders: Vec::with_capacity(ENTITY_CAPACITY),
-            z_indexed_drawing_system: ZIndexedDrawingSystem::new(),
+            z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
             debug_text_lines: None,
             last_fps_update_time: 0.,
             fps: 0,

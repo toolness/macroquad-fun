@@ -31,13 +31,11 @@ pub struct Entity {
 pub const PLAYER_ENTITY_ID: u64 = 0;
 
 pub trait EntityMapHelpers {
-    fn with_player(player: Entity) -> Self;
+    fn new_ex(player: Entity, capacity: usize) -> Self;
     fn player(&self) -> &Entity;
     fn player_mut(&mut self) -> &mut Entity;
     fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F);
 }
-
-pub const ENTITY_CAPACITY: usize = 200;
 
 pub type EntityMap = HashMap<u64, Entity>;
 
@@ -50,8 +48,8 @@ impl EntityMapHelpers for EntityMap {
         self.get_mut(&PLAYER_ENTITY_ID).unwrap()
     }
 
-    fn with_player(player: Entity) -> Self {
-        let mut map = EntityMap::with_capacity(ENTITY_CAPACITY);
+    fn new_ex(player: Entity, capacity: usize) -> Self {
+        let mut map = EntityMap::with_capacity(capacity);
         map.insert(PLAYER_ENTITY_ID, player);
         map
     }

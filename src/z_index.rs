@@ -1,7 +1,4 @@
-use crate::{
-    entity::{EntityMap, ENTITY_CAPACITY},
-    level::Level,
-};
+use crate::{entity::EntityMap, level::Level};
 
 #[derive(Default)]
 pub struct ZIndexComponent {
@@ -19,9 +16,9 @@ pub struct ZIndexedDrawingSystem {
 }
 
 impl ZIndexedDrawingSystem {
-    pub fn new() -> Self {
+    pub fn with_capacity(capacity: usize) -> Self {
         ZIndexedDrawingSystem {
-            entity_z_indices: Vec::with_capacity(ENTITY_CAPACITY),
+            entity_z_indices: Vec::with_capacity(capacity),
         }
     }
 

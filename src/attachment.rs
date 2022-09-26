@@ -2,7 +2,7 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     config::config,
-    entity::{Entity, EntityMap, EntityMapHelpers, ENTITY_CAPACITY},
+    entity::{Entity, EntityMap, EntityMapHelpers},
     level::Level,
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
@@ -17,9 +17,9 @@ pub struct AttachmentSystem {
 }
 
 impl AttachmentSystem {
-    pub fn new() -> Self {
+    pub fn with_capacity(capacity: usize) -> Self {
         AttachmentSystem {
-            entities_to_process: Vec::with_capacity(ENTITY_CAPACITY),
+            entities_to_process: Vec::with_capacity(capacity),
         }
     }
 
