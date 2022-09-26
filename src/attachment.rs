@@ -115,11 +115,9 @@ impl AttachmentComponent {
     }
 
     fn attached_entity<'a>(&self, entities: &'a EntityMap) -> Option<&'a Entity> {
-        if let Some(id) = self.attached_to_entity_id {
-            entities.get(&id)
-        } else {
-            None
-        }
+        self.attached_to_entity_id
+            .map(|id| entities.get(&id))
+            .flatten()
     }
 
     pub fn reset(&mut self) {
