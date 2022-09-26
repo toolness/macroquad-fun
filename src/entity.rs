@@ -10,12 +10,14 @@ use crate::{
     route::RouteComponent,
     running::RunComponent,
     sprite_component::SpriteComponent,
+    z_index::ZIndexComponent,
 };
 
 #[derive(Default)]
 pub struct Entity {
     pub sprite: SpriteComponent,
     pub physics: PhysicsComponent,
+    pub z_index: ZIndexComponent,
     pub mushroom: Option<MushroomComponent>,
     pub flying_eye: Option<FlyingEyeComponent>,
     pub attachable: Option<AttachableComponent>,

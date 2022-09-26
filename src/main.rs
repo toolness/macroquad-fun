@@ -37,6 +37,7 @@ mod text;
 mod time;
 mod world;
 mod xy_range_iterator;
+mod z_index;
 
 #[macroquad::main("Fun")]
 async fn main() {

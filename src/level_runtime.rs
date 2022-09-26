@@ -19,6 +19,7 @@ use crate::player::{
 use crate::route::{draw_route_debug_targets, route_system};
 use crate::text::draw_level_text;
 use crate::time::GameTime;
+use crate::z_index::ZIndexedDrawingSystem;
 use crate::{camera::Camera, level::EntityKind};
 use anyhow::Result;
 use macroquad::prelude::*;
@@ -43,6 +44,7 @@ pub struct LevelRuntime {
     attachment_system: AttachmentSystem,
     dynamic_colliders: Vec<Collider>,
     debug_text_lines: Option<String>,
+    z_indexed_drawing_system: ZIndexedDrawingSystem,
     last_fps_update_time: f64,
     fps: i32,
 }
@@ -58,6 +60,7 @@ impl LevelRuntime {
             time: GameTime::new(),
             attachment_system: AttachmentSystem::new(),
             dynamic_colliders: Vec::with_capacity(ENTITY_CAPACITY),
+            z_indexed_drawing_system: ZIndexedDrawingSystem::new(),
             debug_text_lines: None,
             last_fps_update_time: 0.,
             fps: 0,
@@ -145,21 +148,10 @@ impl LevelRuntime {
         mushroom_movement_system(&mut self.entities, &self.time);
         player_update_system(&mut self.entities, &self.time);
 
-        // Draw environment.
+        // Draw stuff.
         self.level.draw(&self.camera.rect());
-
-        // Draw entities.
-        for (&id, entity) in self.entities.iter() {
-            if id != PLAYER_ENTITY_ID {
-                entity.sprite.draw_current_frame(&self.level);
-            }
-        }
-
-        // Always draw the player in front of everything else.
-        self.entities
-            .player()
-            .sprite
-            .draw_current_frame(&self.level);
+        self.z_indexed_drawing_system
+            .draw_entities(&self.entities, &self.level);
 
         draw_level_text(
             &self.entities.player().sprite,

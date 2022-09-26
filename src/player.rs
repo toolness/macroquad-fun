@@ -11,6 +11,7 @@ use crate::{
     sprite_renderer::SpriteRenderer,
     time::GameTime,
     world::world,
+    z_index::ZIndexComponent,
 };
 
 #[derive(Default)]
@@ -27,6 +28,7 @@ pub fn create_player(start_rect: Rect) -> Entity {
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
+        z_index: ZIndexComponent::new(500),
         player: Some(PlayerComponent {
             ..Default::default()
         }),
