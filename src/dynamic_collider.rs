@@ -56,11 +56,7 @@ pub fn update_dynamic_colliders(entities: &mut EntityMap) {
 pub fn get_dynamic_colliders<'a>(entities: &'a EntityMap) -> impl Iterator<Item = Collider> + 'a {
     entities.values().filter_map(|entity| {
         if let Some(dynamic_collider) = &entity.dynamic_collider {
-            if let Some(computed_collider) = dynamic_collider.computed_collider {
-                Some(computed_collider)
-            } else {
-                None
-            }
+            dynamic_collider.computed_collider
         } else {
             None
         }
