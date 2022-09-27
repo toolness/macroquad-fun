@@ -12,6 +12,6 @@
     "mushroom_speed": 25.0,
     "fall_off_level_threshold": 300.0,
     "moving_platform_speed": 10.0,
-    "coyote_time_ms": 30.0,
+    "coyote_time_ms": 60.0,
     "debug_text_size": 32.0
 }
