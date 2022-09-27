@@ -28,7 +28,10 @@ pub struct PhysicsComponent {
     /// Reset to 0 at the end of the iteration.
     pub x_impulse: f32,
 
+    // This ideally shouldn't be an option, but I'm too lazy to fiddle with
+    // the Default trait to make this default to 1.0.
     pub gravity_coefficient: Option<f32>,
+
     pub defies_gravity: bool,
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
