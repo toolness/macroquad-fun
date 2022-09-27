@@ -133,6 +133,9 @@ impl AttachmentComponent {
         passenger_physics: &mut PhysicsComponent,
     ) {
         if passenger_physics.latest_frame.was_displaced {
+            // It's possible that the carrier has also just hit something and
+            // is about to change course, so let's give the passenger a
+            // bit more time before detaching them.
             self.num_frames_displaced += 1;
             if self.num_frames_displaced > 2 {
                 self.detach(passenger_physics);
