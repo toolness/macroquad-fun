@@ -1,4 +1,4 @@
-use macroquad::prelude::Vec2;
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     collision::{
@@ -6,7 +6,7 @@ use crate::{
         process_collision, Collider, Side,
     },
     config::config,
-    entity::EntityMap,
+    entity::{Entity, EntityMap},
     level::Level,
     time::GameTime,
 };
@@ -43,6 +43,75 @@ pub struct PhysicsFrameResults {
     pub was_displaced: bool,
 }
 
+fn physics_collision_resolution(
+    entity: &mut Entity,
+    prev_bbox: &Rect,
+    level: &Level,
+    dynamic_colliders: &Vec<Collider>,
+) -> PhysicsFrameResults {
+    let physics = &mut entity.physics;
+    let sprite = &mut entity.sprite;
+    let mut results: PhysicsFrameResults = Default::default();
+
+    collision_resolution_loop(|| {
+        let bbox = sprite.bbox();
+
+        let colliders = level
+            .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
+            .chain(dynamic_colliders.iter().copied());
+
+        for collider in colliders {
+            if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+                match collision.side {
+                    Side::Top => {
+                        results.is_on_any_surface = true;
+                        if !physics.defies_gravity {
+                            physics.velocity.y = collider.velocity.y;
+                        }
+                        if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
+                            physics.velocity.x = collider.velocity.x;
+                        }
+                    }
+                    Side::Bottom => {
+                        if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
+                            physics.velocity.y = 0.;
+                        }
+                    }
+                    Side::Left | Side::Right => {
+                        if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
+                            physics.velocity.x = 0.;
+                        }
+                    }
+                }
+
+                if collision.displacement != Vec2::ZERO {
+                    sprite.pos += collision.displacement;
+                    results.was_displaced = true;
+                    match physics.collision_behavior {
+                        PhysicsCollisionBehavior::ReverseDirectionX => {
+                            maybe_reverse_direction_x(
+                                &mut physics.velocity,
+                                &collision.displacement,
+                            );
+                        }
+                        PhysicsCollisionBehavior::ReverseDirectionXY => {
+                            maybe_reverse_direction_xy(
+                                &mut physics.velocity,
+                                &collision.displacement,
+                            );
+                        }
+                        _ => {}
+                    }
+                    return true;
+                }
+            }
+        }
+        false
+    });
+
+    results
+}
+
 pub fn physics_system(
     entities: &mut EntityMap,
     level: &Level,
@@ -53,79 +122,23 @@ pub fn physics_system(
     let time_since_last_frame = time.time_since_last_frame as f32;
     let gravity_this_frame = gravity * time_since_last_frame;
 
-    for (_id, entity) in entities.iter_mut() {
-        let physics = &mut entity.physics;
-        let sprite = &mut entity.sprite;
-
-        if !physics.defies_gravity {
-            physics.velocity.y += gravity_this_frame;
+    for entity in entities.values_mut() {
+        if !entity.physics.defies_gravity {
+            entity.physics.velocity.y += gravity_this_frame;
         }
 
-        let prev_bbox = sprite.bbox();
-        let mut results: PhysicsFrameResults = Default::default();
+        let prev_bbox = entity.sprite.bbox();
 
-        sprite.pos += physics.velocity * time_since_last_frame;
-        sprite.pos.x += physics.x_impulse * time_since_last_frame;
-        physics.x_impulse = 0.;
+        entity.sprite.pos += entity.physics.velocity * time_since_last_frame;
+        entity.sprite.pos.x += entity.physics.x_impulse * time_since_last_frame;
+        entity.physics.x_impulse = 0.;
 
-        if physics.collision_behavior != PhysicsCollisionBehavior::None {
-            collision_resolution_loop(|| {
-                let bbox = sprite.bbox();
+        let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
+            physics_collision_resolution(entity, &prev_bbox, &level, dynamic_colliders)
+        } else {
+            Default::default()
+        };
 
-                let colliders = level
-                    .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
-                    .chain(dynamic_colliders.iter().copied());
-
-                for collider in colliders {
-                    if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
-                        match collision.side {
-                            Side::Top => {
-                                results.is_on_any_surface = true;
-                                if !physics.defies_gravity {
-                                    physics.velocity.y = collider.velocity.y;
-                                }
-                                if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                    physics.velocity.x = collider.velocity.x;
-                                }
-                            }
-                            Side::Bottom => {
-                                if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                    physics.velocity.y = 0.;
-                                }
-                            }
-                            Side::Left | Side::Right => {
-                                if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
-                                    physics.velocity.x = 0.;
-                                }
-                            }
-                        }
-
-                        if collision.displacement != Vec2::ZERO {
-                            sprite.pos += collision.displacement;
-                            results.was_displaced = true;
-                            match physics.collision_behavior {
-                                PhysicsCollisionBehavior::ReverseDirectionX => {
-                                    maybe_reverse_direction_x(
-                                        &mut physics.velocity,
-                                        &collision.displacement,
-                                    );
-                                }
-                                PhysicsCollisionBehavior::ReverseDirectionXY => {
-                                    maybe_reverse_direction_xy(
-                                        &mut physics.velocity,
-                                        &collision.displacement,
-                                    );
-                                }
-                                _ => {}
-                            }
-                            return true;
-                        }
-                    }
-                }
-                false
-            });
-        }
-
-        physics.latest_frame = results;
+        entity.physics.latest_frame = results;
     }
 }
