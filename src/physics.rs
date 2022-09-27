@@ -28,6 +28,7 @@ pub struct PhysicsComponent {
     /// Reset to 0 at the end of the iteration.
     pub x_impulse: f32,
 
+    pub gravity_coefficient: Option<f32>,
     pub defies_gravity: bool,
     pub defies_level_bounds: bool,
     pub collision_behavior: PhysicsCollisionBehavior,
@@ -124,7 +125,8 @@ pub fn physics_system(
 
     for entity in entities.values_mut() {
         if !entity.physics.defies_gravity {
-            entity.physics.velocity.y += gravity_this_frame;
+            entity.physics.velocity.y +=
+                gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
         }
 
         let prev_bbox = entity.sprite.bbox();

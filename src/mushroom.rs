@@ -41,6 +41,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         }),
         physics: PhysicsComponent {
             collision_behavior: PhysicsCollisionBehavior::ReverseDirectionX,
+            gravity_coefficient: Some(0.5),
             ..Default::default()
         },
         ..Default::default()
