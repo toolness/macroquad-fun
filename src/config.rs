@@ -12,6 +12,7 @@ pub struct Config {
     pub gravity: f32,
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
+    pub attach_velocity_coefficient: f32,
     pub flying_eye_speed: f32,
     pub moving_platform_speed: f32,
     pub mushroom_speed: f32,

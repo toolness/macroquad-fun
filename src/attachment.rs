@@ -6,6 +6,7 @@ use crate::{
     level::Level,
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
+    time::GameTime,
 };
 
 const CARRY_Y_OFFSET: f32 = 10.0;
@@ -23,7 +24,7 @@ impl AttachmentSystem {
         }
     }
 
-    pub fn run(&mut self, entities: &mut EntityMap, level: &Level) {
+    pub fn run(&mut self, entities: &mut EntityMap, level: &Level, time: &GameTime) {
         self.entities_to_process.clear();
         self.entities_to_process
             .extend(entities.iter().filter_map(|(&id, entity)| {
@@ -45,6 +46,7 @@ impl AttachmentSystem {
                         &carrier_entity.physics,
                         sprite,
                         &mut entity.physics,
+                        time,
                     );
                 } else if attachment.should_attach {
                     attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
@@ -131,6 +133,7 @@ impl AttachmentComponent {
         carrier_physics: &PhysicsComponent,
         passenger_sprite: &mut SpriteComponent,
         passenger_physics: &mut PhysicsComponent,
+        time: &GameTime,
     ) {
         if passenger_physics.latest_frame.was_displaced {
             // It's possible that the carrier has also just hit something and
@@ -146,8 +149,11 @@ impl AttachmentComponent {
         }
 
         let delta = get_passenger_displacement(&carrier_sprite.bbox(), &passenger_sprite.bbox());
+        let max_delta = carrier_physics.velocity.length()
+            * time.time_since_last_frame as f32
+            * config().attach_velocity_coefficient;
 
-        passenger_sprite.pos += delta.clamp_length_max(config().sprite_scale);
+        passenger_sprite.pos += delta.clamp_length_max(max_delta);
         passenger_sprite.is_facing_left = carrier_sprite.is_facing_left;
         passenger_physics.velocity = carrier_physics.velocity;
         passenger_physics.defies_gravity = true;

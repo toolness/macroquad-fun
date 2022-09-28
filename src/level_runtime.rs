@@ -136,7 +136,8 @@ impl LevelRuntime {
             .update(&self.entities.player().sprite, &self.level);
 
         process_player_input(&mut self.entities, &self.time);
-        self.attachment_system.run(&mut self.entities, &self.level);
+        self.attachment_system
+            .run(&mut self.entities, &self.level, &self.time);
         route_system(&mut self.entities);
         self.recompute_dynamic_colliders();
         physics_system(
