@@ -20,6 +20,7 @@ mod drawing;
 mod dynamic_collider;
 mod entity;
 mod flying_eye;
+mod font;
 mod game_sprites;
 mod ldtk;
 mod level;

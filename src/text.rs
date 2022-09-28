@@ -1,16 +1,17 @@
-use macroquad::{
-    prelude::{Rect, WHITE},
-    text::draw_text,
-};
+use macroquad::prelude::{Rect, WHITE};
 
-use crate::{level::Level, sprite_component::SpriteComponent};
+use crate::{
+    config::config, game_sprites::game_sprites, level::Level, sprite_component::SpriteComponent,
+};
 
 pub fn draw_level_text(sprite: &SpriteComponent, level: &Level, camera_rect: &Rect) {
     if let Some(text) = level.get_text(&sprite.bbox()) {
+        let font = &game_sprites().font;
         let mut y = camera_rect.y + 128.;
+        let line_height = (font.char_height as f32 + 2.) * config().sprite_scale;
         for line in text {
-            draw_text(line, camera_rect.x + 32., y, 32.0, WHITE);
-            y += 36.;
+            font.draw_text(line, camera_rect.x + 32., y, WHITE);
+            y += line_height;
         }
     }
 }

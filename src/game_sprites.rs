@@ -6,7 +6,7 @@ use macroquad::{
     texture::{load_texture, FilterMode, Texture2D},
 };
 
-use crate::{aseprite::load_aseprite_slices, sprite_renderer::SpriteRenderer};
+use crate::{aseprite::load_aseprite_slices, font::BitmapFont, sprite_renderer::SpriteRenderer};
 
 pub struct HuntressSprites {
     pub idle: SpriteRenderer,
@@ -33,6 +33,7 @@ pub struct GameSprites {
     pub flying_eye: FlyingEyeSprites,
     pub mushroom: MushroomSprites,
     pub tileset: Texture2D,
+    pub font: BitmapFont,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -76,6 +77,12 @@ pub async fn load_game_sprites() -> Result<()> {
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
+        font: BitmapFont {
+            texture: load_pixel_perfect_texture("media/pman_font01.png").await?,
+            char_width: 6,
+            char_height: 8,
+            chars_per_line: 16,
+        },
     };
 
     unsafe {
