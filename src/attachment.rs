@@ -146,7 +146,8 @@ impl AttachmentComponent {
         }
 
         let delta = get_passenger_displacement(&carrier_sprite.bbox(), &passenger_sprite.bbox());
-        passenger_sprite.pos += delta;
+
+        passenger_sprite.pos += delta.clamp_length_max(config().sprite_scale);
         passenger_sprite.is_facing_left = carrier_sprite.is_facing_left;
         passenger_physics.velocity = carrier_physics.velocity;
         passenger_physics.defies_gravity = true;
