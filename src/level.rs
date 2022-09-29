@@ -95,7 +95,7 @@ pub struct Entity {
 
 #[derive(PartialEq)]
 pub enum EntityKind {
-    PlayerStart,
+    PlayerStart(String),
     Text(Vec<String>),
     FlyingEye(Vec2),
     Mushroom,
@@ -136,7 +136,9 @@ impl Level {
                         entity.height as f32 * scale,
                     );
                     let kind = match entity.identifier.as_str() {
-                        "PlayerStart" => EntityKind::PlayerStart,
+                        "PlayerStart" => {
+                            EntityKind::PlayerStart(entity.get_string_field_instance("name")?)
+                        }
                         "Text" => {
                             let lines: Vec<String> = entity
                                 .get_string_field_instance("text")?

@@ -3,6 +3,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use std::env::args;
+
 use config::load_config;
 use game_sprites::load_game_sprites;
 use level_runtime::{FrameResult, LevelRuntime};
@@ -40,8 +42,16 @@ mod world;
 mod xy_range_iterator;
 mod z_index;
 
+const DEFAULT_START_POSITION: &str = "default";
+
 #[macroquad::main("Fun")]
 async fn main() {
+    let args: Vec<String> = args().collect();
+    let start_position = args
+        .get(1)
+        .map(|s| s.as_str())
+        .unwrap_or(&DEFAULT_START_POSITION);
+
     load_config("media/config.json")
         .await
         .expect("load_config() must succeed");
@@ -53,17 +63,16 @@ async fn main() {
         .expect("load_world() must succeed");
 
     let config = config::config();
+    let mut level_runtime = new_game(start_position);
 
     request_new_screen_size(config.screen_width, config.screen_height);
     next_frame().await;
-
-    let mut level_runtime = new_game();
 
     loop {
         match level_runtime.advance_one_frame() {
             FrameResult::Ok => {}
             FrameResult::PlayerDied => {
-                level_runtime = new_game();
+                level_runtime = new_game(start_position);
             }
         }
 
@@ -75,9 +84,10 @@ async fn main() {
     }
 }
 
-fn new_game() -> LevelRuntime {
-    let (level_start, player_start) = world::world()
-        .player_start()
-        .expect("World must define a player start position");
+fn new_game(start_position: &str) -> LevelRuntime {
+    let (level_start, player_start) = world::world().player_start(start_position).expect(&format!(
+        "World does not define a PlayerStart entity called '{}'!",
+        start_position
+    ));
     LevelRuntime::new(create_player(player_start), level_start)
 }

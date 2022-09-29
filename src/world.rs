@@ -35,11 +35,14 @@ impl World {
         Ok(World { levels })
     }
 
-    pub fn player_start(&self) -> Option<(&Level, Rect)> {
+    pub fn player_start(&self, name: &str) -> Option<(&Level, Rect)> {
         for level in self.levels.values() {
             for entity in level.entities.iter() {
-                if entity.kind == EntityKind::PlayerStart {
-                    return Some((&level, entity.rect));
+                match &entity.kind {
+                    EntityKind::PlayerStart(entity_name) if entity_name == name => {
+                        return Some((&level, entity.rect));
+                    }
+                    _ => {}
                 }
             }
         }
