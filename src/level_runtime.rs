@@ -163,7 +163,7 @@ impl LevelRuntime {
 
         // Process miscellaneous system input.
 
-        if is_key_pressed(KeyCode::GraveAccent) {
+        if is_key_pressed(KeyCode::G) {
             self.debug_mode = !self.debug_mode;
         }
 
