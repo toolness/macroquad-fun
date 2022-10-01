@@ -11,7 +11,7 @@ use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
-use crate::physics::physics_system;
+use crate::physics::{physics_system_resolve_collisions, physics_system_update_positions};
 use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
     teleport_entity,
@@ -140,12 +140,8 @@ impl LevelRuntime {
             .run(&mut self.entities, &self.level, &self.time);
         route_system(&mut self.entities);
         self.recompute_dynamic_colliders();
-        physics_system(
-            &mut self.entities,
-            &self.level,
-            &self.time,
-            &self.dynamic_colliders,
-        );
+        physics_system_update_positions(&mut self.entities, &self.time);
+        physics_system_resolve_collisions(&mut self.entities, &self.level, &self.dynamic_colliders);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
         player_update_system(&mut self.entities, &self.time);
