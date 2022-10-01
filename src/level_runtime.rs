@@ -1,12 +1,9 @@
 use std::fmt::Write;
 
 use crate::attachment::AttachmentSystem;
-use crate::collision::Collider;
 use crate::config::config;
 use crate::drawing::draw_rect_lines;
-use crate::dynamic_collider::{
-    draw_dynamic_collider_debug_rects, get_dynamic_colliders, update_dynamic_colliders,
-};
+use crate::dynamic_collider::{draw_dynamic_collider_debug_rects, DynamicColliderSystem};
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
@@ -43,7 +40,7 @@ pub struct LevelRuntime {
     next_id: u64,
     time: GameTime,
     attachment_system: AttachmentSystem,
-    dynamic_colliders: Vec<Collider>,
+    dynamic_collider_system: DynamicColliderSystem,
     debug_text_lines: Option<String>,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
     last_fps_update_time: f64,
@@ -60,7 +57,7 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
             attachment_system: AttachmentSystem::with_capacity(ENTITY_CAPACITY),
-            dynamic_colliders: Vec::with_capacity(ENTITY_CAPACITY),
+            dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
             debug_text_lines: None,
             last_fps_update_time: 0.,
@@ -116,13 +113,6 @@ impl LevelRuntime {
         }
     }
 
-    fn recompute_dynamic_colliders(&mut self) {
-        update_dynamic_colliders(&mut self.entities);
-        self.dynamic_colliders.clear();
-        self.dynamic_colliders
-            .extend(get_dynamic_colliders(&self.entities));
-    }
-
     pub fn advance_one_frame(&mut self) -> FrameResult {
         self.time.update();
 
@@ -140,8 +130,12 @@ impl LevelRuntime {
             .run(&mut self.entities, &self.level, &self.time);
         route_system(&mut self.entities);
         physics_system_update_positions(&mut self.entities, &self.time);
-        self.recompute_dynamic_colliders();
-        physics_system_resolve_collisions(&mut self.entities, &self.level, &self.dynamic_colliders);
+        self.dynamic_collider_system.run(&mut self.entities);
+        physics_system_resolve_collisions(
+            &mut self.entities,
+            &self.level,
+            &self.dynamic_collider_system.colliders(),
+        );
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
         player_update_system(&mut self.entities, &self.time);

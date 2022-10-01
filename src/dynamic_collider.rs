@@ -26,7 +26,35 @@ impl DynamicColliderComponent {
     }
 }
 
-pub fn update_dynamic_colliders(entities: &mut EntityMap) {
+pub struct DynamicColliderSystem {
+    /// Cached value of all the dynamic colliders that currently exist.
+    /// This is done partly, for efficiency, but also because it's hard
+    /// for our physics system to do nested loops over all entities,
+    /// given Rust's borrow checker.
+    colliders: Vec<Collider>,
+}
+
+impl DynamicColliderSystem {
+    pub fn with_capacity(capacity: usize) -> Self {
+        DynamicColliderSystem {
+            colliders: Vec::with_capacity(capacity),
+        }
+    }
+
+    /// Update the DynamicCollider components based on their sprites' current
+    /// positions.
+    pub fn run(&mut self, entities: &mut EntityMap) {
+        update_dynamic_colliders(entities);
+        self.colliders.clear();
+        self.colliders.extend(get_dynamic_colliders(entities));
+    }
+
+    pub fn colliders(&self) -> &Vec<Collider> {
+        return &self.colliders;
+    }
+}
+
+fn update_dynamic_colliders(entities: &mut EntityMap) {
     for entity in entities.values_mut() {
         if let Some(dynamic_collider) = entity.dynamic_collider.as_mut() {
             let rect = entity
@@ -53,7 +81,7 @@ pub fn update_dynamic_colliders(entities: &mut EntityMap) {
     }
 }
 
-pub fn get_dynamic_colliders<'a>(entities: &'a EntityMap) -> impl Iterator<Item = Collider> + 'a {
+fn get_dynamic_colliders<'a>(entities: &'a EntityMap) -> impl Iterator<Item = Collider> + 'a {
     entities.values().filter_map(|entity| {
         entity
             .dynamic_collider
