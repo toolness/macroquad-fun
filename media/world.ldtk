@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 22,
+	"nextUid": 23,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -462,6 +462,34 @@
 					"tilesetUid": null
 				}
 			]
+		},
+		{
+			"identifier": "Crate",
+			"uid": 22,
+			"tags": [],
+			"width": 16,
+			"height": 16,
+			"resizableX": false,
+			"resizableY": false,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#B78030",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
 		}
 	], "tilesets": [
 		{
@@ -602,7 +630,7 @@
 						},
 						{
 							"__identifier": "Mushroom",
-							"__grid": [5,8],
+							"__grid": [6,8],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -611,7 +639,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 13,
-							"px": [80,128],
+							"px": [96,128],
 							"fieldInstances": []
 						},
 						{
@@ -630,6 +658,20 @@
 								"id": "V_String",
 								"params": ["default"]
 							}] }]
+						},
+						{
+							"__identifier": "Crate",
+							"__grid": [4,8],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#B78030",
+							"iid": "dc4cbaa0-2a00-11ed-82d1-ddf9b127dcca",
+							"width": 16,
+							"height": 16,
+							"defUid": 22,
+							"px": [64,128],
+							"fieldInstances": []
 						}
 					]
 				},

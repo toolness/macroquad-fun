@@ -2,6 +2,7 @@ use std::fmt::Write;
 
 use crate::attachment::AttachmentSystem;
 use crate::config::config;
+use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::{draw_dynamic_collider_debug_rects, DynamicColliderSystem};
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
@@ -90,6 +91,9 @@ impl LevelRuntime {
                 }
                 EntityKind::MovingPlatform(endpoint) => {
                     self.add_entity(create_moving_platform(entity.rect, endpoint));
+                }
+                EntityKind::Crate => {
+                    self.add_entity(create_crate(entity.rect));
                 }
                 _ => {}
             }

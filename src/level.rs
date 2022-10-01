@@ -100,6 +100,7 @@ pub enum EntityKind {
     FlyingEye(Vec2),
     Mushroom,
     MovingPlatform(Vec2),
+    Crate,
 }
 
 impl Level {
@@ -157,6 +158,7 @@ impl Level {
                             let end_point = entity.get_point_field_instance("endpoint")?;
                             EntityKind::MovingPlatform(end_point * grid_size)
                         }
+                        "Crate" => EntityKind::Crate,
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
                             continue;

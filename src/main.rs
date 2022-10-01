@@ -18,6 +18,7 @@ mod attachment;
 mod camera;
 mod collision;
 mod config;
+mod crate_entity;
 mod drawing;
 mod dynamic_collider;
 mod entity;
