@@ -5,7 +5,7 @@ use crate::{
     collision::Collider,
     config::config,
     game_sprites::game_sprites,
-    ldtk::{self, LayerInstance},
+    ldtk::{self, LayerInstance, TileInstance},
     xy_range_iterator::XYRangeIterator,
 };
 
@@ -127,6 +127,7 @@ impl Level {
         for layer in layers.iter() {
             if layer.identifier == "IntGrid" {
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
+                opt_tiles = Some(load_tile_layer(&layer, &layer.auto_layer_tiles));
             } else if layer.identifier == "Entities" {
                 for entity in layer.entity_instances.iter() {
                     let rect = Rect::new(
@@ -163,12 +164,10 @@ impl Level {
                     };
                     entities.push(Entity { kind, rect });
                 }
-            } else if layer.identifier == "Tiles" {
-                opt_tiles = Some(load_tile_layer(&layer));
             } else if layer.identifier == "BackgroundTiles" {
-                opt_background_tiles = Some(load_tile_layer(&layer));
+                opt_background_tiles = Some(load_tile_layer(&layer, &layer.grid_tiles));
             } else if layer.identifier == "EntityTiles" {
-                opt_entity_tiles = Some(load_tile_layer(&layer));
+                opt_entity_tiles = Some(load_tile_layer(&layer, &layer.grid_tiles));
             } else {
                 eprintln!("Unexpected layer found: {}", layer.identifier);
             }
@@ -358,9 +357,9 @@ impl Level {
     }
 }
 
-fn load_tile_layer(layer: &LayerInstance) -> Vec<Option<Tile>> {
+fn load_tile_layer(layer: &LayerInstance, layer_tiles: &Vec<TileInstance>) -> Vec<Option<Tile>> {
     let mut tiles: Vec<Option<Tile>> = vec![None; layer.c_wid as usize * layer.c_hei as usize];
-    for grid_tile in layer.grid_tiles.iter() {
+    for grid_tile in layer_tiles.iter() {
         let grid_x = grid_tile.layer_px[0] / layer.grid_size;
         let grid_y = grid_tile.layer_px[1] / layer.grid_size;
         let tileset_px = Vec2::new(
