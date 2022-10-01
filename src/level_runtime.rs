@@ -139,8 +139,8 @@ impl LevelRuntime {
         self.attachment_system
             .run(&mut self.entities, &self.level, &self.time);
         route_system(&mut self.entities);
-        self.recompute_dynamic_colliders();
         physics_system_update_positions(&mut self.entities, &self.time);
+        self.recompute_dynamic_colliders();
         physics_system_resolve_collisions(&mut self.entities, &self.level, &self.dynamic_colliders);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
