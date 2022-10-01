@@ -1,4 +1,7 @@
-use macroquad::prelude::{clamp, set_camera, Camera2D, Rect, Vec2};
+use macroquad::{
+    prelude::{clamp, set_camera, Camera2D, Rect, Vec2},
+    window::{screen_height, screen_width},
+};
 
 use crate::{
     config::config, level::Level, math_util::floor_rect, sprite_component::SpriteComponent,
@@ -47,12 +50,13 @@ impl Camera {
 }
 
 fn calculate_camera_rect(center: &Vec2, level_rect: &Rect) -> Rect {
-    let config = config();
+    let screen_width = screen_width();
+    let screen_height = screen_height();
     let mut camera_rect = Rect::new(
-        center.x - config.screen_width / 2.,
-        center.y - config.screen_height / 2.,
-        config.screen_width,
-        config.screen_height,
+        center.x - screen_width / 2.,
+        center.y - screen_height / 2.,
+        screen_width,
+        screen_height,
     );
     if camera_rect.left() < level_rect.left() || camera_rect.w > level_rect.w {
         camera_rect.x = level_rect.left();
