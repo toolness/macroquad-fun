@@ -91,6 +91,9 @@ pub struct Entity {
 
     /// The entity's position in pixel coordinates.
     pub rect: Rect,
+
+    /// The entity's Instance Identifier (from LDtk).
+    pub iid: String,
 }
 
 #[derive(PartialEq)]
@@ -137,6 +140,7 @@ impl Level {
                         entity.width as f32 * scale,
                         entity.height as f32 * scale,
                     );
+                    let iid = entity.iid.clone();
                     let kind = match entity.identifier.as_str() {
                         "PlayerStart" => {
                             EntityKind::PlayerStart(entity.get_string_field_instance("name")?)
@@ -164,7 +168,7 @@ impl Level {
                             continue;
                         }
                     };
-                    entities.push(Entity { kind, rect });
+                    entities.push(Entity { kind, rect, iid });
                 }
             } else if layer.identifier == "BackgroundTiles" {
                 opt_background_tiles = Some(load_tile_layer(&layer, &layer.grid_tiles));

@@ -26,6 +26,7 @@ pub struct Entity {
     pub attachment: Option<AttachmentComponent>,
     pub dynamic_collider: Option<DynamicColliderComponent>,
     pub route: Option<RouteComponent>,
+    pub iid: Option<&'static str>,
 }
 
 pub const PLAYER_ENTITY_ID: u64 = 0;

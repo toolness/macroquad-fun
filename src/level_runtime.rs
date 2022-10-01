@@ -82,20 +82,18 @@ impl LevelRuntime {
 
     fn spawn_entities(&mut self) {
         for entity in self.level.entities.iter() {
-            match entity.kind {
-                EntityKind::FlyingEye(velocity) => {
-                    self.add_entity(create_flying_eye(entity.rect, velocity));
-                }
-                EntityKind::Mushroom => {
-                    self.add_entity(create_mushrom(entity.rect));
-                }
+            let opt_instance = match entity.kind {
+                EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, velocity)),
+                EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
                 EntityKind::MovingPlatform(endpoint) => {
-                    self.add_entity(create_moving_platform(entity.rect, endpoint));
+                    Some(create_moving_platform(entity.rect, endpoint))
                 }
-                EntityKind::Crate => {
-                    self.add_entity(create_crate(entity.rect));
-                }
-                _ => {}
+                EntityKind::Crate => Some(create_crate(entity.rect)),
+                _ => None,
+            };
+            if let Some(mut instance) = opt_instance {
+                instance.iid = Some(&entity.iid);
+                self.add_entity(instance);
             }
         }
     }
