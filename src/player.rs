@@ -6,6 +6,7 @@ use crate::{
     game_sprites::game_sprites,
     level::Level,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
+    push::PushComponent,
     running::RunComponent,
     sprite_component::{Renderer, SpriteComponent},
     sprite_renderer::SpriteRenderer,
@@ -39,6 +40,10 @@ pub fn create_player(start_rect: Rect) -> Entity {
             defies_level_bounds: true,
             ..Default::default()
         },
+        push: Some(PushComponent {
+            can_push: true,
+            ..Default::default()
+        }),
         ..Default::default()
     }
 }
@@ -67,6 +72,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     let physics = &mut player_entity.physics;
     let sprite = &mut player_entity.sprite;
     let player = player_entity.player.as_mut().unwrap();
+    let push = player_entity.push.as_mut().unwrap();
     let attachment = &mut player_entity.attachment.as_mut().unwrap();
 
     if physics.latest_frame.is_on_any_surface {
@@ -95,6 +101,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     }
 
     attachment.should_attach = player.is_in_air;
+    push.can_push = !player.is_in_air;
     sprite.renderer = Renderer::Sprite(sprite_renderer(
         player.is_in_air,
         &physics.velocity,

@@ -7,6 +7,7 @@ use crate::{
     mushroom::MushroomComponent,
     physics::PhysicsComponent,
     player::PlayerComponent,
+    push::PushComponent,
     route::RouteComponent,
     running::RunComponent,
     sprite_component::SpriteComponent,
@@ -26,6 +27,7 @@ pub struct Entity {
     pub attachment: Option<AttachmentComponent>,
     pub dynamic_collider: Option<DynamicColliderComponent>,
     pub route: Option<RouteComponent>,
+    pub push: Option<PushComponent>,
     pub iid: Option<&'static str>,
 }
 

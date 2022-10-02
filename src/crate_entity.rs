@@ -4,6 +4,7 @@ use crate::{
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
+    push::PushComponent,
     sprite_component::{Renderer, SpriteComponent},
 };
 
@@ -29,6 +30,10 @@ pub fn create_crate(start_rect: Rect) -> Entity {
             enable_left: true,
             enable_right: true,
         })),
+        push: Some(PushComponent {
+            pushable_coefficient: 0.1,
+            ..Default::default()
+        }),
         ..Default::default()
     }
 }
