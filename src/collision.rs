@@ -86,6 +86,9 @@ pub fn process_collision(
     if let Some(intersection) = collider_rect.intersect(*actor_bbox) {
         if collider.enable_top
             && intersection.top() <= collider_rect.top()
+            // Make sure the actor was above our collider in the last frame.
+            // Without this check, the actor can "pop" to the top side of
+            // a collider instead of hitting its side.
             && actor_prev_bbox.bottom() <= collider.prev_rect.top()
         {
             // The top of the collider is being intersected with.
@@ -96,6 +99,9 @@ pub fn process_collision(
             });
         } else if collider.enable_bottom
             && intersection.bottom() >= collider_rect.bottom()
+            // Make sure the actor was below our collider in the last frame.
+            // Without this check, the actor can "pop" to the bottom side
+            // of a collider instead of hitting its side.
             && actor_prev_bbox.top() >= collider.prev_rect.bottom()
         {
             // The bottom side of the collider is being intersected with.
