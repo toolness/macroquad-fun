@@ -132,7 +132,7 @@ fn physics_collision_resolution(
     let collision_flags = physics.collision_flags;
     let mut results: PhysicsFrameResults = Default::default();
 
-    collision_resolution_loop(|| {
+    let loop_result = collision_resolution_loop(|| {
         let bbox = sprite.bbox();
 
         let colliders = level
@@ -201,6 +201,14 @@ fn physics_collision_resolution(
         }
         false
     });
+
+    if loop_result.aborted {
+        println!(
+            "WARNING: aborting collision resolution for entity {} after {} displacements.",
+            entity.iid.unwrap_or("UNKNOWN"),
+            loop_result.displacements
+        );
+    }
 
     results
 }

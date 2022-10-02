@@ -175,20 +175,30 @@ pub fn process_collision(
     None
 }
 
-pub fn collision_resolution_loop<F: FnMut() -> bool>(mut resolve_collisions: F) {
-    let mut displacements_this_frame = 0;
+pub struct CollisionResolutionResult {
+    pub displacements: u32,
+    pub aborted: bool,
+}
+
+pub fn collision_resolution_loop<F: FnMut() -> bool>(
+    mut resolve_collisions: F,
+) -> CollisionResolutionResult {
+    let mut displacements = 0;
 
     loop {
         let displacement_occurred = resolve_collisions();
         if !displacement_occurred {
-            break;
+            return CollisionResolutionResult {
+                displacements,
+                aborted: false,
+            };
         }
-        displacements_this_frame += 1;
-        if displacements_this_frame > MAX_DISPLACEMENTS_PER_FRAME {
-            println!(
-                "WARNING: stuck in possible displacement loop, aborting collision resolution."
-            );
-            break;
+        displacements += 1;
+        if displacements > MAX_DISPLACEMENTS_PER_FRAME {
+            return CollisionResolutionResult {
+                displacements,
+                aborted: true,
+            };
         }
     }
 }

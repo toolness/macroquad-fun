@@ -23,7 +23,7 @@ pub struct PlayerComponent {
     run_direction: f32,
 }
 
-pub fn create_player(start_rect: Rect) -> Entity {
+pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
     Entity {
         sprite: SpriteComponent {
             relative_bbox: game_sprites().huntress.idle_bbox,
@@ -34,6 +34,7 @@ pub fn create_player(start_rect: Rect) -> Entity {
         player: Some(PlayerComponent {
             ..Default::default()
         }),
+        iid: Some(iid),
         run: Some(RunComponent::new()),
         attachment: Some(Default::default()),
         physics: PhysicsComponent {

@@ -125,5 +125,5 @@ fn new_game(start_position: &str) -> LevelRuntime {
         "World does not define a PlayerStart entity called '{}'!",
         start_position
     ));
-    LevelRuntime::new(create_player(player_start), level_start)
+    LevelRuntime::new(create_player(player_start, "PLAYER"), level_start)
 }
