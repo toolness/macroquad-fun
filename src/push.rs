@@ -1,4 +1,4 @@
-use crate::entity::{EntityMap, EntityMapHelpers};
+use crate::entity::{EntityMap, EntityProcessor};
 
 #[derive(Default)]
 pub struct PushComponent {
@@ -12,32 +12,21 @@ pub struct PushComponent {
 }
 
 pub struct PushSystem {
-    // This solely exists as an instance variable so we can amortize
-    // allocations across frames.
-    entities_to_process: Vec<u64>,
+    pub processor: EntityProcessor,
 }
 
 impl PushSystem {
-    pub fn with_capacity(capacity: usize) -> Self {
-        PushSystem {
-            entities_to_process: Vec::with_capacity(capacity),
-        }
-    }
-
     pub fn run(&mut self, entities: &mut EntityMap) {
-        self.entities_to_process.clear();
-        self.entities_to_process
-            .extend(entities.iter().filter_map(|(&id, entity)| {
-                if let Some(push) = entity.push.as_ref() {
-                    if push.can_push {
-                        return Some(id);
-                    }
-                }
-                return None;
-            }));
-
-        for &id in self.entities_to_process.iter() {
-            entities.with_entity_removed(id, |pusher, entities| {
+        self.processor.filter_and_process_entities(
+            entities,
+            |entity| {
+                entity
+                    .push
+                    .as_ref()
+                    .map(|push| push.can_push)
+                    .unwrap_or(false)
+            },
+            |pusher, entities| {
                 for pushed in entities.values_mut() {
                     if let Some(push) = &pushed.push {
                         if push.pushable_coefficient > 0. {
@@ -59,7 +48,7 @@ impl PushSystem {
                         }
                     }
                 }
-            });
-        }
+            },
+        )
     }
 }

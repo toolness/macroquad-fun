@@ -70,3 +70,43 @@ impl EntityMapHelpers for EntityMap {
         self.insert(id, entity);
     }
 }
+
+pub struct EntityProcessor {
+    // This solely exists as an instance variable so we can amortize
+    // allocations across frames.
+    entities_to_process: Vec<u64>,
+}
+
+impl EntityProcessor {
+    pub fn with_capacity(capacity: usize) -> Self {
+        EntityProcessor {
+            entities_to_process: Vec::with_capacity(capacity),
+        }
+    }
+
+    pub fn filter_and_process_entities<
+        Filter: Fn(&Entity) -> bool,
+        Processor: FnMut(&mut Entity, &mut EntityMap),
+    >(
+        &mut self,
+        entities: &mut EntityMap,
+        filter: Filter,
+        mut processor: Processor,
+    ) {
+        self.entities_to_process.clear();
+        self.entities_to_process
+            .extend(entities.iter().filter_map(
+                |(&id, entity)| {
+                    if filter(entity) {
+                        Some(id)
+                    } else {
+                        None
+                    }
+                },
+            ));
+
+        for &id in self.entities_to_process.iter() {
+            entities.with_entity_removed(id, &mut processor);
+        }
+    }
+}

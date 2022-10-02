@@ -2,7 +2,7 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     config::config,
-    entity::{Entity, EntityMap, EntityMapHelpers},
+    entity::{Entity, EntityMap, EntityProcessor},
     level::Level,
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
@@ -12,32 +12,21 @@ use crate::{
 const CARRY_Y_OFFSET: f32 = 10.0;
 
 pub struct AttachmentSystem {
-    // This solely exists as an instance variable so we can amortize
-    // allocations across frames.
-    entities_to_process: Vec<u64>,
+    pub processor: EntityProcessor,
 }
 
 impl AttachmentSystem {
-    pub fn with_capacity(capacity: usize) -> Self {
-        AttachmentSystem {
-            entities_to_process: Vec::with_capacity(capacity),
-        }
-    }
-
     pub fn run(&mut self, entities: &mut EntityMap, level: &Level, time: &GameTime) {
-        self.entities_to_process.clear();
-        self.entities_to_process
-            .extend(entities.iter().filter_map(|(&id, entity)| {
+        self.processor.filter_and_process_entities(
+            entities,
+            |entity| {
                 if let Some(attachment) = entity.attachment.as_ref() {
-                    if attachment.is_attached() || attachment.should_attach {
-                        return Some(id);
-                    }
+                    attachment.is_attached() || attachment.should_attach
+                } else {
+                    false
                 }
-                return None;
-            }));
-
-        for &id in self.entities_to_process.iter() {
-            entities.with_entity_removed(id, |entity, entities| {
+            },
+            |entity, entities| {
                 let sprite = &mut entity.sprite;
                 let attachment = entity.attachment.as_mut().unwrap();
                 if let Some(carrier_entity) = attachment.attached_entity(entities) {
@@ -51,8 +40,8 @@ impl AttachmentSystem {
                 } else if attachment.should_attach {
                     attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
                 }
-            });
-        }
+            },
+        );
     }
 }
 

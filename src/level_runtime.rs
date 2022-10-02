@@ -5,7 +5,7 @@ use crate::config::config;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::{draw_dynamic_collider_debug_rects, DynamicColliderSystem};
-use crate::entity::{Entity, EntityMap, EntityMapHelpers, PLAYER_ENTITY_ID};
+use crate::entity::{Entity, EntityMap, EntityMapHelpers, EntityProcessor, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -59,8 +59,12 @@ impl LevelRuntime {
             debug_mode: false,
             camera: Camera::new(),
             time: GameTime::new(),
-            attachment_system: AttachmentSystem::with_capacity(ENTITY_CAPACITY),
-            push_system: PushSystem::with_capacity(ENTITY_CAPACITY),
+            attachment_system: AttachmentSystem {
+                processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
+            },
+            push_system: PushSystem {
+                processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
+            },
             dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
             debug_text_lines: None,
