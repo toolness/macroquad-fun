@@ -14,9 +14,16 @@ use crate::{
 #[derive(Default, PartialEq)]
 pub enum PhysicsCollisionBehavior {
     #[default]
+    /// This effectively disables collisions for the entity.
     None,
+
+    /// When the entity collides with a Collider, make it stop.
     Stop,
+
+    /// When the entity collides with a Collider, reverse its direction along the X axis.
     ReverseDirectionX,
+
+    /// When the entity collides with a Collider, reverse its direction along the X and Y axes.
     ReverseDirectionXY,
 }
 
@@ -28,12 +35,20 @@ pub struct PhysicsComponent {
     /// Reset to 0 at the end of the iteration.
     pub x_impulse: f32,
 
-    // This ideally shouldn't be an option, but I'm too lazy to fiddle with
-    // the Default trait to make this default to 1.0.
+    /// How much gravity affects the y-velocity of the entity (assuming `defies_gravity` is false).
+    /// It defaults to 1.0; a higher value amplifies gravity, while a lower value dampens it.
+    ///
+    /// This ideally should be a f32 instead of an Option<f32>, but I'm too lazy to fiddle with
+    /// the Default trait to make this default to 1.0.
     pub gravity_coefficient: Option<f32>,
 
+    /// If false, the entity will be subject to the forces of gravity.
     pub defies_gravity: bool,
+
+    /// If false, the bounds of the level itself will be treated as colliders for this entity.
     pub defies_level_bounds: bool,
+
+    /// What happens when the entity collides with a Collider.
     pub collision_behavior: PhysicsCollisionBehavior,
 
     /// The bounding box of the entity in the *last* frame.
