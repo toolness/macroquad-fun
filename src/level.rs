@@ -454,6 +454,7 @@ impl<'a> Iterator for GridColliderIterator<'a> {
                         enable_left: !self.level.is_occupied_at(x - 1, y),
                         enable_right: !self.level.is_occupied_at(x + 1, y),
                         rect,
+                        entity_id: None,
                         prev_rect: rect,
                         velocity: Vec2::ZERO,
                     };

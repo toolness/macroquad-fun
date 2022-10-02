@@ -82,9 +82,9 @@ pub fn physics_system_resolve_collisions(
     level: &Level,
     dynamic_colliders: &Vec<Collider>,
 ) {
-    for entity in entities.values_mut() {
+    for (&id, entity) in entities.iter_mut() {
         let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
-            physics_collision_resolution(entity, &level, dynamic_colliders)
+            physics_collision_resolution(id, entity, &level, dynamic_colliders)
         } else {
             Default::default()
         };
@@ -94,6 +94,7 @@ pub fn physics_system_resolve_collisions(
 }
 
 fn physics_collision_resolution(
+    entity_id: u64,
     entity: &mut Entity,
     level: &Level,
     dynamic_colliders: &Vec<Collider>,
@@ -111,6 +112,14 @@ fn physics_collision_resolution(
             .chain(dynamic_colliders.iter().copied());
 
         for collider in colliders {
+            if let Some(collider_entity_id) = collider.entity_id {
+                if collider_entity_id == entity_id {
+                    // The collider represents the collider for the entity we're
+                    // processing. An entity can't collide with itself, so skip testing
+                    // for a collision here.
+                    continue;
+                }
+            }
             if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
                 match collision.side {
                     Side::Top => {

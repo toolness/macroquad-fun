@@ -11,6 +11,7 @@ pub struct Collision {
 pub struct Collider {
     pub rect: Rect,
     pub prev_rect: Rect,
+    pub entity_id: Option<u64>,
     pub enable_top: bool,
     pub enable_bottom: bool,
     pub enable_right: bool,

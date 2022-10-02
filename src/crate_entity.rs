@@ -3,7 +3,7 @@ use macroquad::prelude::{Rect, BROWN};
 use crate::{
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
-    physics::PhysicsComponent,
+    physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{Renderer, SpriteComponent},
 };
 
@@ -19,7 +19,7 @@ pub fn create_crate(start_rect: Rect) -> Entity {
             ..Default::default()
         },
         physics: PhysicsComponent {
-            defies_gravity: true,
+            collision_behavior: PhysicsCollisionBehavior::Stop,
             ..Default::default()
         },
         dynamic_collider: Some(DynamicColliderComponent::new(RelativeCollider {

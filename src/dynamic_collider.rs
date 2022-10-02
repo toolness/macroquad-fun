@@ -55,7 +55,7 @@ impl DynamicColliderSystem {
 }
 
 fn update_dynamic_colliders(entities: &mut EntityMap) {
-    for entity in entities.values_mut() {
+    for (&id, entity) in entities.iter_mut() {
         if let Some(dynamic_collider) = entity.dynamic_collider.as_mut() {
             let rect = entity
                 .sprite
@@ -71,6 +71,7 @@ fn update_dynamic_colliders(entities: &mut EntityMap) {
             dynamic_collider.computed_collider = Some(Collider {
                 rect,
                 prev_rect,
+                entity_id: Some(id),
                 velocity: entity.physics.velocity,
                 enable_top: relative.enable_top,
                 enable_bottom: relative.enable_bottom,
