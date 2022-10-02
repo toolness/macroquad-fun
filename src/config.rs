@@ -18,6 +18,7 @@ pub struct Config {
     pub mushroom_speed: f32,
     pub screen_width: f32,
     pub screen_height: f32,
+    pub crate_pushable_coefficient: f32,
     pub fall_off_level_threshold: f32,
     pub coyote_time_ms: f64,
     pub debug_text_size: f32,

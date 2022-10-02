@@ -1,6 +1,7 @@
 use macroquad::prelude::{Rect, BROWN};
 
 use crate::{
+    config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
@@ -31,7 +32,7 @@ pub fn create_crate(start_rect: Rect) -> Entity {
             enable_right: true,
         })),
         push: Some(PushComponent {
-            pushable_coefficient: 0.1,
+            pushable_coefficient: config().crate_pushable_coefficient,
             ..Default::default()
         }),
         ..Default::default()
