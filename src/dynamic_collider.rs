@@ -1,10 +1,14 @@
 use macroquad::prelude::{Rect, PURPLE};
 
-use crate::{collision::Collider, entity::EntityMap};
+use crate::{
+    collision::{Collider, CollisionFlags},
+    entity::EntityMap,
+};
 
 #[derive(Default)]
 pub struct RelativeCollider {
     pub rect: Rect,
+    pub collision_flags: CollisionFlags,
     pub enable_top: bool,
     pub enable_bottom: bool,
     pub enable_right: bool,
@@ -72,6 +76,7 @@ fn update_dynamic_colliders(entities: &mut EntityMap) {
                 rect,
                 prev_rect,
                 entity_id: Some(id),
+                flags: relative.collision_flags,
                 velocity: entity.physics.velocity,
                 enable_top: relative.enable_top,
                 enable_bottom: relative.enable_bottom,

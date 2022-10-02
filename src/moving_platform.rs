@@ -1,6 +1,7 @@
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
+    collision::CollisionFlags,
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
@@ -25,6 +26,7 @@ pub fn create_moving_platform(start_rect: Rect, end_point: Vec2) -> Entity {
         },
         dynamic_collider: Some(DynamicColliderComponent::new(RelativeCollider {
             rect: relative_bbox,
+            collision_flags: CollisionFlags::ENVIRONMENT,
             enable_top: true,
             enable_bottom: true,
             enable_left: true,

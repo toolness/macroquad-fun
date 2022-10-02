@@ -219,6 +219,7 @@ name = "macroquad-fun"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bitflags",
  "macroquad",
  "serde",
  "serde_derive",

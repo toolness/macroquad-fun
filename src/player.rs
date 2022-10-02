@@ -1,6 +1,7 @@
 use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 
 use crate::{
+    collision::CollisionFlags,
     config::config,
     entity::{Entity, EntityMap, EntityMapHelpers},
     game_sprites::game_sprites,
@@ -37,6 +38,7 @@ pub fn create_player(start_rect: Rect) -> Entity {
         attachment: Some(Default::default()),
         physics: PhysicsComponent {
             collision_behavior: PhysicsCollisionBehavior::Stop,
+            collision_flags: CollisionFlags::ENVIRONMENT | CollisionFlags::PLAYER_ONLY,
             defies_level_bounds: true,
             ..Default::default()
         },

@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use macroquad::prelude::*;
 
 use crate::math_util::are_opposites;
@@ -7,10 +8,24 @@ pub struct Collision {
     pub displacement: Vec2,
 }
 
+bitflags! {
+    pub struct CollisionFlags: u32 {
+        const ENVIRONMENT = 0b00000001;
+        const PLAYER_ONLY = 0b00000010;
+    }
+}
+
+impl Default for CollisionFlags {
+    fn default() -> Self {
+        CollisionFlags::ENVIRONMENT
+    }
+}
+
 #[derive(Default, Clone, Copy)]
 pub struct Collider {
     pub rect: Rect,
     pub prev_rect: Rect,
+    pub flags: CollisionFlags,
     pub entity_id: Option<u64>,
     pub enable_top: bool,
     pub enable_bottom: bool,

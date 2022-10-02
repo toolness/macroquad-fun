@@ -2,7 +2,7 @@ use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 
 use crate::{
-    collision::Collider,
+    collision::{Collider, CollisionFlags},
     config::config,
     game_sprites::game_sprites,
     ldtk::{self, LayerInstance, TileInstance},
@@ -453,6 +453,7 @@ impl<'a> Iterator for GridColliderIterator<'a> {
                         enable_bottom: !self.level.is_occupied_at(x, y + 1),
                         enable_left: !self.level.is_occupied_at(x - 1, y),
                         enable_right: !self.level.is_occupied_at(x + 1, y),
+                        flags: CollisionFlags::ENVIRONMENT,
                         rect,
                         entity_id: None,
                         prev_rect: rect,

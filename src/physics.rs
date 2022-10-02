@@ -3,7 +3,7 @@ use macroquad::prelude::{Rect, Vec2};
 use crate::{
     collision::{
         collision_resolution_loop, maybe_reverse_direction_x, maybe_reverse_direction_xy,
-        process_collision, Collider, Side,
+        process_collision, Collider, CollisionFlags, Side,
     },
     config::config,
     entity::{Entity, EntityMap},
@@ -51,6 +51,9 @@ pub struct PhysicsComponent {
 
     /// What happens when the entity collides with a Collider.
     pub collision_behavior: PhysicsCollisionBehavior,
+
+    /// What kinds of things the entity collides with.
+    pub collision_flags: CollisionFlags,
 
     /// The bounding box of the entity in the *last* frame.
     /// This should really be read-only, but it's easiest to just make it public.
@@ -126,6 +129,7 @@ fn physics_collision_resolution(
     let prev_bbox = entity.physics.prev_bbox;
     let physics = &mut entity.physics;
     let sprite = &mut entity.sprite;
+    let collision_flags = physics.collision_flags;
     let mut results: PhysicsFrameResults = Default::default();
 
     collision_resolution_loop(|| {
@@ -143,6 +147,10 @@ fn physics_collision_resolution(
                     // for a collision here.
                     continue;
                 }
+            }
+            if (collider.flags & collision_flags).is_empty() {
+                // The collider and the entity can't collide, skip this.
+                continue;
             }
             if let Some(collision) =
                 process_collision(&collider, &prev_bbox, &bbox, vertical_collision_leeway)
