@@ -5,7 +5,7 @@ extern crate serde_json;
 
 use std::env::args;
 
-use config::{load_config, parse_config};
+use config::load_config;
 use game_sprites::load_game_sprites;
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
@@ -58,7 +58,7 @@ fn window_conf() -> Conf {
         //
         // MacOS in particular won't let us change window dimensions after launching, so we'll
         // need to parse the config synchronously here and pass the correct dimensions to it.
-        let config = parse_config(&std::fs::read_to_string(CONFIG_PATH).unwrap())
+        let config = config::parse_config(&std::fs::read_to_string(CONFIG_PATH).unwrap())
             .expect("parse_config() must succeed");
 
         Conf {
