@@ -3,6 +3,7 @@ use macroquad::prelude::*;
 
 use crate::math_util::are_opposites;
 
+#[derive(Debug)]
 pub struct Collision {
     pub side: Side,
     pub displacement: Vec2,
@@ -21,7 +22,7 @@ impl Default for CollisionFlags {
     }
 }
 
-#[derive(Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Collider {
     pub rect: Rect,
     pub prev_rect: Rect,
@@ -34,7 +35,7 @@ pub struct Collider {
     pub velocity: Vec2,
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Side {
     Top,
     Bottom,
@@ -180,13 +181,13 @@ pub struct CollisionResolutionResult {
     pub aborted: bool,
 }
 
-pub fn collision_resolution_loop<F: FnMut() -> bool>(
+pub fn collision_resolution_loop<F: FnMut(u32) -> bool>(
     mut resolve_collisions: F,
 ) -> CollisionResolutionResult {
     let mut displacements = 0;
 
     loop {
-        let displacement_occurred = resolve_collisions();
+        let displacement_occurred = resolve_collisions(displacements);
         if !displacement_occurred {
             return CollisionResolutionResult {
                 displacements,

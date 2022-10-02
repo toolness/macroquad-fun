@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use crate::{
     attachment::{AttachableComponent, AttachmentComponent},
@@ -29,6 +29,12 @@ pub struct Entity {
     pub route: Option<RouteComponent>,
     pub push: Option<PushComponent>,
     pub iid: Option<&'static str>,
+}
+
+impl Display for Entity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.iid.unwrap_or("UNKNOWN")))
+    }
 }
 
 pub const PLAYER_ENTITY_ID: u64 = 0;

@@ -11,6 +11,10 @@ use crate::{
     time::GameTime,
 };
 
+/// If we have more than this many displacements for a single entity while performing
+/// collision resolution, start logging debug information.
+const LOTS_OF_DISPLACEMENTS: u32 = 20;
+
 #[derive(Default, PartialEq)]
 pub enum PhysicsCollisionBehavior {
     #[default]
@@ -132,7 +136,7 @@ fn physics_collision_resolution(
     let collision_flags = physics.collision_flags;
     let mut results: PhysicsFrameResults = Default::default();
 
-    let loop_result = collision_resolution_loop(|| {
+    let loop_result = collision_resolution_loop(|displacements| {
         let bbox = sprite.bbox();
 
         let colliders = level
@@ -195,6 +199,12 @@ fn physics_collision_resolution(
                         }
                         _ => {}
                     }
+                    if displacements > LOTS_OF_DISPLACEMENTS {
+                        println!(
+                            "WARNING: collision_resolution_loop #{} {:?} with {:?}",
+                            displacements, collision, collider
+                        );
+                    }
                     return true;
                 }
             }
@@ -204,9 +214,8 @@ fn physics_collision_resolution(
 
     if loop_result.aborted {
         println!(
-            "WARNING: aborting collision resolution for entity {} after {} displacements.",
-            entity.iid.unwrap_or("UNKNOWN"),
-            loop_result.displacements
+            "WARNING: aborting collision_resolution_loop for entity {} after {} iterations.",
+            entity, loop_result.displacements
         );
     }
 
