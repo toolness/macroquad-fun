@@ -23,8 +23,9 @@ pub struct Config {
     pub debug_text_size: f32,
 }
 
-pub async fn load_config(path: &str) -> Result<()> {
-    let mut config: Config = serde_json::from_str(&load_string(path).await?)?;
+pub fn parse_config(config: &str) -> Result<Config> {
+    let mut config: Config = serde_json::from_str(config)?;
+
     config.run_speed *= config.sprite_scale;
     config.gravity *= config.sprite_scale;
     config.jump_velocity *= config.sprite_scale;
@@ -35,6 +36,12 @@ pub async fn load_config(path: &str) -> Result<()> {
     config.mushroom_speed *= config.sprite_scale;
     config.fall_off_level_threshold *= config.sprite_scale;
     config.moving_platform_speed *= config.sprite_scale;
+
+    Ok(config)
+}
+
+pub async fn load_config(path: &str) -> Result<()> {
+    let config = parse_config(&load_string(path).await?)?;
 
     unsafe {
         CONFIG = Some(config);

@@ -5,7 +5,7 @@ extern crate serde_json;
 
 use std::env::args;
 
-use config::load_config;
+use config::{load_config, parse_config};
 use game_sprites::load_game_sprites;
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
@@ -45,7 +45,33 @@ mod z_index;
 
 const DEFAULT_START_POSITION: &str = "default";
 
-#[macroquad::main("Fun")]
+const CONFIG_PATH: &str = "media/config.json";
+
+fn window_conf() -> Conf {
+    #[cfg(target_arch = "wasm32")]
+    return Default::default();
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        // Unfortunately this function isn't async, so we can't use Macroquad's WASM-compatible
+        // async filesystem functions here. So all this code is specific to native builds.
+        //
+        // MacOS in particular won't let us change window dimensions after launching, so we'll
+        // need to parse the config synchronously here and pass the correct dimensions to it.
+        let config = parse_config(&std::fs::read_to_string(CONFIG_PATH).unwrap())
+            .expect("parse_config() must succeed");
+
+        Conf {
+            window_title: "Macroquad Fun".to_owned(),
+            window_width: config.screen_width as i32,
+            window_height: config.screen_height as i32,
+            window_resizable: false,
+            ..Default::default()
+        }
+    }
+}
+
+#[macroquad::main(window_conf)]
 async fn main() {
     let args: Vec<String> = args().collect();
     let start_position = args
@@ -53,7 +79,7 @@ async fn main() {
         .map(|s| s.as_str())
         .unwrap_or(&DEFAULT_START_POSITION);
 
-    load_config("media/config.json")
+    load_config(CONFIG_PATH)
         .await
         .expect("load_config() must succeed");
     load_game_sprites()
@@ -63,11 +89,19 @@ async fn main() {
         .await
         .expect("load_world() must succeed");
 
-    let config = config::config();
     let mut level_runtime = new_game(start_position);
 
-    request_new_screen_size(config.screen_width, config.screen_height);
-    next_frame().await;
+    #[cfg(target_arch = "wasm32")]
+    {
+        // I'm unclear on whether this is actually needed on wasm32, but
+        // just in case...
+        //
+        // (Note that native builds will have already set the screen size
+        // properly via our window_conf function.)
+        let config = config::config();
+        request_new_screen_size(config.screen_width, config.screen_height);
+        next_frame().await;
+    }
 
     loop {
         match level_runtime.advance_one_frame() {
