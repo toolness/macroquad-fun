@@ -20,6 +20,7 @@ pub struct Config {
     pub screen_height: f32,
     pub crate_pushable_coefficient: f32,
     pub fall_off_level_threshold: f32,
+    pub vertical_collision_leeway: f32,
     pub coyote_time_ms: f64,
     pub debug_text_size: f32,
 }
@@ -37,6 +38,7 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.mushroom_speed *= config.sprite_scale;
     config.fall_off_level_threshold *= config.sprite_scale;
     config.moving_platform_speed *= config.sprite_scale;
+    config.vertical_collision_leeway *= config.sprite_scale;
 
     Ok(config)
 }

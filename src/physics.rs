@@ -98,9 +98,16 @@ pub fn physics_system_resolve_collisions(
     level: &Level,
     dynamic_colliders: &Vec<Collider>,
 ) {
+    let vertical_collision_leeway = config().vertical_collision_leeway;
     for (&id, entity) in entities.iter_mut() {
         let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
-            physics_collision_resolution(id, entity, &level, dynamic_colliders)
+            physics_collision_resolution(
+                id,
+                entity,
+                &level,
+                dynamic_colliders,
+                vertical_collision_leeway,
+            )
         } else {
             Default::default()
         };
@@ -114,6 +121,7 @@ fn physics_collision_resolution(
     entity: &mut Entity,
     level: &Level,
     dynamic_colliders: &Vec<Collider>,
+    vertical_collision_leeway: f32,
 ) -> PhysicsFrameResults {
     let prev_bbox = entity.physics.prev_bbox;
     let physics = &mut entity.physics;
@@ -136,7 +144,9 @@ fn physics_collision_resolution(
                     continue;
                 }
             }
-            if let Some(collision) = process_collision(&collider, &prev_bbox, &bbox) {
+            if let Some(collision) =
+                process_collision(&collider, &prev_bbox, &bbox, vertical_collision_leeway)
+            {
                 match collision.side {
                     Side::Top => {
                         results.is_on_any_surface = true;
