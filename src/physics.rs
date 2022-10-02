@@ -29,6 +29,7 @@ pub enum PhysicsCollisionBehavior {
 
 #[derive(Default)]
 pub struct PhysicsComponent {
+    /// The current velocity of the entity.
     pub velocity: Vec2,
 
     /// Extra amount of x-velocity for the next iteration of the physics loop.
