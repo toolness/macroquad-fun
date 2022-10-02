@@ -43,7 +43,14 @@ pub enum Side {
     Right,
 }
 
+/// If we have more than this many displacements for a single entity while performing
+/// collision resolution, assume we're in an infinite displacement loop and abort.
 const MAX_DISPLACEMENTS_PER_FRAME: u32 = 30;
+
+/// A number very close to zero that we add to all our displacements during collision
+/// resolution, to ensure that we always displace entities outside of whatever they're
+/// colliding with, irrespective of the vagaries of floating point arithmetic.
+const EXTRA_DISPLACEMENT: f32 = 0.001;
 
 impl Collider {
     pub fn draw_debug_rect(&self, color: Color) {
@@ -111,7 +118,7 @@ pub fn process_collision(
             let y_diff = actor_bbox.bottom() - collider_rect.top();
             return Some(Collision {
                 side: Side::Top,
-                displacement: Vec2::new(0., -y_diff),
+                displacement: Vec2::new(0., -y_diff - EXTRA_DISPLACEMENT),
             });
         } else if collider.enable_bottom
             && intersection.bottom() >= collider_rect.bottom()
@@ -124,7 +131,7 @@ pub fn process_collision(
             let y_diff = collider_rect.bottom() - actor_bbox.top();
             return Some(Collision {
                 side: Side::Bottom,
-                displacement: Vec2::new(0., y_diff),
+                displacement: Vec2::new(0., y_diff + EXTRA_DISPLACEMENT),
             });
         } else {
             let left_or_right_collision =
@@ -133,14 +140,14 @@ pub fn process_collision(
                     let x_diff = actor_bbox.right() - collider_rect.left();
                     Some(Collision {
                         side: Side::Left,
-                        displacement: Vec2::new(-x_diff, 0.),
+                        displacement: Vec2::new(-x_diff - EXTRA_DISPLACEMENT, 0.),
                     })
                 } else if collider.enable_right && intersection.right() >= collider_rect.right() {
                     // The right side of the collider is being intersected with.
                     let x_diff = collider_rect.right() - actor_bbox.left();
                     Some(Collision {
                         side: Side::Right,
-                        displacement: Vec2::new(x_diff, 0.),
+                        displacement: Vec2::new(x_diff + EXTRA_DISPLACEMENT, 0.),
                     })
                 } else {
                     None
@@ -165,7 +172,7 @@ pub fn process_collision(
                     let y_diff = actor_bbox.bottom() - collider_rect.top();
                     return Some(Collision {
                         side: Side::Top,
-                        displacement: Vec2::new(0., -y_diff),
+                        displacement: Vec2::new(0., -y_diff - EXTRA_DISPLACEMENT),
                     });
                 }
                 return left_or_right_collision;
