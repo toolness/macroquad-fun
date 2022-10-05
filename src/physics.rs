@@ -74,52 +74,75 @@ pub struct PhysicsFrameResults {
     pub was_displaced: bool,
 }
 
-/// Update the positions of all entities based on their velocities, applying the
-/// effects of gravity for all that obey it.
-///
-/// After this runs, some entities may have positions that are inside others;
-/// call `physics_system_resolve_collisions` to resolve them.
-pub fn physics_system_update_positions(entities: &mut EntityMap, time: &GameTime) {
-    let gravity = config().gravity;
-    let time_since_last_frame = time.time_since_last_frame as f32;
-    let gravity_this_frame = gravity * time_since_last_frame;
-
-    for entity in entities.values_mut() {
-        if !entity.physics.defies_gravity {
-            entity.physics.velocity.y +=
-                gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
-        }
-
-        entity.physics.prev_bbox = entity.sprite.bbox();
-
-        entity.sprite.pos += entity.physics.velocity * time_since_last_frame;
-        entity.sprite.pos.x += entity.physics.x_impulse * time_since_last_frame;
-        entity.physics.x_impulse = 0.;
-    }
+pub struct PhysicsSystem {
+    entities: Vec<u64>,
 }
 
-/// Resolve any collisions that occurred since the last call to
-/// `physics_system_update_positions`.
-pub fn physics_system_resolve_collisions(
-    entities: &mut EntityMap,
-    level: &Level,
-    dynamic_colliders: &Vec<Collider>,
-) {
-    let vertical_collision_leeway = config().vertical_collision_leeway;
-    for (&id, entity) in entities.iter_mut() {
-        let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
-            physics_collision_resolution(
-                id,
-                entity,
-                &level,
-                dynamic_colliders,
-                vertical_collision_leeway,
-            )
-        } else {
-            Default::default()
-        };
+impl PhysicsSystem {
+    pub fn with_capacity(capacity: usize) -> Self {
+        PhysicsSystem {
+            entities: Vec::with_capacity(capacity),
+        }
+    }
 
-        entity.physics.latest_frame = results;
+    /// Update the positions of all entities based on their velocities, applying the
+    /// effects of gravity for all that obey it.
+    ///
+    /// After this runs, some entities may have positions that are inside others;
+    /// call `physics_system_resolve_collisions` to resolve them.
+    pub fn update_positions(&mut self, entities: &mut EntityMap, time: &GameTime) {
+        let gravity = config().gravity;
+        let time_since_last_frame = time.time_since_last_frame as f32;
+        let gravity_this_frame = gravity * time_since_last_frame;
+
+        for entity in entities.values_mut() {
+            if !entity.physics.defies_gravity {
+                entity.physics.velocity.y +=
+                    gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
+            }
+
+            entity.physics.prev_bbox = entity.sprite.bbox();
+
+            entity.sprite.pos += entity.physics.velocity * time_since_last_frame;
+            entity.sprite.pos.x += entity.physics.x_impulse * time_since_last_frame;
+            entity.physics.x_impulse = 0.;
+        }
+    }
+
+    /// Resolve any collisions that occurred since the last call to
+    /// `physics_system_update_positions`.
+    pub fn resolve_collisions(
+        &mut self,
+        entities: &mut EntityMap,
+        level: &Level,
+        dynamic_colliders: &Vec<Collider>,
+    ) {
+        let vertical_collision_leeway = config().vertical_collision_leeway;
+
+        self.entities.clear();
+        self.entities.extend(entities.keys());
+        self.entities.sort_by(|a, b| {
+            let a_y = entities.get(a).unwrap().sprite.pos.y;
+            let b_y = entities.get(b).unwrap().sprite.pos.y;
+            b_y.partial_cmp(&a_y).unwrap()
+        });
+
+        for &id in self.entities.iter() {
+            let entity = entities.get_mut(&id).unwrap();
+            let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
+                physics_collision_resolution(
+                    id,
+                    entity,
+                    &level,
+                    dynamic_colliders,
+                    vertical_collision_leeway,
+                )
+            } else {
+                Default::default()
+            };
+
+            entity.physics.latest_frame = results;
+        }
     }
 }
 
@@ -130,6 +153,7 @@ fn physics_collision_resolution(
     dynamic_colliders: &Vec<Collider>,
     vertical_collision_leeway: f32,
 ) -> PhysicsFrameResults {
+    let entity_iid = entity.iid;
     let prev_bbox = entity.physics.prev_bbox;
     let physics = &mut entity.physics;
     let sprite = &mut entity.sprite;
@@ -159,6 +183,7 @@ fn physics_collision_resolution(
             if let Some(collision) =
                 process_collision(&collider, &prev_bbox, &bbox, vertical_collision_leeway)
             {
+                let mut hit_bottom_side = false;
                 match collision.side {
                     Side::Top => {
                         results.is_on_any_surface = true;
@@ -173,6 +198,7 @@ fn physics_collision_resolution(
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
                             physics.velocity.y = 0.;
                         }
+                        hit_bottom_side = true;
                     }
                     Side::Left | Side::Right => {
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
@@ -181,7 +207,21 @@ fn physics_collision_resolution(
                     }
                 }
 
+                if hit_bottom_side && results.is_on_any_surface {
+                    println!(
+                        "SQUEEEEEZE {:?} {} {:?}",
+                        entity_iid, displacements, collision.displacement
+                    );
+                    return false;
+                }
+
                 if collision.displacement != Vec2::ZERO {
+                    if entity_iid == Some("6bd72cd0-2a00-11ed-8224-637eb1046910") {
+                        println!(
+                            "DISPLACE {:?} {} {:?}",
+                            entity_iid, displacements, collision
+                        );
+                    }
                     sprite.pos += collision.displacement;
                     results.was_displaced = true;
                     match physics.collision_behavior {

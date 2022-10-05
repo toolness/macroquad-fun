@@ -661,7 +661,7 @@
 						},
 						{
 							"__identifier": "Crate",
-							"__grid": [3,8],
+							"__grid": [10,8],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -670,7 +670,21 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 22,
-							"px": [48,128],
+							"px": [160,128],
+							"fieldInstances": []
+						},
+						{
+							"__identifier": "Crate",
+							"__grid": [10,6],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#B78030",
+							"iid": "15c09a10-2a00-11ed-ae96-3fbde5e54231",
+							"width": 16,
+							"height": 16,
+							"defUid": 22,
+							"px": [160,96],
 							"fieldInstances": []
 						}
 					]
