@@ -154,7 +154,6 @@ fn physics_collision_resolution(
     dynamic_collider_system: &mut DynamicColliderSystem,
     vertical_collision_leeway: f32,
 ) -> PhysicsFrameResults {
-    let entity_iid = entity.iid;
     let prev_bbox = entity.physics.prev_bbox;
     let physics = &mut entity.physics;
     let sprite = &mut entity.sprite;
@@ -209,20 +208,11 @@ fn physics_collision_resolution(
                 }
 
                 if hit_bottom_side && results.is_on_any_surface {
-                    println!(
-                        "SQUEEEEEZE {:?} {} {:?}",
-                        entity_iid, displacements, collision.displacement
-                    );
+                    // We are being squeezed from the top and bottom!
                     return false;
                 }
 
                 if collision.displacement != Vec2::ZERO {
-                    if entity_iid == Some("6bd72cd0-2a00-11ed-8224-637eb1046910") {
-                        println!(
-                            "DISPLACE {:?} {} {:?}",
-                            entity_iid, displacements, collision
-                        );
-                    }
                     sprite.pos += collision.displacement;
                     results.was_displaced = true;
                     match physics.collision_behavior {
@@ -258,6 +248,12 @@ fn physics_collision_resolution(
             "WARNING: aborting collision_resolution_loop for entity {} after {} iterations.",
             entity, loop_result.displacements
         );
+    }
+
+    if results.was_displaced && entity.dynamic_collider.is_some() {
+        // This entity has a dynamic collider associated with it, so update its
+        // computed collider to reflect its displaced position.
+        dynamic_collider_system.update_dynamic_collider(entity_id, entity);
     }
 
     results

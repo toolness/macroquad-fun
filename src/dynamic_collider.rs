@@ -2,7 +2,7 @@ use macroquad::prelude::{Rect, PURPLE};
 
 use crate::{
     collision::{Collider, CollisionFlags},
-    entity::EntityMap,
+    entity::{Entity, EntityMap},
 };
 
 #[derive(Default)]
@@ -53,48 +53,70 @@ impl DynamicColliderSystem {
         self.colliders.extend(get_dynamic_colliders(entities));
     }
 
+    pub fn update_dynamic_collider(&mut self, entity_id: u64, entity: &mut Entity) {
+        update_dynamic_collider(entity_id, entity, false);
+        // TODO: This isn't great, it's O(n). Maybe we should make self.colliders() a HashMap?
+        for collider in self.colliders.iter_mut() {
+            if collider.entity_id == Some(entity_id) {
+                if let Some(computed_collider) = get_computed_collider(entity) {
+                    *collider = computed_collider;
+                }
+            }
+        }
+    }
+
     pub fn colliders(&self) -> &Vec<Collider> {
         return &self.colliders;
     }
 }
 
-fn update_dynamic_colliders(entities: &mut EntityMap) {
-    for (&id, entity) in entities.iter_mut() {
-        if let Some(dynamic_collider) = entity.dynamic_collider.as_mut() {
-            let rect = entity
-                .sprite
-                .calculate_absolute_bounding_box(&dynamic_collider.relative_collider.rect);
-            let prev_rect = {
-                if let Some(computed_collider) = dynamic_collider.computed_collider {
+fn update_dynamic_collider(id: u64, entity: &mut Entity, update_prev_rect: bool) {
+    if let Some(dynamic_collider) = entity.dynamic_collider.as_mut() {
+        let rect = entity
+            .sprite
+            .calculate_absolute_bounding_box(&dynamic_collider.relative_collider.rect);
+        let prev_rect = {
+            if let Some(computed_collider) = dynamic_collider.computed_collider {
+                if update_prev_rect {
                     computed_collider.rect
                 } else {
-                    rect
+                    computed_collider.prev_rect
                 }
-            };
-            let relative = &dynamic_collider.relative_collider;
-            dynamic_collider.computed_collider = Some(Collider {
-                rect,
-                prev_rect,
-                entity_id: Some(id),
-                flags: relative.collision_flags,
-                velocity: entity.physics.velocity,
-                enable_top: relative.enable_top,
-                enable_bottom: relative.enable_bottom,
-                enable_right: relative.enable_right,
-                enable_left: relative.enable_left,
-            });
-        }
+            } else {
+                rect
+            }
+        };
+        let relative = &dynamic_collider.relative_collider;
+        dynamic_collider.computed_collider = Some(Collider {
+            rect,
+            prev_rect,
+            entity_id: Some(id),
+            flags: relative.collision_flags,
+            velocity: entity.physics.velocity,
+            enable_top: relative.enable_top,
+            enable_bottom: relative.enable_bottom,
+            enable_right: relative.enable_right,
+            enable_left: relative.enable_left,
+        });
     }
 }
 
+fn update_dynamic_colliders(entities: &mut EntityMap) {
+    for (&id, entity) in entities.iter_mut() {
+        update_dynamic_collider(id, entity, true);
+    }
+}
+
+fn get_computed_collider(entity: &Entity) -> Option<Collider> {
+    entity
+        .dynamic_collider
+        .as_ref()
+        .map(|dc| dc.computed_collider)
+        .flatten()
+}
+
 fn get_dynamic_colliders<'a>(entities: &'a EntityMap) -> impl Iterator<Item = Collider> + 'a {
-    entities.values().filter_map(|entity| {
-        entity
-            .dynamic_collider
-            .as_ref()
-            .map(|dc| dc.computed_collider)
-            .flatten()
-    })
+    entities.values().filter_map(get_computed_collider)
 }
 
 pub fn draw_dynamic_collider_debug_rects(entities: &EntityMap) {
