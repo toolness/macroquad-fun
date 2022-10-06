@@ -29,7 +29,7 @@ impl DynamicColliderComponent {
 }
 
 pub struct DynamicColliderSystem {
-    /// Cached values of all the dynamic colliders that currently exist.
+    /// Computed values of all the dynamic colliders that currently exist.
     /// This is done partly, for efficiency, but also because it's hard
     /// for our physics system to do nested loops over all entities,
     /// given Rust's borrow checker.
