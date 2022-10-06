@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use macroquad::prelude::{Rect, PURPLE};
 
 use crate::{
@@ -35,13 +37,13 @@ pub struct DynamicColliderSystem {
     /// This is done partly, for efficiency, but also because it's hard
     /// for our physics system to do nested loops over all entities,
     /// given Rust's borrow checker.
-    colliders: Vec<Collider>,
+    colliders: HashMap<u64, Collider>,
 }
 
 impl DynamicColliderSystem {
     pub fn with_capacity(capacity: usize) -> Self {
         DynamicColliderSystem {
-            colliders: Vec::with_capacity(capacity),
+            colliders: HashMap::with_capacity(capacity),
         }
     }
 
@@ -50,23 +52,24 @@ impl DynamicColliderSystem {
     pub fn run(&mut self, entities: &mut EntityMap) {
         update_dynamic_colliders(entities);
         self.colliders.clear();
-        self.colliders.extend(get_dynamic_colliders(entities));
-    }
-
-    pub fn update_dynamic_collider(&mut self, entity_id: u64, entity: &mut Entity) {
-        update_dynamic_collider(entity_id, entity, false);
-        // TODO: This isn't great, it's O(n). Maybe we should make self.colliders() a HashMap?
-        for collider in self.colliders.iter_mut() {
-            if collider.entity_id == Some(entity_id) {
-                if let Some(computed_collider) = get_computed_collider(entity) {
-                    *collider = computed_collider;
-                }
+        for (&id, entity) in entities.iter() {
+            if let Some(collider) = get_computed_collider(entity) {
+                self.colliders.insert(id, collider);
             }
         }
     }
 
-    pub fn colliders(&self) -> &Vec<Collider> {
-        return &self.colliders;
+    pub fn update_dynamic_collider(&mut self, entity_id: u64, entity: &mut Entity) {
+        update_dynamic_collider(entity_id, entity, false);
+        if let Some(collider) = self.colliders.get_mut(&entity_id) {
+            if let Some(computed_collider) = get_computed_collider(entity) {
+                *collider = computed_collider;
+            }
+        }
+    }
+
+    pub fn colliders(&self) -> impl Iterator<Item = &Collider> {
+        self.colliders.values()
     }
 }
 
@@ -115,12 +118,8 @@ fn get_computed_collider(entity: &Entity) -> Option<Collider> {
         .flatten()
 }
 
-fn get_dynamic_colliders<'a>(entities: &'a EntityMap) -> impl Iterator<Item = Collider> + 'a {
-    entities.values().filter_map(get_computed_collider)
-}
-
 pub fn draw_dynamic_collider_debug_rects(entities: &EntityMap) {
-    for dynamic_collider in get_dynamic_colliders(entities) {
+    for dynamic_collider in entities.values().filter_map(get_computed_collider) {
         dynamic_collider.draw_debug_rect(PURPLE);
     }
 }

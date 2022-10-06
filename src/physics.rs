@@ -170,7 +170,7 @@ fn physics_collision_resolution(
 
         let colliders = level
             .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
-            .chain(dynamic_collider_system.colliders().iter().copied());
+            .chain(dynamic_collider_system.colliders().copied());
 
         for collider in colliders {
             if let Some(collider_entity_id) = collider.entity_id {
