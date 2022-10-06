@@ -3,9 +3,10 @@ use macroquad::prelude::{Rect, Vec2};
 use crate::{
     collision::{
         collision_resolution_loop, maybe_reverse_direction_x, maybe_reverse_direction_xy,
-        process_collision, Collider, CollisionFlags, Side,
+        process_collision, CollisionFlags, Side,
     },
     config::config,
+    dynamic_collider::DynamicColliderSystem,
     entity::{Entity, EntityMap},
     level::Level,
     time::GameTime,
@@ -74,52 +75,80 @@ pub struct PhysicsFrameResults {
     pub was_displaced: bool,
 }
 
-/// Update the positions of all entities based on their velocities, applying the
-/// effects of gravity for all that obey it.
-///
-/// After this runs, some entities may have positions that are inside others;
-/// call `physics_system_resolve_collisions` to resolve them.
-pub fn physics_system_update_positions(entities: &mut EntityMap, time: &GameTime) {
-    let gravity = config().gravity;
-    let time_since_last_frame = time.time_since_last_frame as f32;
-    let gravity_this_frame = gravity * time_since_last_frame;
-
-    for entity in entities.values_mut() {
-        if !entity.physics.defies_gravity {
-            entity.physics.velocity.y +=
-                gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
-        }
-
-        entity.physics.prev_bbox = entity.sprite.bbox();
-
-        entity.sprite.pos += entity.physics.velocity * time_since_last_frame;
-        entity.sprite.pos.x += entity.physics.x_impulse * time_since_last_frame;
-        entity.physics.x_impulse = 0.;
-    }
+pub struct PhysicsSystem {
+    entities: Vec<u64>,
 }
 
-/// Resolve any collisions that occurred since the last call to
-/// `physics_system_update_positions`.
-pub fn physics_system_resolve_collisions(
-    entities: &mut EntityMap,
-    level: &Level,
-    dynamic_colliders: &Vec<Collider>,
-) {
-    let vertical_collision_leeway = config().vertical_collision_leeway;
-    for (&id, entity) in entities.iter_mut() {
-        let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
-            physics_collision_resolution(
-                id,
-                entity,
-                &level,
-                dynamic_colliders,
-                vertical_collision_leeway,
-            )
-        } else {
-            Default::default()
-        };
+impl PhysicsSystem {
+    pub fn with_capacity(capacity: usize) -> Self {
+        PhysicsSystem {
+            entities: Vec::with_capacity(capacity),
+        }
+    }
 
-        entity.physics.latest_frame = results;
+    /// Update the positions of all entities based on their velocities, applying the
+    /// effects of gravity for all that obey it.
+    ///
+    /// After this runs, some entities may have positions that are inside others;
+    /// call `physics_system_resolve_collisions` to resolve them.
+    pub fn update_positions(&mut self, entities: &mut EntityMap, time: &GameTime) {
+        let gravity = config().gravity;
+        let time_since_last_frame = time.time_since_last_frame as f32;
+        let gravity_this_frame = gravity * time_since_last_frame;
+
+        for entity in entities.values_mut() {
+            if !entity.physics.defies_gravity {
+                entity.physics.velocity.y +=
+                    gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
+            }
+
+            entity.physics.prev_bbox = entity.sprite.bbox();
+
+            entity.sprite.pos += entity.physics.velocity * time_since_last_frame;
+            entity.sprite.pos.x += entity.physics.x_impulse * time_since_last_frame;
+            entity.physics.x_impulse = 0.;
+        }
+    }
+
+    /// Resolve any collisions that occurred since the last call to
+    /// `physics_system_update_positions`.
+    pub fn resolve_collisions(
+        &mut self,
+        entities: &mut EntityMap,
+        level: &Level,
+        dynamic_collider_system: &mut DynamicColliderSystem,
+    ) {
+        let vertical_collision_leeway = config().vertical_collision_leeway;
+
+        self.entities.clear();
+        self.entities.extend(entities.keys());
+
+        // Sort our entities from bottom to top. This ensures that any displacements
+        // caused by the effects of gravity will propagate upwards, e.g. that the
+        // displacement caused by a crate that hits the ground propagates to a
+        // crate stacked atop it.
+        self.entities.sort_by(|a, b| {
+            let a_y = entities.get(a).unwrap().sprite.pos.y;
+            let b_y = entities.get(b).unwrap().sprite.pos.y;
+            b_y.partial_cmp(&a_y).unwrap()
+        });
+
+        for &id in self.entities.iter() {
+            let entity = entities.get_mut(&id).unwrap();
+            let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
+                physics_collision_resolution(
+                    id,
+                    entity,
+                    &level,
+                    dynamic_collider_system,
+                    vertical_collision_leeway,
+                )
+            } else {
+                Default::default()
+            };
+
+            entity.physics.latest_frame = results;
+        }
     }
 }
 
@@ -127,7 +156,7 @@ fn physics_collision_resolution(
     entity_id: u64,
     entity: &mut Entity,
     level: &Level,
-    dynamic_colliders: &Vec<Collider>,
+    dynamic_collider_system: &mut DynamicColliderSystem,
     vertical_collision_leeway: f32,
 ) -> PhysicsFrameResults {
     let prev_bbox = entity.physics.prev_bbox;
@@ -141,7 +170,7 @@ fn physics_collision_resolution(
 
         let colliders = level
             .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
-            .chain(dynamic_colliders.iter().copied());
+            .chain(dynamic_collider_system.colliders().copied());
 
         for collider in colliders {
             if let Some(collider_entity_id) = collider.entity_id {
@@ -159,6 +188,7 @@ fn physics_collision_resolution(
             if let Some(collision) =
                 process_collision(&collider, &prev_bbox, &bbox, vertical_collision_leeway)
             {
+                let mut hit_bottom_side = false;
                 match collision.side {
                     Side::Top => {
                         results.is_on_any_surface = true;
@@ -173,12 +203,23 @@ fn physics_collision_resolution(
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
                             physics.velocity.y = 0.;
                         }
+                        hit_bottom_side = true;
                     }
                     Side::Left | Side::Right => {
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
                             physics.velocity.x = 0.;
                         }
                     }
+                }
+
+                if hit_bottom_side && results.is_on_any_surface {
+                    // We are being squeezed from the top and bottom. Assume that it's
+                    // gravity that's doing the squeezing; we already displaced ourself
+                    // from below in a previous iteration of this loop, so return now
+                    // without doing any displacement, so that whatever's above us
+                    // (remember we're iterating through entities from bottom to top)
+                    // will be displaced by us, if we have a dynamic collider.
+                    return false;
                 }
 
                 if collision.displacement != Vec2::ZERO {
@@ -217,6 +258,14 @@ fn physics_collision_resolution(
             "WARNING: aborting collision_resolution_loop for entity {} after {} iterations.",
             entity, loop_result.displacements
         );
+    }
+
+    if results.was_displaced && entity.dynamic_collider.is_some() {
+        // This entity has a dynamic collider associated with it, so update its
+        // computed collider to reflect its displaced position. This will ensure
+        // anything above us that collides with us is displaced by our new
+        // position.
+        dynamic_collider_system.update_dynamic_collider(entity_id, entity);
     }
 
     results

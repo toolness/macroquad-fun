@@ -24,6 +24,7 @@ pub fn create_crate(start_rect: Rect) -> Entity {
         },
         physics: PhysicsComponent {
             collision_behavior: PhysicsCollisionBehavior::Stop,
+            collision_flags: CollisionFlags::PLAYER_ONLY | CollisionFlags::ENVIRONMENT,
             ..Default::default()
         },
         z_index: ZIndexComponent::new(100),
@@ -37,6 +38,7 @@ pub fn create_crate(start_rect: Rect) -> Entity {
         })),
         push: Some(PushComponent {
             pushable_coefficient: config().crate_pushable_coefficient,
+            can_push: true,
             ..Default::default()
         }),
         ..Default::default()

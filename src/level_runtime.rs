@@ -4,12 +4,12 @@ use crate::attachment::AttachmentSystem;
 use crate::config::config;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
-use crate::dynamic_collider::{draw_dynamic_collider_debug_rects, DynamicColliderSystem};
+use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, EntityProcessor, PLAYER_ENTITY_ID};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
-use crate::physics::{physics_system_resolve_collisions, physics_system_update_positions};
+use crate::physics::PhysicsSystem;
 use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
     teleport_entity,
@@ -41,6 +41,7 @@ pub struct LevelRuntime {
     camera: Camera,
     next_id: u64,
     time: GameTime,
+    physics_system: PhysicsSystem,
     attachment_system: AttachmentSystem,
     push_system: PushSystem,
     dynamic_collider_system: DynamicColliderSystem,
@@ -59,6 +60,7 @@ impl LevelRuntime {
             debug_mode: false,
             camera: Camera::new(),
             time: GameTime::new(),
+            physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
             attachment_system: AttachmentSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -138,13 +140,14 @@ impl LevelRuntime {
         self.attachment_system
             .run(&mut self.entities, &self.level, &self.time);
         route_system(&mut self.entities);
-        physics_system_update_positions(&mut self.entities, &self.time);
+        self.physics_system
+            .update_positions(&mut self.entities, &self.time);
         self.dynamic_collider_system.run(&mut self.entities);
         self.push_system.run(&mut self.entities);
-        physics_system_resolve_collisions(
+        self.physics_system.resolve_collisions(
             &mut self.entities,
             &self.level,
-            &self.dynamic_collider_system.colliders(),
+            &mut self.dynamic_collider_system,
         );
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
@@ -212,7 +215,7 @@ impl LevelRuntime {
         for collider in level.iter_colliders(&level.pixel_bounds()) {
             collider.draw_debug_rect(PURPLE);
         }
-        draw_dynamic_collider_debug_rects(&self.entities);
+        self.dynamic_collider_system.draw_debug_rects();
         draw_route_debug_targets(&self.entities);
         draw_rect_lines(
             &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
