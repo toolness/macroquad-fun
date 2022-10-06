@@ -122,6 +122,11 @@ impl PhysicsSystem {
 
         self.entities.clear();
         self.entities.extend(entities.keys());
+
+        // Sort our entities from bottom to top. This ensures that any displacements
+        // caused by the effects of gravity will propagate upwards, e.g. that the
+        // displacement caused by a crate that hits the ground propagates to a
+        // crate stacked atop it.
         self.entities.sort_by(|a, b| {
             let a_y = entities.get(a).unwrap().sprite.pos.y;
             let b_y = entities.get(b).unwrap().sprite.pos.y;
@@ -208,7 +213,12 @@ fn physics_collision_resolution(
                 }
 
                 if hit_bottom_side && results.is_on_any_surface {
-                    // We are being squeezed from the top and bottom!
+                    // We are being squeezed from the top and bottom. Assume that it's
+                    // gravity that's doing the squeezing; we already displaced ourself
+                    // from below in a previous iteration of this loop, so return now
+                    // without doing any displacement, so that whatever's above us
+                    // (remember we're iterating through entities from bottom to top)
+                    // will be displaced by us, if we have a dynamic collider.
                     return false;
                 }
 
@@ -252,7 +262,9 @@ fn physics_collision_resolution(
 
     if results.was_displaced && entity.dynamic_collider.is_some() {
         // This entity has a dynamic collider associated with it, so update its
-        // computed collider to reflect its displaced position.
+        // computed collider to reflect its displaced position. This will ensure
+        // anything above us that collides with us is displaced by our new
+        // position.
         dynamic_collider_system.update_dynamic_collider(entity_id, entity);
     }
 
