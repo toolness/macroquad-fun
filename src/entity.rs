@@ -78,8 +78,8 @@ impl EntityMapHelpers for EntityMap {
 }
 
 pub struct EntityProcessor {
-    // This solely exists as an instance variable so we can amortize
-    // allocations across frames.
+    /// This solely exists as an instance variable so we can amortize
+    /// allocations across frames.
     entities_to_process: Vec<u64>,
 }
 
