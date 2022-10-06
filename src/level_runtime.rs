@@ -147,7 +147,7 @@ impl LevelRuntime {
         self.physics_system.resolve_collisions(
             &mut self.entities,
             &self.level,
-            &self.dynamic_collider_system.colliders(),
+            &mut self.dynamic_collider_system,
         );
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);

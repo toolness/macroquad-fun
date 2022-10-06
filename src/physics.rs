@@ -3,9 +3,10 @@ use macroquad::prelude::{Rect, Vec2};
 use crate::{
     collision::{
         collision_resolution_loop, maybe_reverse_direction_x, maybe_reverse_direction_xy,
-        process_collision, Collider, CollisionFlags, Side,
+        process_collision, CollisionFlags, Side,
     },
     config::config,
+    dynamic_collider::DynamicColliderSystem,
     entity::{Entity, EntityMap},
     level::Level,
     time::GameTime,
@@ -115,7 +116,7 @@ impl PhysicsSystem {
         &mut self,
         entities: &mut EntityMap,
         level: &Level,
-        dynamic_colliders: &Vec<Collider>,
+        dynamic_collider_system: &mut DynamicColliderSystem,
     ) {
         let vertical_collision_leeway = config().vertical_collision_leeway;
 
@@ -134,7 +135,7 @@ impl PhysicsSystem {
                     id,
                     entity,
                     &level,
-                    dynamic_colliders,
+                    dynamic_collider_system,
                     vertical_collision_leeway,
                 )
             } else {
@@ -150,7 +151,7 @@ fn physics_collision_resolution(
     entity_id: u64,
     entity: &mut Entity,
     level: &Level,
-    dynamic_colliders: &Vec<Collider>,
+    dynamic_collider_system: &mut DynamicColliderSystem,
     vertical_collision_leeway: f32,
 ) -> PhysicsFrameResults {
     let entity_iid = entity.iid;
@@ -165,7 +166,7 @@ fn physics_collision_resolution(
 
         let colliders = level
             .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
-            .chain(dynamic_colliders.iter().copied());
+            .chain(dynamic_collider_system.colliders().iter().copied());
 
         for collider in colliders {
             if let Some(collider_entity_id) = collider.entity_id {
