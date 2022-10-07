@@ -1,17 +1,19 @@
 use macroquad::{
-    prelude::{clamp, set_camera, Camera2D, Rect, Vec2},
+    prelude::{set_camera, Camera2D, Rect, Vec2},
     window::{screen_height, screen_width},
 };
 
 use crate::{
     config::config, level::Level, math_util::floor_rect, sprite_component::SpriteComponent,
+    time::GameTime,
 };
 
 #[derive(Default)]
 pub struct Camera {
     current_rect: Rect,
     is_panning_next_update: bool,
-    max_pan_speed: f32,
+    velocity: f32,
+    acceleration: f32,
 }
 
 impl Camera {
@@ -19,19 +21,39 @@ impl Camera {
         Camera {
             current_rect: Default::default(),
             is_panning_next_update: false,
-            max_pan_speed: config().sprite_scale * 1.,
+            velocity: 0.,
+            acceleration: config().camera_acceleration,
         }
     }
 
-    pub fn update(&mut self, sprite: &SpriteComponent, level: &Level) {
+    pub fn update(&mut self, sprite: &SpriteComponent, level: &Level, time: &GameTime) {
         let bbox = sprite.bbox();
         let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
         let target_rect = calculate_camera_rect(&bbox_center, &level.pixel_bounds());
+        let time_since_last_frame = time.time_since_last_frame as f32;
         if self.is_panning_next_update {
-            let delta = target_rect.point() - self.current_rect.point();
-            self.current_rect.x += clamp(delta.x, -self.max_pan_speed, self.max_pan_speed);
-            self.current_rect.y += clamp(delta.y, -self.max_pan_speed, self.max_pan_speed);
+            let target = target_rect.point();
+            let vector_to_target = target - self.current_rect.point();
+            if vector_to_target.length_squared() < 1. {
+                self.velocity -= self.acceleration * time_since_last_frame;
+                if self.velocity < 0. {
+                    self.velocity = 0.
+                }
+            } else {
+                self.velocity += self.acceleration * time_since_last_frame;
+                let velocity_vector = vector_to_target.normalize() * self.velocity;
+                self.current_rect.x += velocity_vector.x * time_since_last_frame;
+                self.current_rect.y += velocity_vector.y * time_since_last_frame;
+                let new_vector_to_target = target - self.current_rect.point();
+                let is_moving_towards_target = vector_to_target.dot(new_vector_to_target) > 0.;
+                if !is_moving_towards_target {
+                    // We just overshot the target!
+                    self.current_rect.x = target.x;
+                    self.current_rect.y = target.y;
+                }
+            }
         } else {
+            self.velocity = 0.;
             self.current_rect = target_rect;
             self.is_panning_next_update = true;
         }

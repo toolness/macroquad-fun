@@ -6,6 +6,7 @@
     "ms_to_max_run_speed": 200.0,
     "run_speed": 150.0,
     "gravity": 800.0,
+    "camera_acceleration": 400.0,
     "vertical_collision_leeway": 1.5,
     "long_jump_keypress_extra_force": 400.0,
     "jump_velocity": 210.0,
