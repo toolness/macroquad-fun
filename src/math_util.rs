@@ -18,9 +18,9 @@ pub fn floor_rect(rect: &Rect) -> Rect {
     )
 }
 
-/// Shrink the rectangle by the given amount, using
+/// Shrink the rectangle by the given x and y amounts, using
 /// its center as the origin.
-pub fn contract_rect(rect: &Rect, x_amount: f32, y_amount: f32) -> Rect {
+pub fn contract_rect_xy(rect: &Rect, x_amount: f32, y_amount: f32) -> Rect {
     let mut result = *rect;
 
     result.x += x_amount;
@@ -29,4 +29,10 @@ pub fn contract_rect(rect: &Rect, x_amount: f32, y_amount: f32) -> Rect {
     result.h -= y_amount * 2.;
 
     return result;
+}
+
+/// Shrink the rectangle by the given amount along both axes, using
+/// its center as the origin.
+pub fn contract_rect(rect: &Rect, amount: f32) -> Rect {
+    contract_rect_xy(&rect, amount, amount)
 }
