@@ -11,6 +11,7 @@ pub struct Config {
     pub run_speed: f32,
     pub gravity: f32,
     pub camera_acceleration: f32,
+    pub camera_deadzone_percentage: f32,
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
     pub attach_velocity_coefficient: f32,

@@ -225,6 +225,7 @@ impl LevelRuntime {
         for entity in self.entities.values() {
             entity.sprite.draw_debug_rects();
         }
+        self.camera.draw_debug_info();
 
         if let Some(text) = &self.debug_text_lines {
             let font_size = config().debug_text_size;
