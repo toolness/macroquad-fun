@@ -15,10 +15,11 @@ use crate::{
 pub fn create_crate(start_rect: Rect) -> Entity {
     let start_point = start_rect.point();
     let relative_bbox = start_rect.offset(-start_point);
+    let contraction = config().sprite_scale;
     Entity {
         sprite: SpriteComponent {
             pos: start_point,
-            relative_bbox: contract_rect(&relative_bbox, config().sprite_scale),
+            relative_bbox: contract_rect(&relative_bbox, contraction, contraction),
             renderer: Renderer::SolidRectangle(relative_bbox),
             color: Some(BROWN),
             ..Default::default()
