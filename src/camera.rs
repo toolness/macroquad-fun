@@ -7,7 +7,7 @@ use crate::{
     config::config,
     drawing::{draw_crosshair, draw_rect_lines},
     level::Level,
-    math_util::{contract_rect_xy, floor_rect, rect_fully_contains},
+    math_util::{contract_rect_xy, floor_rect},
     sprite_component::SpriteComponent,
     time::GameTime,
 };
@@ -19,6 +19,7 @@ pub struct Camera {
     velocity: f32,
     acceleration: f32,
     deadzone_percentage: f32,
+    facing_offset_percentage: f32,
     target: Vec2,
 }
 
@@ -30,6 +31,7 @@ impl Camera {
             velocity: 0.,
             acceleration: config().camera_acceleration,
             deadzone_percentage: config().camera_deadzone_percentage,
+            facing_offset_percentage: config().camera_facing_offset_percentage,
             target: Default::default(),
         }
     }
@@ -49,9 +51,14 @@ impl Camera {
     pub fn update(&mut self, sprite: &SpriteComponent, level: &Level, time: &GameTime) {
         let bbox = sprite.bbox();
         let deadzone_rect = self.get_deadzone_rect();
-        let is_target_inside_deadzone = rect_fully_contains(&deadzone_rect, &bbox);
-        let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
-        self.target = bbox_center;
+        let mut target = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
+        target.x += if sprite.is_facing_left {
+            -self.current_rect.w * self.facing_offset_percentage
+        } else {
+            self.current_rect.w * self.facing_offset_percentage
+        };
+        self.target = target;
+        let is_target_inside_deadzone = deadzone_rect.contains(self.target);
         let target_rect = calculate_camera_rect(
             &self.target,
             &level.pixel_bounds(),

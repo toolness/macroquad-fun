@@ -36,12 +36,3 @@ pub fn contract_rect_xy(rect: &Rect, x_amount: f32, y_amount: f32) -> Rect {
 pub fn contract_rect(rect: &Rect, amount: f32) -> Rect {
     contract_rect_xy(&rect, amount, amount)
 }
-
-/// Returns whether the first rect fully contains the second.
-pub fn rect_fully_contains(a: &Rect, b: &Rect) -> bool {
-    if let Some(intersection) = a.intersect(*b) {
-        intersection == *b
-    } else {
-        false
-    }
-}
