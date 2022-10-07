@@ -18,7 +18,7 @@ pub fn create_crate(start_rect: Rect) -> Entity {
     Entity {
         sprite: SpriteComponent {
             pos: start_point,
-            relative_bbox: contract_rect(&relative_bbox, config().sprite_scale * 0.5),
+            relative_bbox: contract_rect(&relative_bbox, config().sprite_scale),
             renderer: Renderer::SolidRectangle(relative_bbox),
             color: Some(BROWN),
             ..Default::default()
