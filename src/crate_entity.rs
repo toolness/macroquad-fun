@@ -38,7 +38,6 @@ pub fn create_crate(start_rect: Rect) -> Entity {
         })),
         push: Some(PushComponent {
             pushable_coefficient: config().crate_pushable_coefficient,
-            can_push: true,
             ..Default::default()
         }),
         ..Default::default()
