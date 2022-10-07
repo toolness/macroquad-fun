@@ -5,7 +5,7 @@ use macroquad::{
 
 use crate::{
     config::config,
-    drawing::draw_rect_lines,
+    drawing::{draw_crosshair, draw_rect_lines},
     level::Level,
     math_util::{contract_rect_xy, floor_rect, rect_fully_contains},
     sprite_component::SpriteComponent,
@@ -19,6 +19,7 @@ pub struct Camera {
     velocity: f32,
     acceleration: f32,
     deadzone_percentage: f32,
+    target: Vec2,
 }
 
 impl Camera {
@@ -29,6 +30,7 @@ impl Camera {
             velocity: 0.,
             acceleration: config().camera_acceleration,
             deadzone_percentage: config().camera_deadzone_percentage,
+            target: Default::default(),
         }
     }
 
@@ -49,8 +51,9 @@ impl Camera {
         let deadzone_rect = self.get_deadzone_rect();
         let is_target_inside_deadzone = rect_fully_contains(&deadzone_rect, &bbox);
         let bbox_center = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
+        self.target = bbox_center;
         let target_rect = calculate_camera_rect(
-            &bbox_center,
+            &self.target,
             &level.pixel_bounds(),
             self.current_rect.w,
             self.current_rect.h,
@@ -100,6 +103,7 @@ impl Camera {
 
     pub fn draw_debug_info(&self) {
         draw_rect_lines(&self.get_deadzone_rect(), 2., BLUE);
+        draw_crosshair(&self.target, 5., 1., BLUE);
     }
 }
 
