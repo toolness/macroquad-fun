@@ -13,7 +13,8 @@ use crate::{
 #[derive(Default)]
 pub enum Renderer {
     #[default]
-    Rectangle,
+    None,
+    SolidRectangle(Rect),
     Sprite(&'static SpriteRenderer),
     EntityTiles(Rect),
 }
@@ -67,6 +68,7 @@ impl SpriteComponent {
 
     pub fn draw_current_frame(&self, level: &Level) {
         match self.renderer {
+            Renderer::None => {}
             Renderer::Sprite(sprite) => {
                 sprite.draw_ex(
                     self.pos.x,
@@ -79,13 +81,13 @@ impl SpriteComponent {
                     },
                 );
             }
-            Renderer::Rectangle => {
+            Renderer::SolidRectangle(rect) => {
                 if let Some(color) = self.color {
                     draw_rectangle(
-                        self.pos.x,
-                        self.pos.y,
-                        self.relative_bbox.w,
-                        self.relative_bbox.h,
+                        self.pos.x + rect.x,
+                        self.pos.y + rect.y,
+                        rect.w,
+                        rect.h,
                         color,
                     );
                 }

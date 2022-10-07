@@ -5,6 +5,7 @@ use crate::{
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
+    math_util::contract_rect,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
     sprite_component::{Renderer, SpriteComponent},
@@ -17,8 +18,8 @@ pub fn create_crate(start_rect: Rect) -> Entity {
     Entity {
         sprite: SpriteComponent {
             pos: start_point,
-            relative_bbox,
-            renderer: Renderer::Rectangle,
+            relative_bbox: contract_rect(&relative_bbox, config().sprite_scale),
+            renderer: Renderer::SolidRectangle(relative_bbox),
             color: Some(BROWN),
             ..Default::default()
         },

@@ -17,3 +17,16 @@ pub fn floor_rect(rect: &Rect) -> Rect {
         rect.h.floor(),
     )
 }
+
+/// Shrink the rectangle by the given amount, using
+/// its center as the origin.
+pub fn contract_rect(rect: &Rect, amount: f32) -> Rect {
+    let mut result = *rect;
+
+    result.x += amount;
+    result.y += amount;
+    result.w -= amount * 2.;
+    result.h -= amount * 2.;
+
+    return result;
+}

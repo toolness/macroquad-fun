@@ -33,9 +33,9 @@ impl PushSystem {
                             let pusher_bbox = pusher.sprite.bbox();
                             let pushed_bbox = pushed.sprite.bbox();
                             if let Some(intersection) = pusher_bbox.intersect(pushed_bbox) {
-                                // Only push if the pusher is overlapping the full height of the
+                                // Only push if the pusher is overlapping most of the
                                 // pushed entity.
-                                if intersection.h == pushed_bbox.h {
+                                if intersection.h >= pushed_bbox.h * 0.5 {
                                     let sign = if pusher_bbox.x > pushed_bbox.x {
                                         -1.
                                     } else {
