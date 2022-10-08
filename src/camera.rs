@@ -16,6 +16,7 @@ use crate::{
 pub struct Camera {
     current_rect: Rect,
     is_panning_next_update: bool,
+    is_centered_without_deadzone: bool,
     x_axis: CameraAxis,
     y_axis: CameraAxis,
     deadzone_percentage: Vec2,
@@ -31,6 +32,7 @@ impl Camera {
             is_panning_next_update: false,
             x_axis: CameraAxis::new("X"),
             y_axis: CameraAxis::new("Y"),
+            is_centered_without_deadzone: false,
             deadzone_percentage: Vec2::new(
                 config.camera_deadzone_width_percentage,
                 config.camera_deadzone_height_percentage,
@@ -52,17 +54,22 @@ impl Camera {
         )
     }
 
-    pub fn update(&mut self, entity: &Entity, level: &Level, time: &GameTime) {
-        let sprite = &entity.sprite;
+    fn should_center_without_deadzone(&self, entity: &Entity) -> bool {
         let is_attached = entity
             .attachment
             .as_ref()
             .map(|a| a.is_attached())
             .unwrap_or(false);
+        is_attached || entity.physics.latest_frame.is_on_moving_surface
+    }
+
+    pub fn update(&mut self, entity: &Entity, level: &Level, time: &GameTime) {
+        let sprite = &entity.sprite;
         let bbox = sprite.bbox();
         let deadzone_rect = self.get_deadzone_rect();
+        self.is_centered_without_deadzone = self.should_center_without_deadzone(entity);
         let mut target = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
-        if !is_attached {
+        if !self.is_centered_without_deadzone {
             target.x += if sprite.is_facing_left {
                 -self.current_rect.w * self.facing_offset_percentage
             } else {
@@ -82,18 +89,18 @@ impl Camera {
         if self.is_panning_next_update {
             self.x_axis.update(
                 target_rect.x,
-                self.target.x >= deadzone_rect.left()
-                    && self.target.x <= deadzone_rect.right()
-                    && !is_attached,
+                !self.is_centered_without_deadzone
+                    && self.target.x >= deadzone_rect.left()
+                    && self.target.x <= deadzone_rect.right(),
                 level_rect.left(),
                 level_rect.right(),
                 time_since_last_frame,
             );
             self.y_axis.update(
                 target_rect.y,
-                self.target.y >= deadzone_rect.top()
-                    && self.target.y <= deadzone_rect.bottom()
-                    && !is_attached,
+                !self.is_centered_without_deadzone
+                    && self.target.y >= deadzone_rect.top()
+                    && self.target.y <= deadzone_rect.bottom(),
                 level_rect.top(),
                 level_rect.bottom(),
                 time_since_last_frame,
@@ -120,7 +127,9 @@ impl Camera {
     }
 
     pub fn draw_debug_info(&self) {
-        draw_rect_lines(&self.get_deadzone_rect(), 2., BLUE);
+        if !self.is_centered_without_deadzone {
+            draw_rect_lines(&self.get_deadzone_rect(), 2., BLUE);
+        }
         draw_crosshair(&self.target, 5., 1., BLUE);
     }
 }

@@ -72,6 +72,7 @@ pub struct PhysicsComponent {
 #[derive(Default)]
 pub struct PhysicsFrameResults {
     pub is_on_any_surface: bool,
+    pub is_on_moving_surface: bool,
     pub was_displaced: bool,
 }
 
@@ -194,9 +195,15 @@ fn physics_collision_resolution(
                         results.is_on_any_surface = true;
                         if !physics.defies_gravity {
                             physics.velocity.y = collider.velocity.y;
+                            if collider.velocity.y != 0. {
+                                results.is_on_moving_surface = true;
+                            }
                         }
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
                             physics.velocity.x = collider.velocity.x;
+                            if collider.velocity.x != 0. {
+                                results.is_on_moving_surface = true;
+                            }
                         }
                     }
                     Side::Bottom => {
