@@ -159,13 +159,20 @@ fn calculate_camera_rect(
 }
 
 #[derive(Default, Debug)]
+enum AxisState {
+    #[default]
+    Idle,
+    EasingIn(f32, f32),
+    Tracking,
+}
+
+#[derive(Default, Debug)]
 struct CameraAxis {
     #[allow(dead_code)]
     name: &'static str,
     pos: f32,
     target: f32,
-    start_pos: f32,
-    time_elapsed: f32,
+    state: AxisState,
 }
 
 impl CameraAxis {
@@ -177,28 +184,55 @@ impl CameraAxis {
     }
 
     fn reset(&mut self, pos: f32) {
+        self.state = AxisState::Idle;
         self.pos = pos;
         self.target = self.pos;
-        self.start_pos = pos;
     }
 
     fn update(&mut self, target: f32, is_target_in_deadzone: bool, time_since_last_frame: f32) {
-        let total_time = config().camera_ms_time_to_target / 1000.;
-        if self.target != target {
-            self.time_elapsed = 0.;
-            self.start_pos = self.pos;
-            self.target = target;
+        match self.state {
+            AxisState::Idle => {
+                if self.target != target {
+                    self.state = AxisState::EasingIn(self.pos, 0.);
+                    self.target = target;
+                }
+            }
+            AxisState::EasingIn(start_pos, prev_time_elapsed) => {
+                let total_time = config().camera_ms_time_to_target / 1000.;
+                let mut new_time_elapsed = prev_time_elapsed + time_since_last_frame;
+                self.target = target;
+                if new_time_elapsed > total_time {
+                    new_time_elapsed = total_time;
+                }
+                self.pos = start_pos
+                    + ease_in_quad(new_time_elapsed / total_time) * (self.target - start_pos);
+                if new_time_elapsed == total_time {
+                    self.state = AxisState::Tracking;
+                } else {
+                    self.state = AxisState::EasingIn(start_pos, new_time_elapsed)
+                }
+            }
+            AxisState::Tracking => {
+                if self.target != target {
+                    self.pos = target;
+                    self.target = target;
+                } else {
+                    self.state = AxisState::Idle;
+                }
+            }
         }
-        self.time_elapsed += time_since_last_frame;
-        if self.time_elapsed > total_time {
-            self.time_elapsed = total_time;
-        }
-        self.pos = self.start_pos
-            + ease_in_out(self.time_elapsed / total_time) * (self.target - self.start_pos);
     }
 }
 
-fn ease_in_out(x: f32) -> f32 {
+fn ease_in_quad(x: f32) -> f32 {
+    x * x
+}
+
+fn ease_out_quad(x: f32) -> f32 {
+    1. - (1. - x) * (1. - x)
+}
+
+fn ease_in_out_quad(x: f32) -> f32 {
     // https://easings.net/#easeInOutQuad
     if x < 0.5 {
         2. * x * x
