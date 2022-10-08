@@ -8,7 +8,7 @@
     "gravity": 800.0,
     "camera_acceleration": 200.0,
     "camera_deadzone_width_percentage": 0.65,
-    "camera_deadzone_height_percentage": 0.40,
+    "camera_deadzone_height_percentage": 0.25,
     "camera_facing_offset_percentage": 0.30,
     "vertical_collision_leeway": 1.5,
     "long_jump_keypress_extra_force": 400.0,
