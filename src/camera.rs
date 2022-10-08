@@ -179,7 +179,6 @@ impl CameraAxis {
         max_pos: f32,
         time_since_last_frame: f32,
     ) {
-        let acceleration = config().camera_acceleration;
         let to_target = target - self.pos;
         let direction_to_target = if to_target < 0. {
             -1.
@@ -192,13 +191,15 @@ impl CameraAxis {
         let has_reached_target = to_target.abs() < 1.;
         let prev_velocity = self.velocity;
         if is_target_in_deadzone || has_reached_target {
-            self.velocity += direction_from_target * acceleration * time_since_last_frame;
+            self.velocity +=
+                direction_from_target * config().camera_deceleration * time_since_last_frame;
             if self.velocity * direction_to_target <= 0. {
                 // We are now going in the opposite direction, but we don't want to do that, so stop.
                 self.velocity = 0.
             }
         } else {
-            self.velocity += direction_to_target * acceleration * time_since_last_frame;
+            self.velocity +=
+                direction_to_target * config().camera_acceleration * time_since_last_frame;
         }
 
         if !has_reached_target {
