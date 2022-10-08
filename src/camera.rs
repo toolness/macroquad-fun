@@ -18,20 +18,24 @@ pub struct Camera {
     is_panning_next_update: bool,
     x_axis: CameraAxis,
     y_axis: CameraAxis,
-    deadzone_percentage: f32,
+    deadzone_percentage: Vec2,
     facing_offset_percentage: f32,
     target: Vec2,
 }
 
 impl Camera {
     pub fn new() -> Self {
+        let config = config();
         Camera {
             current_rect: Rect::new(0., 0., screen_width(), screen_height()),
             is_panning_next_update: false,
             x_axis: Default::default(),
             y_axis: Default::default(),
-            deadzone_percentage: config().camera_deadzone_percentage,
-            facing_offset_percentage: config().camera_facing_offset_percentage,
+            deadzone_percentage: Vec2::new(
+                config.camera_deadzone_width_percentage,
+                config.camera_deadzone_height_percentage,
+            ),
+            facing_offset_percentage: config.camera_facing_offset_percentage,
             target: Default::default(),
         }
     }
@@ -39,8 +43,8 @@ impl Camera {
     fn get_deadzone_rect(&self) -> Rect {
         let w = self.current_rect.w;
         let h = self.current_rect.h;
-        let width_reduction = w - (w * self.deadzone_percentage);
-        let height_reduction = h - (h * self.deadzone_percentage);
+        let width_reduction = w - (w * self.deadzone_percentage.x);
+        let height_reduction = h - (h * self.deadzone_percentage.y);
         contract_rect_xy(
             &self.current_rect,
             width_reduction / 2.,
