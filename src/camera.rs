@@ -6,9 +6,9 @@ use macroquad::{
 use crate::{
     config::config,
     drawing::{draw_crosshair, draw_rect_lines},
+    entity::Entity,
     level::Level,
     math_util::{contract_rect_xy, floor_rect},
-    sprite_component::SpriteComponent,
     time::GameTime,
 };
 
@@ -29,8 +29,8 @@ impl Camera {
         Camera {
             current_rect: Rect::new(0., 0., screen_width(), screen_height()),
             is_panning_next_update: false,
-            x_axis: Default::default(),
-            y_axis: Default::default(),
+            x_axis: CameraAxis::new("X"),
+            y_axis: CameraAxis::new("Y"),
             deadzone_percentage: Vec2::new(
                 config.camera_deadzone_width_percentage,
                 config.camera_deadzone_height_percentage,
@@ -52,19 +52,28 @@ impl Camera {
         )
     }
 
-    pub fn update(&mut self, sprite: &SpriteComponent, level: &Level, time: &GameTime) {
+    pub fn update(&mut self, entity: &Entity, level: &Level, time: &GameTime) {
+        let sprite = &entity.sprite;
+        let is_attached = entity
+            .attachment
+            .as_ref()
+            .map(|a| a.is_attached())
+            .unwrap_or(false);
         let bbox = sprite.bbox();
         let deadzone_rect = self.get_deadzone_rect();
         let mut target = Vec2::new(bbox.x + bbox.w / 2., bbox.y + bbox.h / 2.);
-        target.x += if sprite.is_facing_left {
-            -self.current_rect.w * self.facing_offset_percentage
-        } else {
-            self.current_rect.w * self.facing_offset_percentage
-        };
+        if !is_attached {
+            target.x += if sprite.is_facing_left {
+                -self.current_rect.w * self.facing_offset_percentage
+            } else {
+                self.current_rect.w * self.facing_offset_percentage
+            };
+        }
         self.target = target;
+        let level_rect = level.pixel_bounds();
         let target_rect = calculate_camera_rect(
             &self.target,
-            &level.pixel_bounds(),
+            &level_rect,
             self.current_rect.w,
             self.current_rect.h,
         );
@@ -73,12 +82,20 @@ impl Camera {
         if self.is_panning_next_update {
             self.x_axis.update(
                 target_rect.x,
-                self.target.x >= deadzone_rect.left() && self.target.x <= deadzone_rect.right(),
+                self.target.x >= deadzone_rect.left()
+                    && self.target.x <= deadzone_rect.right()
+                    && !is_attached,
+                level_rect.left(),
+                level_rect.right(),
                 time_since_last_frame,
             );
             self.y_axis.update(
                 target_rect.y,
-                self.target.y >= deadzone_rect.top() && self.target.y <= deadzone_rect.bottom(),
+                self.target.y >= deadzone_rect.top()
+                    && self.target.y <= deadzone_rect.bottom()
+                    && !is_attached,
+                level_rect.top(),
+                level_rect.bottom(),
                 time_since_last_frame,
             );
             self.current_rect.x = self.x_axis.pos;
@@ -135,22 +152,45 @@ fn calculate_camera_rect(
 
 #[derive(Default, Debug)]
 struct CameraAxis {
+    #[allow(dead_code)]
+    name: &'static str,
     pos: f32,
     velocity: f32,
 }
 
 impl CameraAxis {
+    fn new(name: &'static str) -> Self {
+        CameraAxis {
+            name,
+            ..Default::default()
+        }
+    }
+
     fn reset(&mut self, pos: f32) {
         self.pos = pos;
         self.velocity = 0.;
     }
 
-    fn update(&mut self, target: f32, is_target_in_deadzone: bool, time_since_last_frame: f32) {
+    fn update(
+        &mut self,
+        target: f32,
+        is_target_in_deadzone: bool,
+        min_pos: f32,
+        max_pos: f32,
+        time_since_last_frame: f32,
+    ) {
         let acceleration = config().camera_acceleration;
         let to_target = target - self.pos;
-        let direction_to_target = if to_target < 0. { -1. } else { 1. };
+        let direction_to_target = if to_target < 0. {
+            -1.
+        } else if to_target > 0. {
+            1.
+        } else {
+            0.
+        };
         let direction_from_target = -1. * direction_to_target;
         let has_reached_target = to_target.abs() < 1.;
+        let prev_velocity = self.velocity;
         if is_target_in_deadzone || has_reached_target {
             self.velocity += direction_from_target * acceleration * time_since_last_frame;
             if self.velocity * direction_to_target <= 0. {
@@ -168,6 +208,12 @@ impl CameraAxis {
             if !is_moving_towards_target {
                 // We just overshot the target!
                 self.pos = target;
+                self.velocity = prev_velocity;
+            }
+            if self.pos < min_pos {
+                self.pos = min_pos;
+            } else if self.pos > max_pos {
+                self.pos = max_pos;
             }
         }
     }

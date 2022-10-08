@@ -134,7 +134,7 @@ impl LevelRuntime {
         }
 
         self.camera
-            .update(&self.entities.player().sprite, &self.level, &self.time);
+            .update(&self.entities.player(), &self.level, &self.time);
 
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system
