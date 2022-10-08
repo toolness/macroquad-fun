@@ -58,33 +58,23 @@ impl Camera {
             self.current_rect.w * self.facing_offset_percentage
         };
         self.target = target;
-        let level_rect = level.pixel_bounds();
         let target_rect = calculate_camera_rect(
             &self.target,
-            &level_rect,
+            &level.pixel_bounds(),
             self.current_rect.w,
             self.current_rect.h,
         );
-        let can_we_scroll_left = self.current_rect.x >= 1.;
-        let can_we_scroll_right = self.current_rect.right() < level_rect.right();
-        let can_we_scroll_up = self.current_rect.y >= 1.;
-        let can_we_scroll_down = self.current_rect.bottom() < level_rect.bottom();
-        let is_target_in_deadzone_x = (self.target.x >= deadzone_rect.left()
-            || !can_we_scroll_left)
-            && (self.target.x <= deadzone_rect.right() || !can_we_scroll_right);
-        let is_target_in_deadzone_y = (self.target.y >= deadzone_rect.top() || !can_we_scroll_up)
-            && (self.target.y <= deadzone_rect.bottom() || !can_we_scroll_down);
 
         let time_since_last_frame = time.time_since_last_frame as f32;
         if self.is_panning_next_update {
             self.x_axis.update(
                 target_rect.x,
-                is_target_in_deadzone_x,
+                self.target.x >= deadzone_rect.left() && self.target.x <= deadzone_rect.right(),
                 time_since_last_frame,
             );
             self.y_axis.update(
                 target_rect.y,
-                is_target_in_deadzone_y,
+                self.target.y >= deadzone_rect.top() && self.target.y <= deadzone_rect.bottom(),
                 time_since_last_frame,
             );
             self.current_rect.x = self.x_axis.pos;
