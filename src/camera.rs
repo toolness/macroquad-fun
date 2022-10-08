@@ -55,6 +55,9 @@ impl Camera {
     }
 
     fn should_center_without_deadzone(&self, entity: &Entity) -> bool {
+        if config().camera_disable_deadzone {
+            return true;
+        }
         let is_attached = entity
             .attachment
             .as_ref()
