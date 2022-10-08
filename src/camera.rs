@@ -63,7 +63,15 @@ impl Camera {
             .as_ref()
             .map(|a| a.is_attached())
             .unwrap_or(false);
-        is_attached || entity.physics.latest_frame.is_on_moving_surface
+        if is_attached || entity.physics.latest_frame.is_on_moving_surface {
+            return true;
+        }
+        if !entity.physics.latest_frame.is_on_any_surface {
+            // The target is in the air. Keep whatever setting we had while they
+            // were on the ground, otherwise it's disorienting.
+            return self.is_centered_without_deadzone;
+        }
+        return false;
     }
 
     pub fn update(&mut self, entity: &Entity, level: &Level, time: &GameTime) {
