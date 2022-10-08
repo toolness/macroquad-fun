@@ -10,6 +10,7 @@ pub struct Config {
     pub ms_to_max_run_speed: f64,
     pub run_speed: f32,
     pub gravity: f32,
+    pub camera_ms_time_to_target: f32,
     pub camera_acceleration: f32,
     pub camera_deceleration: f32,
     pub camera_deadzone_width_percentage: f32,

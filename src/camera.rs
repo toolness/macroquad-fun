@@ -95,8 +95,6 @@ impl Camera {
                 !self.is_centered_without_deadzone
                     && self.target.x >= deadzone_rect.left()
                     && self.target.x <= deadzone_rect.right(),
-                level_rect.left(),
-                level_rect.right(),
                 time_since_last_frame,
             );
             self.y_axis.update(
@@ -104,8 +102,6 @@ impl Camera {
                 !self.is_centered_without_deadzone
                     && self.target.y >= deadzone_rect.top()
                     && self.target.y <= deadzone_rect.bottom(),
-                level_rect.top(),
-                level_rect.bottom(),
                 time_since_last_frame,
             );
             self.current_rect.x = self.x_axis.pos;
@@ -167,7 +163,9 @@ struct CameraAxis {
     #[allow(dead_code)]
     name: &'static str,
     pos: f32,
-    velocity: f32,
+    target: f32,
+    start_pos: f32,
+    time_elapsed: f32,
 }
 
 impl CameraAxis {
@@ -180,54 +178,31 @@ impl CameraAxis {
 
     fn reset(&mut self, pos: f32) {
         self.pos = pos;
-        self.velocity = 0.;
+        self.target = self.pos;
+        self.start_pos = pos;
     }
 
-    fn update(
-        &mut self,
-        target: f32,
-        is_target_in_deadzone: bool,
-        min_pos: f32,
-        max_pos: f32,
-        time_since_last_frame: f32,
-    ) {
-        let to_target = target - self.pos;
-        let direction_to_target = if to_target < 0. {
-            -1.
-        } else if to_target > 0. {
-            1.
-        } else {
-            0.
-        };
-        let direction_from_target = -1. * direction_to_target;
-        let has_reached_target = to_target.abs() < 1.;
-        let prev_velocity = self.velocity;
-        if is_target_in_deadzone || has_reached_target {
-            self.velocity +=
-                direction_from_target * config().camera_deceleration * time_since_last_frame;
-            if self.velocity * direction_to_target <= 0. {
-                // We are now going in the opposite direction, but we don't want to do that, so stop.
-                self.velocity = 0.
-            }
-        } else {
-            self.velocity +=
-                direction_to_target * config().camera_acceleration * time_since_last_frame;
+    fn update(&mut self, target: f32, is_target_in_deadzone: bool, time_since_last_frame: f32) {
+        let total_time = config().camera_ms_time_to_target / 1000.;
+        if self.target != target {
+            self.time_elapsed = 0.;
+            self.start_pos = self.pos;
+            self.target = target;
         }
+        self.time_elapsed += time_since_last_frame;
+        if self.time_elapsed > total_time {
+            self.time_elapsed = total_time;
+        }
+        self.pos = self.start_pos
+            + ease_in_out(self.time_elapsed / total_time) * (self.target - self.start_pos);
+    }
+}
 
-        if !has_reached_target {
-            self.pos += self.velocity * time_since_last_frame;
-            let new_to_target = target - self.pos;
-            let is_moving_towards_target = to_target * new_to_target > 0.;
-            if !is_moving_towards_target {
-                // We just overshot the target!
-                self.pos = target;
-                self.velocity = prev_velocity;
-            }
-            if self.pos < min_pos {
-                self.pos = min_pos;
-            } else if self.pos > max_pos {
-                self.pos = max_pos;
-            }
-        }
+fn ease_in_out(x: f32) -> f32 {
+    // https://easings.net/#easeInOutQuad
+    if x < 0.5 {
+        2. * x * x
+    } else {
+        1. - (-2. * x + 2.).powi(2) / 2.
     }
 }

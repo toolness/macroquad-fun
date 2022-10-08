@@ -6,6 +6,7 @@
     "ms_to_max_run_speed": 200.0,
     "run_speed": 150.0,
     "gravity": 800.0,
+    "camera_ms_time_to_target": 500.0,
     "camera_acceleration": 200.0,
     "camera_deceleration": 200.0,
     "camera_deadzone_width_percentage": 0.65,
