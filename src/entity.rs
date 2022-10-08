@@ -3,6 +3,7 @@ use std::{collections::HashMap, fmt::Display};
 use crate::{
     attachment::{AttachableComponent, AttachmentComponent},
     dynamic_collider::DynamicColliderComponent,
+    floor_switch::FloorSwitchComponent,
     flying_eye::FlyingEyeComponent,
     mushroom::MushroomComponent,
     physics::PhysicsComponent,
@@ -11,6 +12,7 @@ use crate::{
     route::RouteComponent,
     running::RunComponent,
     sprite_component::SpriteComponent,
+    switch::SwitchComponent,
     z_index::ZIndexComponent,
 };
 
@@ -28,6 +30,8 @@ pub struct Entity {
     pub dynamic_collider: Option<DynamicColliderComponent>,
     pub route: Option<RouteComponent>,
     pub push: Option<PushComponent>,
+    pub switch: Option<SwitchComponent>,
+    pub floor_switch: Option<FloorSwitchComponent>,
     pub iid: Option<&'static str>,
 }
 

@@ -104,6 +104,7 @@ pub enum EntityKind {
     Mushroom,
     MovingPlatform(Vec2),
     Crate,
+    FloorSwitch,
 }
 
 impl Level {
@@ -163,6 +164,7 @@ impl Level {
                             EntityKind::MovingPlatform(end_point * grid_size)
                         }
                         "Crate" => EntityKind::Crate,
+                        "FloorSwitch" => EntityKind::FloorSwitch,
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
                             continue;

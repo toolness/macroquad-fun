@@ -6,6 +6,7 @@ use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap, EntityMapHelpers, EntityProcessor, PLAYER_ENTITY_ID};
+use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -16,6 +17,7 @@ use crate::player::{
 };
 use crate::push::PushSystem;
 use crate::route::{draw_route_debug_targets, route_system};
+use crate::switch::SwitchSystem;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
 use crate::z_index::ZIndexedDrawingSystem;
@@ -43,6 +45,7 @@ pub struct LevelRuntime {
     time: GameTime,
     physics_system: PhysicsSystem,
     attachment_system: AttachmentSystem,
+    switch_system: SwitchSystem,
     push_system: PushSystem,
     dynamic_collider_system: DynamicColliderSystem,
     debug_text_lines: Option<String>,
@@ -65,6 +68,9 @@ impl LevelRuntime {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
             push_system: PushSystem {
+                processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
+            },
+            switch_system: SwitchSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
             dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
@@ -97,7 +103,8 @@ impl LevelRuntime {
                     Some(create_moving_platform(entity.rect, endpoint))
                 }
                 EntityKind::Crate => Some(create_crate(entity.rect)),
-                _ => None,
+                EntityKind::FloorSwitch => Some(create_floor_switch(entity.rect)),
+                EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
             };
             if let Some(mut instance) = opt_instance {
                 instance.iid = Some(&entity.iid);
@@ -140,11 +147,13 @@ impl LevelRuntime {
             .update_positions(&mut self.entities, &self.time);
         self.dynamic_collider_system.run(&mut self.entities);
         self.push_system.run(&mut self.entities);
+        self.switch_system.run(&mut self.entities);
         self.physics_system.resolve_collisions(
             &mut self.entities,
             &self.level,
             &mut self.dynamic_collider_system,
         );
+        floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
         player_update_system(&mut self.entities, &self.time);
