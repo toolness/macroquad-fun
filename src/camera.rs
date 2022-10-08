@@ -133,34 +133,36 @@ fn calculate_camera_rect(
     camera_rect
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct CameraAxis {
     pos: f32,
-    velocity_magnitude: f32,
+    velocity: f32,
 }
 
 impl CameraAxis {
     fn reset(&mut self, pos: f32) {
         self.pos = pos;
-        self.velocity_magnitude = 0.;
+        self.velocity = 0.;
     }
 
     fn update(&mut self, target: f32, is_target_in_deadzone: bool, time_since_last_frame: f32) {
         let acceleration = config().camera_acceleration;
         let to_target = target - self.pos;
+        let direction_to_target = if to_target < 0. { -1. } else { 1. };
+        let direction_from_target = -1. * direction_to_target;
         let has_reached_target = to_target.abs() < 1.;
         if is_target_in_deadzone || has_reached_target {
-            self.velocity_magnitude -= acceleration * time_since_last_frame;
-            if self.velocity_magnitude < 0. {
-                self.velocity_magnitude = 0.
+            self.velocity += direction_from_target * acceleration * time_since_last_frame;
+            if self.velocity * direction_to_target <= 0. {
+                // We are now going in the opposite direction, but we don't want to do that, so stop.
+                self.velocity = 0.
             }
         } else {
-            self.velocity_magnitude += acceleration * time_since_last_frame;
+            self.velocity += direction_to_target * acceleration * time_since_last_frame;
         }
 
         if !has_reached_target {
-            let direction = if to_target < 0. { -1. } else { 1. };
-            self.pos += direction * self.velocity_magnitude * time_since_last_frame;
+            self.pos += self.velocity * time_since_last_frame;
             let new_to_target = target - self.pos;
             let is_moving_towards_target = to_target * new_to_target > 0.;
             if !is_moving_towards_target {
