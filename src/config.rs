@@ -15,7 +15,7 @@ pub struct Config {
     pub camera_deadzone_width_percentage: f32,
     pub camera_deadzone_height_percentage: f32,
     pub camera_facing_offset_percentage: f32,
-    pub camera_disable_deadzone: bool,
+    pub camera_force_simple_behavior: bool,
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
     pub attach_velocity_coefficient: f32,

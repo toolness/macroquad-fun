@@ -55,7 +55,7 @@ impl Camera {
     }
 
     fn should_center_without_deadzone(&self, entity: &Entity) -> bool {
-        if config().camera_disable_deadzone {
+        if config().camera_force_simple_behavior {
             return true;
         }
         let is_attached = entity
@@ -199,6 +199,11 @@ impl CameraAxis {
         max_pos: f32,
         time_since_last_frame: f32,
     ) {
+        if config().camera_force_simple_behavior {
+            self.pos = target;
+            return;
+        }
+
         let to_target = target - self.pos;
         let direction_to_target = if to_target < 0. {
             -1.
