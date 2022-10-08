@@ -133,9 +133,6 @@ impl LevelRuntime {
             return FrameResult::PlayerDied;
         }
 
-        self.camera
-            .update(&self.entities.player(), &self.level, &self.time);
-
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system
             .run(&mut self.entities, &self.level, &self.time);
@@ -154,6 +151,8 @@ impl LevelRuntime {
         player_update_system(&mut self.entities, &self.time);
 
         // Draw stuff.
+        self.camera
+            .update(&self.entities.player(), &self.level, &self.time);
         self.level.draw(&self.camera.rect());
         self.z_indexed_drawing_system
             .draw_entities(&self.entities, &self.level);
