@@ -85,7 +85,6 @@ impl LevelRuntime {
     fn change_level(&mut self, level: &'static Level) {
         self.level = level;
         self.entities.retain(|&key, _value| key == PLAYER_ENTITY_ID);
-        self.camera.cut();
         self.spawn_entities();
     }
 
@@ -151,8 +150,7 @@ impl LevelRuntime {
         player_update_system(&mut self.entities, &self.time);
 
         // Draw stuff.
-        self.camera
-            .update(&self.entities.player(), &self.level, &self.time);
+        self.camera.update(&self.entities.player(), &self.level);
         self.level.draw(&self.camera.rect());
         self.z_indexed_drawing_system
             .draw_entities(&self.entities, &self.level);
