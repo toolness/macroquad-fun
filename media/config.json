@@ -7,7 +7,7 @@
     "run_speed": 150.0,
     "gravity": 800.0,
     "camera_acceleration": 200.0,
-    "camera_deceleration": 400.0,
+    "camera_deceleration": 200.0,
     "camera_deadzone_width_percentage": 0.65,
     "camera_deadzone_height_percentage": 0.25,
     "camera_disable_deadzone": false,
