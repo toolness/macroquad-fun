@@ -48,7 +48,6 @@ pub trait EntityMapHelpers {
     fn player(&self) -> &Entity;
     fn player_mut(&mut self) -> &mut Entity;
     fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F);
-    fn find_entity_id_with_iid(&self, iid: &str) -> Option<u64>;
 }
 
 pub type EntityMap = HashMap<u64, Entity>;
@@ -77,17 +76,6 @@ impl EntityMapHelpers for EntityMap {
         let mut entity = self.remove(&id).unwrap();
         f(&mut entity, self);
         self.insert(id, entity);
-    }
-
-    fn find_entity_id_with_iid(&self, iid: &str) -> Option<u64> {
-        // This is O(n), if we use it a lot and have lots of entities, we should make
-        // a lookup table or something instead.
-        for (&id, entity) in self.iter() {
-            if matches!(entity.iid, Some(entity_iid) if entity_iid == iid) {
-                return Some(id);
-            }
-        }
-        None
     }
 }
 

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Write;
 
 use crate::attachment::AttachmentSystem;
@@ -83,11 +84,6 @@ impl LevelRuntime {
         instance
     }
 
-    fn add_entity(&mut self, entity: Entity) {
-        let id = self.new_id();
-        self.entities.insert(id, entity);
-    }
-
     fn change_level(&mut self, level: &'static Level) {
         self.level = level;
         self.entities.retain(|&key, _value| key == PLAYER_ENTITY_ID);
@@ -95,6 +91,15 @@ impl LevelRuntime {
     }
 
     fn spawn_entities(&mut self) {
+        let mut iid_id_map: HashMap<&str, u64> = HashMap::with_capacity(self.level.entities.len());
+        for entity in self.level.entities.iter() {
+            let result = iid_id_map.insert(&entity.iid, self.new_id());
+            assert!(
+                result.is_none(),
+                "All level entities should have unique IIDs"
+            );
+        }
+
         for entity in self.level.entities.iter() {
             let opt_instance = match &entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
@@ -105,13 +110,14 @@ impl LevelRuntime {
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
                     entity.rect,
-                    trigger_entity_iid.as_ref().map(|s| s.as_str()),
+                    trigger_entity_iid.as_ref().map(|s| iid_id_map[s.as_str()]),
                 )),
                 EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
             };
             if let Some(mut instance) = opt_instance {
                 instance.iid = Some(&entity.iid);
-                self.add_entity(instance);
+                self.entities
+                    .insert(iid_id_map[entity.iid.as_str()], instance);
             }
         }
     }

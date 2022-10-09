@@ -1,12 +1,12 @@
 use crate::{
-    entity::{EntityMap, EntityMapHelpers, EntityProcessor},
+    entity::{EntityMap, EntityProcessor},
     route::try_to_start_route,
 };
 
 #[derive(Default)]
 pub struct SwitchComponent {
     pub is_switched_on: bool,
-    pub trigger_entity_iid: Option<&'static str>,
+    pub trigger_entity: Option<u64>,
 }
 
 pub struct SwitchSystem {
@@ -32,11 +32,9 @@ impl SwitchSystem {
                 switch.is_switched_on = overlaps_anything;
 
                 if was_switched_on != switch.is_switched_on {
-                    if let Some(iid) = switch.trigger_entity_iid {
-                        if let Some(trigger_entity_id) = entities.find_entity_id_with_iid(iid) {
-                            if let Some(triggered_entity) = entities.get_mut(&trigger_entity_id) {
-                                try_to_start_route(triggered_entity, !switch.is_switched_on);
-                            }
+                    if let Some(id) = switch.trigger_entity {
+                        if let Some(triggered_entity) = entities.get_mut(&id) {
+                            try_to_start_route(triggered_entity, !switch.is_switched_on);
                         }
                     }
                 }
