@@ -1,4 +1,7 @@
-use crate::entity::{EntityMap, EntityProcessor};
+use crate::{
+    entity::{EntityMap, EntityMapHelpers, EntityProcessor},
+    route::try_to_start_route,
+};
 
 #[derive(Default)]
 pub struct SwitchComponent {
@@ -25,7 +28,18 @@ impl SwitchSystem {
                         break;
                     }
                 }
+                let was_switched_on = switch.is_switched_on;
                 switch.is_switched_on = overlaps_anything;
+
+                if was_switched_on != switch.is_switched_on {
+                    if let Some(iid) = switch.trigger_entity_iid {
+                        if let Some(trigger_entity_id) = entities.find_entity_id_with_iid(iid) {
+                            if let Some(triggered_entity) = entities.get_mut(&trigger_entity_id) {
+                                try_to_start_route(triggered_entity, !switch.is_switched_on);
+                            }
+                        }
+                    }
+                }
             },
         );
     }

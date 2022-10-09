@@ -3,7 +3,7 @@ use macroquad::{
     shapes::draw_line,
 };
 
-use crate::entity::EntityMap;
+use crate::entity::{Entity, EntityMap};
 
 pub struct RouteComponent {
     pub start_point: Vec2,
@@ -21,6 +21,17 @@ impl RouteComponent {
         } else {
             self.end_point
         }
+    }
+}
+
+pub fn try_to_start_route(entity: &mut Entity, move_towards_start: bool) -> bool {
+    if let Some(route) = entity.route.as_mut() {
+        route.is_moving = true;
+        entity.physics.velocity = Vec2::ZERO;
+        route.is_moving_towards_start = move_towards_start;
+        true
+    } else {
+        false
     }
 }
 
