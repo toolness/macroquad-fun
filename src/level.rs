@@ -104,7 +104,7 @@ pub enum EntityKind {
     Mushroom,
     MovingPlatform(Vec2, bool),
     Crate,
-    FloorSwitch(Option<&'static str>),
+    FloorSwitch(Option<String>),
 }
 
 impl Level {
@@ -166,8 +166,8 @@ impl Level {
                         }
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
-                            // TODO: Parse out the trigger_entity_iid.
-                            EntityKind::FloorSwitch(None)
+                            let iid = entity.get_opt_entity_ref_field_instance("trigger")?;
+                            EntityKind::FloorSwitch(iid.map(|s| s.to_owned()))
                         }
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);

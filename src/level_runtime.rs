@@ -96,15 +96,15 @@ impl LevelRuntime {
 
     fn spawn_entities(&mut self) {
         for entity in self.level.entities.iter() {
-            let opt_instance = match entity.kind {
-                EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, velocity)),
+            let opt_instance = match &entity.kind {
+                EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
                 EntityKind::MovingPlatform(endpoint, ping_pong) => {
-                    Some(create_moving_platform(entity.rect, endpoint, ping_pong))
+                    Some(create_moving_platform(entity.rect, *endpoint, *ping_pong))
                 }
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch(trigger_entity_iid) => {
-                    Some(create_floor_switch(entity.rect, trigger_entity_iid))
+                    Some(create_floor_switch(entity.rect, trigger_entity_iid.clone()))
                 }
                 EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
             };

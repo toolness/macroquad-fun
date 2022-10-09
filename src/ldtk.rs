@@ -89,7 +89,7 @@ pub struct LayerInstance {
 }
 
 /// This structure represents a single tile from a given Tileset.
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct TileInstance {
     /// "Flip bits", a 2-bits integer to represent the mirror transformations of the tile.<br/>
     /// - Bit 0 = X flip<br/>   - Bit 1 = Y flip<br/>   Examples: f=0 (no flip), f=1 (X flip
@@ -107,7 +107,7 @@ pub struct TileInstance {
     pub t: i64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct EntityInstance {
     /// Grid-based coordinates (`[x,y]` format)
     #[serde(rename = "__grid")]
@@ -157,6 +157,33 @@ impl EntityInstance {
                 }
                 return Err(anyhow!(
                     "Expected field instance with identifier '{}' to be a point",
+                    identifier
+                ));
+            }
+        }
+
+        Err(anyhow!(
+            "Unable to find field instance with identifier '{}'",
+            identifier
+        ))
+    }
+
+    pub fn get_opt_entity_ref_field_instance(&self, identifier: &str) -> Result<Option<String>> {
+        for field in self.field_instances.iter() {
+            if field.identifier == identifier {
+                match &field.value {
+                    Some(serde_json::Value::Object(value)) => {
+                        if let Some(serde_json::Value::String(iid)) = &value.get("entityIid") {
+                            return Ok(Some(iid.to_owned()));
+                        }
+                    }
+                    Some(serde_json::Value::Null) => {
+                        return Ok(None);
+                    }
+                    _ => {}
+                }
+                return Err(anyhow!(
+                    "Expected field instance with identifier '{}' to be an EntityRef or null",
                     identifier
                 ));
             }

@@ -11,7 +11,7 @@ use crate::{
 
 pub struct FloorSwitchComponent();
 
-pub fn create_floor_switch(start_rect: Rect, trigger_entity_iid: Option<&'static str>) -> Entity {
+pub fn create_floor_switch(start_rect: Rect, trigger_entity_iid: Option<String>) -> Entity {
     let start_point = start_rect.point();
     let mut relative_bbox = start_rect.offset(-start_point);
     let drawn_rect = contract_rect(&relative_bbox, config().sprite_scale * 4.);
