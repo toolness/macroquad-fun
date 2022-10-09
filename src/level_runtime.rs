@@ -91,6 +91,9 @@ impl LevelRuntime {
     }
 
     fn spawn_entities(&mut self) {
+        // Create a mapping from LDtk Entity IIDs to our runtime entity IDs. We'll do this
+        // up-front so we can convert EntityRefs in our Entities into entity IDs at spawn time,
+        // rather than having to do it every frame.
         let mut iid_id_map: HashMap<&str, u64> = HashMap::with_capacity(self.level.entities.len());
         for entity in self.level.entities.iter() {
             let result = iid_id_map.insert(&entity.iid, self.new_id());
