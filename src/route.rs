@@ -9,6 +9,8 @@ pub struct RouteComponent {
     pub start_point: Vec2,
     pub end_point: Vec2,
     pub is_moving_towards_start: bool,
+    pub is_moving: bool,
+    pub ping_pong: bool,
     pub speed: f32,
 }
 
@@ -25,6 +27,9 @@ impl RouteComponent {
 pub fn route_system(entities: &mut EntityMap) {
     for entity in entities.values_mut() {
         if let Some(route) = entity.route.as_mut() {
+            if !route.is_moving {
+                continue;
+            }
             let target = route.target();
             let direction_to_target = target - entity.sprite.pos;
             if entity.physics.velocity == Vec2::ZERO {
@@ -35,7 +40,11 @@ pub fn route_system(entities: &mut EntityMap) {
                 if !is_moving_towards_target {
                     entity.sprite.pos = target;
                     entity.physics.velocity = Vec2::ZERO;
-                    route.is_moving_towards_start = !route.is_moving_towards_start;
+                    if route.ping_pong {
+                        route.is_moving_towards_start = !route.is_moving_towards_start;
+                    } else {
+                        route.is_moving = false;
+                    }
                 }
             }
         }

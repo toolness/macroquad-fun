@@ -10,7 +10,7 @@ use crate::{
     sprite_component::{Renderer, SpriteComponent},
 };
 
-pub fn create_moving_platform(start_rect: Rect, end_point: Vec2) -> Entity {
+pub fn create_moving_platform(start_rect: Rect, end_point: Vec2, ping_pong: bool) -> Entity {
     let start_point = start_rect.point();
     let relative_bbox = start_rect.offset(-start_point);
     return Entity {
@@ -35,6 +35,8 @@ pub fn create_moving_platform(start_rect: Rect, end_point: Vec2) -> Entity {
         route: Some(RouteComponent {
             start_point,
             end_point,
+            is_moving: ping_pong,
+            ping_pong,
             is_moving_towards_start: false,
             speed: config().moving_platform_speed,
         }),

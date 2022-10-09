@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 24,
+	"nextUid": 25,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -460,6 +460,35 @@
 					"allowedRefs": "OnlySame",
 					"allowedRefTags": [],
 					"tilesetUid": null
+				},
+				{
+					"identifier": "ping_pong",
+					"__type": "Bool",
+					"uid": 24,
+					"type": "F_Bool",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayPos": "Above",
+					"editorAlwaysShow": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefTags": [],
+					"tilesetUid": null
 				}
 			]
 		},
@@ -689,7 +718,7 @@
 						},
 						{
 							"__identifier": "Crate",
-							"__grid": [10,8],
+							"__grid": [4,8],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -698,12 +727,12 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 22,
-							"px": [160,128],
+							"px": [64,128],
 							"fieldInstances": []
 						},
 						{
 							"__identifier": "Crate",
-							"__grid": [10,6],
+							"__grid": [4,6],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -712,7 +741,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 22,
-							"px": [160,96],
+							"px": [64,96],
 							"fieldInstances": []
 						},
 						{
@@ -728,6 +757,29 @@
 							"defUid": 23,
 							"px": [320,96],
 							"fieldInstances": []
+						},
+						{
+							"__identifier": "MovingPlatform",
+							"__grid": [24,1],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#EFE606",
+							"iid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
+							"width": 16,
+							"height": 96,
+							"defUid": 15,
+							"px": [384,16],
+							"fieldInstances": [
+								{ "__identifier": "endpoint", "__value": { "cx": 24, "cy": 6 }, "__type": "Point", "__tile": null, "defUid": 16, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["24,6"]
+								}] },
+								{ "__identifier": "ping_pong", "__value": false, "__type": "Bool", "__tile": null, "defUid": 24, "realEditorValues": [{
+									"id": "V_Bool",
+									"params": [ false ]
+								}] }
+							]
 						}
 					]
 				},
@@ -758,7 +810,7 @@
 						0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
+						0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
 						0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,
@@ -850,7 +902,6 @@
 						{ "px": [336,96], "src": [0,0], "f": 0, "t": 0, "d": [21,297] },
 						{ "px": [352,96], "src": [0,0], "f": 0, "t": 0, "d": [21,298] },
 						{ "px": [368,96], "src": [0,0], "f": 0, "t": 0, "d": [21,299] },
-						{ "px": [384,96], "src": [0,0], "f": 0, "t": 0, "d": [21,300] },
 						{ "px": [400,96], "src": [0,0], "f": 0, "t": 0, "d": [21,301] },
 						{ "px": [416,96], "src": [0,0], "f": 0, "t": 0, "d": [21,302] },
 						{ "px": [432,96], "src": [0,0], "f": 0, "t": 0, "d": [21,303] },
@@ -999,7 +1050,14 @@
 					"autoLayerTiles": [],
 					"seed": 9709956,
 					"overrideTilesetUid": null,
-					"gridTiles": [],
+					"gridTiles": [
+						{ "px": [384,16], "src": [0,0], "f": 0, "t": 0, "d": [70] },
+						{ "px": [384,32], "src": [0,0], "f": 0, "t": 0, "d": [116] },
+						{ "px": [384,48], "src": [0,0], "f": 0, "t": 0, "d": [162] },
+						{ "px": [384,64], "src": [0,0], "f": 0, "t": 0, "d": [208] },
+						{ "px": [384,80], "src": [0,0], "f": 0, "t": 0, "d": [254] },
+						{ "px": [384,96], "src": [0,0], "f": 0, "t": 0, "d": [300] }
+					],
 					"entityInstances": []
 				},
 				{
@@ -1824,10 +1882,16 @@
 							"height": 16,
 							"defUid": 15,
 							"px": [64,80],
-							"fieldInstances": [{ "__identifier": "endpoint", "__value": { "cx": 18, "cy": 10 }, "__type": "Point", "__tile": null, "defUid": 16, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["18,10"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "endpoint", "__value": { "cx": 18, "cy": 10 }, "__type": "Point", "__tile": null, "defUid": 16, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["18,10"]
+								}] },
+								{ "__identifier": "ping_pong", "__value": true, "__type": "Bool", "__tile": null, "defUid": 24, "realEditorValues": [{
+									"id": "V_Bool",
+									"params": [ true ]
+								}] }
+							]
 						},
 						{
 							"__identifier": "PlayerStart",

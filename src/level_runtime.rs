@@ -99,8 +99,8 @@ impl LevelRuntime {
             let opt_instance = match entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, velocity)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
-                EntityKind::MovingPlatform(endpoint) => {
-                    Some(create_moving_platform(entity.rect, endpoint))
+                EntityKind::MovingPlatform(endpoint, ping_pong) => {
+                    Some(create_moving_platform(entity.rect, endpoint, ping_pong))
                 }
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch => Some(create_floor_switch(entity.rect)),

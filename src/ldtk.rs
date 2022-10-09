@@ -168,6 +168,25 @@ impl EntityInstance {
         ))
     }
 
+    pub fn get_bool_field_instance(&self, identifier: &str) -> Result<bool> {
+        for field in self.field_instances.iter() {
+            if field.identifier == identifier {
+                if let Some(serde_json::Value::Bool(value)) = &field.value {
+                    return Ok(*value);
+                }
+                return Err(anyhow!(
+                    "Expected field instance with identifier '{}' to be a boolean",
+                    identifier
+                ));
+            }
+        }
+
+        Err(anyhow!(
+            "Unable to find field instance with identifier '{}'",
+            identifier
+        ))
+    }
+
     pub fn get_float_field_instance(&self, identifier: &str) -> Result<f64> {
         for field in self.field_instances.iter() {
             if field.identifier == identifier {

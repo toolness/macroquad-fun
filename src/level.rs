@@ -102,7 +102,7 @@ pub enum EntityKind {
     Text(Vec<String>),
     FlyingEye(Vec2),
     Mushroom,
-    MovingPlatform(Vec2),
+    MovingPlatform(Vec2, bool),
     Crate,
     FloorSwitch,
 }
@@ -161,7 +161,8 @@ impl Level {
                         "Mushroom" => EntityKind::Mushroom,
                         "MovingPlatform" => {
                             let end_point = entity.get_point_field_instance("endpoint")?;
-                            EntityKind::MovingPlatform(end_point * grid_size)
+                            let ping_pong: bool = entity.get_bool_field_instance("ping_pong")?;
+                            EntityKind::MovingPlatform(end_point * grid_size, ping_pong)
                         }
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => EntityKind::FloorSwitch,
