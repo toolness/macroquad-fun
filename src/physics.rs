@@ -219,7 +219,7 @@ fn physics_collision_resolution(
                     }
                 }
 
-                if hit_bottom_side && results.is_on_any_surface {
+                if hit_bottom_side && results.is_on_any_surface && collider.entity_id.is_some() {
                     // We are being squeezed from the top and bottom. Assume that it's
                     // gravity that's doing the squeezing; we already displaced ourself
                     // from below in a previous iteration of this loop, so return now
