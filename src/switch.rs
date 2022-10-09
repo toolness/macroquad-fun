@@ -3,7 +3,7 @@ use crate::entity::{EntityMap, EntityProcessor};
 #[derive(Default)]
 pub struct SwitchComponent {
     pub is_switched_on: bool,
-    pub trigger_entity_iid: Option<String>,
+    pub trigger_entity_iid: Option<&'static str>,
 }
 
 pub struct SwitchSystem {

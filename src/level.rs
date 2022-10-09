@@ -167,7 +167,7 @@ impl Level {
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
                             let iid = entity.get_opt_entity_ref_field_instance("trigger")?;
-                            EntityKind::FloorSwitch(iid.map(|s| s.to_owned()))
+                            EntityKind::FloorSwitch(iid)
                         }
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);

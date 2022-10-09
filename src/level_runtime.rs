@@ -103,9 +103,10 @@ impl LevelRuntime {
                     Some(create_moving_platform(entity.rect, *endpoint, *ping_pong))
                 }
                 EntityKind::Crate => Some(create_crate(entity.rect)),
-                EntityKind::FloorSwitch(trigger_entity_iid) => {
-                    Some(create_floor_switch(entity.rect, trigger_entity_iid.clone()))
-                }
+                EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
+                    entity.rect,
+                    trigger_entity_iid.as_ref().map(|s| s.as_str()),
+                )),
                 EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
             };
             if let Some(mut instance) = opt_instance {
