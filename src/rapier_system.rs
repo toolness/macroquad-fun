@@ -1,11 +1,11 @@
 use rapier2d::prelude::*;
 
-use crate::{entity::EntityMap, level::Level, time::GameTime};
+use crate::{config::config, entity::EntityMap, level::Level, time::GameTime};
 
 #[derive(Default)]
 pub struct RapierComponent {
-    pub rigid_body_handle: Option<RigidBodyHandle>,
-    pub collider_handle: Option<ColliderHandle>,
+    rigid_body_handle: RigidBodyHandle,
+    collider_handle: ColliderHandle,
 }
 
 pub struct RapierSystem {
@@ -39,7 +39,7 @@ impl RapierSystem {
             collider_set.insert_with_parent(collider, handle, &mut rigid_body_set);
         }
         RapierSystem {
-            gravity: vector![0.0, 0.0],
+            gravity: vector![0.0, config().gravity],
             rigid_body_set,
             collider_set,
             integration_parameters: IntegrationParameters::default(),
@@ -56,6 +56,30 @@ impl RapierSystem {
     }
 
     pub fn run(&mut self, entities: &mut EntityMap, time: &GameTime) {
+        for (_id, entity) in entities.iter_mut() {
+            if entity.physics.use_rapier {
+                if entity.rapier.is_none() {
+                    let bbox = entity.sprite.bbox();
+                    let half_extents = vector![bbox.w / 2., bbox.h / 2.];
+                    let origin: Vector<Real> = bbox.point().into();
+                    let rigid_body = RigidBodyBuilder::dynamic()
+                        .translation(origin + half_extents)
+                        .lock_rotations()
+                        .build();
+                    let rigid_body_handle = self.rigid_body_set.insert(rigid_body);
+                    let collider = ColliderBuilder::cuboid(half_extents.x, half_extents.y);
+                    let collider_handle = self.collider_set.insert_with_parent(
+                        collider,
+                        rigid_body_handle,
+                        &mut self.rigid_body_set,
+                    );
+                    entity.rapier = Some(RapierComponent {
+                        rigid_body_handle,
+                        collider_handle,
+                    });
+                }
+            }
+        }
         self.integration_parameters.dt = time.time_since_last_frame as f32;
         self.physics_pipeline.step(
             &self.gravity,
@@ -71,5 +95,15 @@ impl RapierSystem {
             &self.physics_hooks,
             &self.event_handler,
         );
+        for (_id, entity) in entities.iter_mut() {
+            if let Some(rapier) = &entity.rapier {
+                let body = &self.rigid_body_set[rapier.rigid_body_handle];
+                let bbox = entity.sprite.bbox();
+                let half_extents = vector![bbox.w / 2., bbox.h / 2.];
+                let center = body.translation();
+                let top_left = center - half_extents;
+                entity.sprite.pos = top_left.into();
+            }
+        }
     }
 }
