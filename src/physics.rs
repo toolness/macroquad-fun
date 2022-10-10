@@ -21,7 +21,7 @@ const LOTS_OF_DISPLACEMENTS: u32 = 20;
 /// If we had to run through our collision resolution loop for some subset of our
 /// entities more than this many times, stop resolving collisions to avoid hanging
 /// the game.
-const LOTS_OF_RESOLVE_COLLISION_ITERATIONS: u32 = 10;
+const MAX_RESOLVE_COLLISION_ITERATIONS: u32 = 10;
 
 #[derive(Default, PartialEq)]
 pub enum PhysicsCollisionBehavior {
@@ -164,7 +164,7 @@ impl PhysicsSystem {
             }
 
             loop_count += 1;
-            if loop_count > LOTS_OF_RESOLVE_COLLISION_ITERATIONS {
+            if loop_count > MAX_RESOLVE_COLLISION_ITERATIONS {
                 println!(
                     "WARNING: resolve_collisions #{} with {:?}",
                     loop_count, self.entities_to_recompute
