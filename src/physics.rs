@@ -251,7 +251,7 @@ fn physics_collision_resolution(
             if let Some(collision) =
                 process_collision(&collider, &prev_bbox, &bbox, vertical_collision_leeway)
             {
-                let mut hit_bottom_side = false;
+                let mut displace = true;
                 match collision.side {
                     Side::Top => {
                         results.is_on_any_surface = true;
@@ -273,7 +273,38 @@ fn physics_collision_resolution(
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
                             physics.velocity.y = 0.;
                         }
-                        hit_bottom_side = true;
+
+                        if results.is_on_any_surface && collision.displacement != Vec2::ZERO {
+                            // We are being squeezed from the top and bottom.
+                            if let Some(collider_above) = collider.entity_id {
+                                // We already displaced ourself
+                                // from below in a previous iteration of this loop, and above us is a
+                                // entity that can itself be displaced, so don't displace us anymore.
+                                displace = false;
+                                if entities_processed.contains(&collider_above) {
+                                    // Let the engine know to recompute
+                                    // collisions for whatever's above us so that it has a chance to be
+                                    // displaced by us, if we have a dynamic collider.
+                                    entities_to_recompute.insert(collider_above);
+                                }
+                            } else if let Some(collider_below) = results.surface_entity_id {
+                                if let Some(other_entity) = other_entities.get_mut(&collider_below)
+                                {
+                                    if other_entity.physics.collision_behavior
+                                        == PhysicsCollisionBehavior::Stop
+                                        && other_entity.physics.velocity.y < 0.
+                                    {
+                                        // A moving platform or something is below us, make it stop
+                                        // instead of attempting to displace us.
+                                        sprite.pos += collision.displacement;
+                                        other_entity.sprite.pos.y =
+                                            sprite.bbox().bottom() + EXTRA_DISPLACEMENT;
+                                        other_entity.physics.latest_frame.was_blocked = true;
+                                        displace = false;
+                                    }
+                                }
+                            }
+                        }
                     }
                     Side::Left | Side::Right => {
                         if physics.collision_behavior == PhysicsCollisionBehavior::Stop {
@@ -282,36 +313,7 @@ fn physics_collision_resolution(
                     }
                 }
 
-                if hit_bottom_side && results.is_on_any_surface {
-                    if let Some(collider_above) = collider.entity_id {
-                        // We are being squeezed from the top and bottom. Assume that it's
-                        // gravity that's doing the squeezing; we already displaced ourself
-                        // from below in a previous iteration of this loop, so return now
-                        // without doing any displacement.
-                        if entities_processed.contains(&collider_above) {
-                            // Let the engine know to recompute
-                            // collisions for whatever's above us so that it has a chance to be
-                            // displaced by us, if we have a dynamic collider.
-                            entities_to_recompute.insert(collider_above);
-                        }
-                        return false;
-                    } else if let Some(collider_below) = results.surface_entity_id {
-                        if let Some(other_entity) = other_entities.get_mut(&collider_below) {
-                            if other_entity.physics.collision_behavior
-                                == PhysicsCollisionBehavior::Stop
-                                && other_entity.physics.velocity.y < 0.
-                            {
-                                sprite.pos += collision.displacement;
-                                other_entity.sprite.pos.y =
-                                    sprite.bbox().bottom() + EXTRA_DISPLACEMENT;
-                                other_entity.physics.latest_frame.was_blocked = true;
-                                return false;
-                            }
-                        }
-                    }
-                }
-
-                if collision.displacement != Vec2::ZERO {
+                if displace && collision.displacement != Vec2::ZERO {
                     sprite.pos += collision.displacement;
                     results.was_displaced = true;
                     match physics.collision_behavior {
