@@ -1,4 +1,3 @@
-use rapier2d::prelude::*;
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -18,6 +17,7 @@ use crate::player::{
     teleport_entity,
 };
 use crate::push::PushSystem;
+use crate::rapier_system::RapierSystem;
 use crate::route::{draw_route_debug_targets, route_system};
 use crate::switch::SwitchSystem;
 use crate::text::draw_level_text;
@@ -46,6 +46,7 @@ pub struct LevelRuntime {
     next_id: u64,
     time: GameTime,
     physics_system: PhysicsSystem,
+    rapier_system: RapierSystem,
     attachment_system: AttachmentSystem,
     switch_system: SwitchSystem,
     push_system: PushSystem,
@@ -54,20 +55,6 @@ pub struct LevelRuntime {
     z_indexed_drawing_system: ZIndexedDrawingSystem,
     last_fps_update_time: f64,
     fps: i32,
-
-    gravity: Vector<Real>,
-    rigid_body_set: RigidBodySet,
-    collider_set: ColliderSet,
-    integration_parameters: IntegrationParameters,
-    physics_pipeline: PhysicsPipeline,
-    island_manager: IslandManager,
-    broad_phase: BroadPhase,
-    narrow_phase: NarrowPhase,
-    impulse_joint_set: ImpulseJointSet,
-    multibody_joint_set: MultibodyJointSet,
-    ccd_solver: CCDSolver,
-    physics_hooks: (),
-    event_handler: (),
 }
 
 impl LevelRuntime {
@@ -80,6 +67,7 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
+            rapier_system: RapierSystem::new(),
             attachment_system: AttachmentSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -94,20 +82,6 @@ impl LevelRuntime {
             debug_text_lines: None,
             last_fps_update_time: 0.,
             fps: 0,
-
-            gravity: vector![0.0, 0.0],
-            rigid_body_set: RigidBodySet::new(),
-            collider_set: ColliderSet::new(),
-            integration_parameters: IntegrationParameters::default(),
-            physics_pipeline: PhysicsPipeline::new(),
-            island_manager: IslandManager::new(),
-            broad_phase: BroadPhase::new(),
-            narrow_phase: NarrowPhase::new(),
-            impulse_joint_set: ImpulseJointSet::new(),
-            multibody_joint_set: MultibodyJointSet::new(),
-            ccd_solver: CCDSolver::new(),
-            physics_hooks: (),
-            event_handler: (),
         };
         instance.change_level(&level);
         instance
@@ -180,21 +154,6 @@ impl LevelRuntime {
             return FrameResult::PlayerDied;
         }
 
-        self.integration_parameters.dt = self.time.time_since_last_frame as f32;
-        self.physics_pipeline.step(
-            &self.gravity,
-            &self.integration_parameters,
-            &mut self.island_manager,
-            &mut self.broad_phase,
-            &mut self.narrow_phase,
-            &mut self.rigid_body_set,
-            &mut self.collider_set,
-            &mut self.impulse_joint_set,
-            &mut self.multibody_joint_set,
-            &mut self.ccd_solver,
-            &self.physics_hooks,
-            &self.event_handler,
-        );
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system
             .run(&mut self.entities, &self.level, &self.time);
@@ -209,6 +168,7 @@ impl LevelRuntime {
             &self.level,
             &mut self.dynamic_collider_system,
         );
+        self.rapier_system.run(&mut self.entities, &self.time);
         floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);
