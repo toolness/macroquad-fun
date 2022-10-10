@@ -326,7 +326,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bitflags",
+ "glam",
  "macroquad",
+ "nalgebra",
  "rapier2d",
  "serde",
  "serde_derive",
@@ -400,6 +402,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da388c517f7c8540918d00f7aed9864c1ead01a14a0cc21513b171857119de12"
 dependencies = [
  "approx",
+ "glam",
  "matrixmultiply",
  "nalgebra-macros",
  "num-complex",
