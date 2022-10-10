@@ -180,6 +180,7 @@ impl LevelRuntime {
             return FrameResult::PlayerDied;
         }
 
+        self.integration_parameters.dt = self.time.time_since_last_frame as f32;
         self.physics_pipeline.step(
             &self.gravity,
             &self.integration_parameters,
