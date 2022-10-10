@@ -18,7 +18,9 @@ use crate::{
 /// collision resolution, start logging debug information.
 const LOTS_OF_DISPLACEMENTS: u32 = 20;
 
-/// TODO ADD COMMENTS
+/// If we had to run through our collision resolution loop for some subset of our
+/// entities more than this many times, stop resolving collisions to avoid hanging
+/// the game.
 const LOTS_OF_RESOLVE_COLLISION_ITERATIONS: u32 = 10;
 
 #[derive(Default, PartialEq)]
