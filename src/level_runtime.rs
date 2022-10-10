@@ -55,6 +55,7 @@ pub struct LevelRuntime {
     z_indexed_drawing_system: ZIndexedDrawingSystem,
     last_fps_update_time: f64,
     fps: i32,
+    level_changes: u64,
 }
 
 impl LevelRuntime {
@@ -67,7 +68,7 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
-            rapier_system: RapierSystem::new(),
+            rapier_system: RapierSystem::new(level),
             attachment_system: AttachmentSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -82,6 +83,7 @@ impl LevelRuntime {
             debug_text_lines: None,
             last_fps_update_time: 0.,
             fps: 0,
+            level_changes: 0,
         };
         instance.change_level(&level);
         instance
@@ -89,8 +91,12 @@ impl LevelRuntime {
 
     fn change_level(&mut self, level: &'static Level) {
         self.level = level;
+        if self.level_changes > 0 {
+            self.rapier_system = RapierSystem::new(level);
+        }
         self.entities.retain(|&key, _value| key == PLAYER_ENTITY_ID);
         self.spawn_entities();
+        self.level_changes += 1;
     }
 
     fn spawn_entities(&mut self) {

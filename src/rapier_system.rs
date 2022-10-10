@@ -1,6 +1,6 @@
 use rapier2d::prelude::*;
 
-use crate::{entity::EntityMap, time::GameTime};
+use crate::{entity::EntityMap, level::Level, time::GameTime};
 
 #[derive(Default)]
 pub struct RapierComponent {
@@ -25,11 +25,23 @@ pub struct RapierSystem {
 }
 
 impl RapierSystem {
-    pub fn new() -> Self {
+    pub fn new(level: &'static Level) -> Self {
+        let mut rigid_body_set = RigidBodySet::new();
+        let mut collider_set = ColliderSet::new();
+        for collider in level.iter_colliders(&level.pixel_bounds()) {
+            let half_extents = vector![collider.rect.w / 2., collider.rect.h / 2.];
+            let origin: Vector<Real> = collider.rect.point().into();
+            let rigid_body = RigidBodyBuilder::fixed()
+                .translation(origin + half_extents)
+                .build();
+            let handle = rigid_body_set.insert(rigid_body);
+            let collider = ColliderBuilder::cuboid(half_extents.x, half_extents.y);
+            collider_set.insert_with_parent(collider, handle, &mut rigid_body_set);
+        }
         RapierSystem {
             gravity: vector![0.0, 0.0],
-            rigid_body_set: RigidBodySet::new(),
-            collider_set: ColliderSet::new(),
+            rigid_body_set,
+            collider_set,
             integration_parameters: IntegrationParameters::default(),
             physics_pipeline: PhysicsPipeline::new(),
             island_manager: IslandManager::new(),
