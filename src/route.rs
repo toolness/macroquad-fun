@@ -38,7 +38,7 @@ pub fn try_to_start_route(entity: &mut Entity, move_towards_start: bool) -> bool
 pub fn route_system(entities: &mut EntityMap) {
     for entity in entities.values_mut() {
         if let Some(route) = entity.route.as_mut() {
-            if !route.is_moving {
+            if !route.is_moving || entity.physics.latest_frame.was_blocked {
                 continue;
             }
             let target = route.target();

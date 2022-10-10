@@ -1,15 +1,15 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     collision::{
         collision_resolution_loop, maybe_reverse_direction_x, maybe_reverse_direction_xy,
-        process_collision, CollisionFlags, Side,
+        process_collision, CollisionFlags, Side, EXTRA_DISPLACEMENT,
     },
     config::config,
     dynamic_collider::DynamicColliderSystem,
-    entity::{Entity, EntityMap},
+    entity::{Entity, EntityMap, EntityMapHelpers},
     level::Level,
     time::GameTime,
 };
@@ -80,7 +80,9 @@ pub struct PhysicsComponent {
 pub struct PhysicsFrameResults {
     pub is_on_any_surface: bool,
     pub is_on_moving_surface: bool,
+    pub surface_entity_id: Option<u64>,
     pub was_displaced: bool,
+    pub was_blocked: bool,
 }
 
 pub struct PhysicsSystem {
@@ -189,29 +191,31 @@ fn resolve_collisions(
     let vertical_collision_leeway = config().vertical_collision_leeway;
 
     for &id in entities_to_process.iter() {
-        let entity = entities.get_mut(&id).unwrap();
-        let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
-            physics_collision_resolution(
-                id,
-                entity,
-                &level,
-                dynamic_collider_system,
-                vertical_collision_leeway,
-                entities_processed,
-                entities_to_recompute,
-            )
-        } else {
-            Default::default()
-        };
+        entities.with_entity_removed(id, |entity, other_entities| {
+            let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
+                physics_collision_resolution(
+                    id,
+                    entity,
+                    other_entities,
+                    &level,
+                    dynamic_collider_system,
+                    vertical_collision_leeway,
+                    entities_processed,
+                    entities_to_recompute,
+                )
+            } else {
+                Default::default()
+            };
+            entity.physics.latest_frame = results;
+        });
         entities_processed.insert(id);
-
-        entity.physics.latest_frame = results;
     }
 }
 
 fn physics_collision_resolution(
     entity_id: u64,
     entity: &mut Entity,
+    other_entities: &mut HashMap<u64, Entity>,
     level: &Level,
     dynamic_collider_system: &mut DynamicColliderSystem,
     vertical_collision_leeway: f32,
@@ -251,6 +255,7 @@ fn physics_collision_resolution(
                 match collision.side {
                     Side::Top => {
                         results.is_on_any_surface = true;
+                        results.surface_entity_id = collider.entity_id;
                         if !physics.defies_gravity {
                             physics.velocity.y = collider.velocity.y;
                             if collider.velocity.y != 0. {
@@ -290,6 +295,19 @@ fn physics_collision_resolution(
                             entities_to_recompute.insert(collider_above);
                         }
                         return false;
+                    } else if let Some(collider_below) = results.surface_entity_id {
+                        if let Some(other_entity) = other_entities.get_mut(&collider_below) {
+                            if other_entity.physics.collision_behavior
+                                == PhysicsCollisionBehavior::Stop
+                                && other_entity.physics.velocity.y < 0.
+                            {
+                                sprite.pos += collision.displacement;
+                                other_entity.sprite.pos.y =
+                                    sprite.bbox().bottom() + EXTRA_DISPLACEMENT;
+                                other_entity.physics.latest_frame.was_blocked = true;
+                                return false;
+                            }
+                        }
                     }
                 }
 

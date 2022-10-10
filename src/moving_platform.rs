@@ -5,7 +5,7 @@ use crate::{
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
-    physics::PhysicsComponent,
+    physics::{PhysicsCollisionBehavior, PhysicsComponent},
     route::RouteComponent,
     sprite_component::{Renderer, SpriteComponent},
 };
@@ -22,6 +22,7 @@ pub fn create_moving_platform(start_rect: Rect, end_point: Vec2, ping_pong: bool
         },
         physics: PhysicsComponent {
             defies_gravity: true,
+            collision_behavior: PhysicsCollisionBehavior::Stop,
             ..Default::default()
         },
         dynamic_collider: Some(DynamicColliderComponent::new(RelativeCollider {

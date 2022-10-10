@@ -50,7 +50,7 @@ const MAX_DISPLACEMENTS_PER_FRAME: u32 = 30;
 /// A number very close to zero that we add to all our displacements during collision
 /// resolution, to ensure that we always displace entities outside of whatever they're
 /// colliding with, irrespective of the vagaries of floating point arithmetic.
-const EXTRA_DISPLACEMENT: f32 = 0.001;
+pub const EXTRA_DISPLACEMENT: f32 = 0.001;
 
 impl Collider {
     pub fn draw_debug_rect(&self, color: Color) {
