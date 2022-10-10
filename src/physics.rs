@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
@@ -17,11 +15,6 @@ use crate::{
 /// If we have more than this many displacements for a single entity while performing
 /// collision resolution, start logging debug information.
 const LOTS_OF_DISPLACEMENTS: u32 = 20;
-
-/// If we had to run through our collision resolution loop for some subset of our
-/// entities more than this many times, stop resolving collisions to avoid hanging
-/// the game.
-const MAX_RESOLVE_COLLISION_ITERATIONS: u32 = 10;
 
 #[derive(Default, PartialEq)]
 pub enum PhysicsCollisionBehavior {
@@ -85,16 +78,12 @@ pub struct PhysicsFrameResults {
 
 pub struct PhysicsSystem {
     entities: Vec<u64>,
-    entities_processed: HashSet<u64>,
-    entities_to_recompute: HashSet<u64>,
 }
 
 impl PhysicsSystem {
     pub fn with_capacity(capacity: usize) -> Self {
         PhysicsSystem {
             entities: Vec::with_capacity(capacity),
-            entities_processed: HashSet::with_capacity(capacity),
-            entities_to_recompute: HashSet::with_capacity(capacity),
         }
     }
 
@@ -130,82 +119,37 @@ impl PhysicsSystem {
         level: &Level,
         dynamic_collider_system: &mut DynamicColliderSystem,
     ) {
+        let vertical_collision_leeway = config().vertical_collision_leeway;
+
         self.entities.clear();
         self.entities.extend(entities.keys());
 
-        let mut loop_count = 0;
+        // Sort our entities from bottom to top. This ensures that any displacements
+        // caused by the effects of gravity will propagate upwards, e.g. that the
+        // displacement caused by a crate that hits the ground propagates to a
+        // crate stacked atop it.
+        self.entities.sort_by(|a, b| {
+            let a_y = entities.get(a).unwrap().sprite.pos.y;
+            let b_y = entities.get(b).unwrap().sprite.pos.y;
+            b_y.partial_cmp(&a_y).unwrap()
+        });
 
-        loop {
-            // Sort our entities from bottom to top. This gives determinism to our
-            // system and should also reduce the number of loops we need to do, as any
-            // displacements caused by the effects of gravity will propagate upwards,
-            // e.g. that the displacement caused by a crate that hits the ground propagates
-            // to a crate stacked atop it without necessitating another loop.
-            self.entities.sort_by(|a, b| {
-                let a_y = entities.get(a).unwrap().sprite.pos.y;
-                let b_y = entities.get(b).unwrap().sprite.pos.y;
-                b_y.partial_cmp(&a_y).unwrap()
-            });
+        for &id in self.entities.iter() {
+            let entity = entities.get_mut(&id).unwrap();
+            let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
+                physics_collision_resolution(
+                    id,
+                    entity,
+                    &level,
+                    dynamic_collider_system,
+                    vertical_collision_leeway,
+                )
+            } else {
+                Default::default()
+            };
 
-            self.entities_processed.clear();
-            self.entities_to_recompute.clear();
-
-            resolve_collisions(
-                entities,
-                level,
-                dynamic_collider_system,
-                &self.entities,
-                &mut self.entities_processed,
-                &mut self.entities_to_recompute,
-            );
-
-            if self.entities_to_recompute.is_empty() {
-                break;
-            }
-
-            loop_count += 1;
-            if loop_count > MAX_RESOLVE_COLLISION_ITERATIONS {
-                println!(
-                    "WARNING: resolve_collisions #{} with {:?}",
-                    loop_count, self.entities_to_recompute
-                );
-                break;
-            }
-
-            self.entities.clear();
-            self.entities.extend(self.entities_to_recompute.iter());
+            entity.physics.latest_frame = results;
         }
-    }
-}
-
-fn resolve_collisions(
-    entities: &mut EntityMap,
-    level: &Level,
-    dynamic_collider_system: &mut DynamicColliderSystem,
-    entities_to_process: &Vec<u64>,
-    entities_processed: &mut HashSet<u64>,
-    entities_to_recompute: &mut HashSet<u64>,
-) {
-    let vertical_collision_leeway = config().vertical_collision_leeway;
-
-    for &id in entities_to_process.iter() {
-        let entity = entities.get_mut(&id).unwrap();
-        let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
-            physics_collision_resolution(
-                id,
-                entity,
-                &level,
-                dynamic_collider_system,
-                vertical_collision_leeway,
-                entities_processed,
-                entities_to_recompute,
-            )
-        } else {
-            Default::default()
-        };
-        entities_processed.insert(id);
-
-        entity.physics.latest_frame = results;
     }
 }
 
@@ -215,8 +159,6 @@ fn physics_collision_resolution(
     level: &Level,
     dynamic_collider_system: &mut DynamicColliderSystem,
     vertical_collision_leeway: f32,
-    entities_processed: &HashSet<u64>,
-    entities_to_recompute: &mut HashSet<u64>,
 ) -> PhysicsFrameResults {
     let prev_bbox = entity.physics.prev_bbox;
     let physics = &mut entity.physics;
@@ -277,20 +219,14 @@ fn physics_collision_resolution(
                     }
                 }
 
-                if hit_bottom_side && results.is_on_any_surface {
-                    if let Some(collider_above) = collider.entity_id {
-                        // We are being squeezed from the top and bottom. Assume that it's
-                        // gravity that's doing the squeezing; we already displaced ourself
-                        // from below in a previous iteration of this loop, so return now
-                        // without doing any displacement.
-                        if entities_processed.contains(&collider_above) {
-                            // Let the engine know to recompute
-                            // collisions for whatever's above us so that it has a chance to be
-                            // displaced by us, if we have a dynamic collider.
-                            entities_to_recompute.insert(collider_above);
-                        }
-                        return false;
-                    }
+                if hit_bottom_side && results.is_on_any_surface && collider.entity_id.is_some() {
+                    // We are being squeezed from the top and bottom. Assume that it's
+                    // gravity that's doing the squeezing; we already displaced ourself
+                    // from below in a previous iteration of this loop, so return now
+                    // without doing any displacement, so that whatever's above us
+                    // (remember we're iterating through entities from bottom to top)
+                    // will be displaced by us, if we have a dynamic collider.
+                    return false;
                 }
 
                 if collision.displacement != Vec2::ZERO {
@@ -334,7 +270,7 @@ fn physics_collision_resolution(
     if results.was_displaced && entity.dynamic_collider.is_some() {
         // This entity has a dynamic collider associated with it, so update its
         // computed collider to reflect its displaced position. This will ensure
-        // anything else that collides with us is displaced by our new
+        // anything above us that collides with us is displaced by our new
         // position.
         dynamic_collider_system.update_dynamic_collider(entity_id, entity);
     }
