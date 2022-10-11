@@ -5,7 +5,6 @@ use crate::{config::config, entity::EntityMap, level::Level, time::GameTime};
 #[derive(Default)]
 pub struct RapierComponent {
     rigid_body_handle: RigidBodyHandle,
-    collider_handle: ColliderHandle,
 }
 
 pub struct RapierSystem {
@@ -77,15 +76,12 @@ impl RapierSystem {
                     let rigid_body_handle = self.rigid_body_set.insert(rigid_body);
                     let collider =
                         ColliderBuilder::cuboid(half_extents.x, half_extents.y).density(0.001);
-                    let collider_handle = self.collider_set.insert_with_parent(
+                    let _collider_handle = self.collider_set.insert_with_parent(
                         collider,
                         rigid_body_handle,
                         &mut self.rigid_body_set,
                     );
-                    entity.rapier = Some(RapierComponent {
-                        rigid_body_handle,
-                        collider_handle,
-                    });
+                    entity.rapier = Some(RapierComponent { rigid_body_handle });
                 }
             }
         }
