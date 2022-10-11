@@ -38,7 +38,8 @@ impl RapierSystem {
             collider_set.insert_with_parent(collider, handle, &mut rigid_body_set);
         }
         RapierSystem {
-            gravity: vector![0.0, config().gravity],
+            // We manually apply gravity ourselves, so it's set to zero here.
+            gravity: vector![0.0, 0.0],
             rigid_body_set,
             collider_set,
             integration_parameters: IntegrationParameters::default(),
@@ -69,10 +70,13 @@ impl RapierSystem {
                     let bbox = entity.sprite.bbox();
                     let half_extents = vector![bbox.w / 2., bbox.h / 2.];
                     let origin: Vector<Real> = bbox.point().into();
-                    let rigid_body = RigidBodyBuilder::dynamic()
+                    let mut rigid_body = RigidBodyBuilder::dynamic()
                         .translation(origin + half_extents)
                         .lock_rotations()
                         .build();
+                    if !entity.physics.defies_gravity {
+                        rigid_body.add_force(vector![0.0, config().gravity], true);
+                    }
                     let rigid_body_handle = self.rigid_body_set.insert(rigid_body);
                     let collider =
                         ColliderBuilder::cuboid(half_extents.x, half_extents.y).density(0.001);
