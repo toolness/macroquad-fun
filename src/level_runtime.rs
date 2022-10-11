@@ -167,7 +167,8 @@ impl LevelRuntime {
         self.physics_system
             .update_positions(&mut self.entities, &self.time);
         self.dynamic_collider_system.run(&mut self.entities);
-        self.push_system.run(&mut self.entities);
+        self.push_system
+            .run(&mut self.entities, &mut self.rapier_system);
         self.switch_system.run(&mut self.entities);
         self.physics_system.resolve_collisions(
             &mut self.entities,

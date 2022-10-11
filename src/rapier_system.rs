@@ -55,6 +55,14 @@ impl RapierSystem {
         }
     }
 
+    pub fn apply_impulse(&mut self, rapier: &RapierComponent, amount: macroquad::prelude::Vec2) {
+        let body = self
+            .rigid_body_set
+            .get_mut(rapier.rigid_body_handle)
+            .unwrap();
+        body.apply_impulse(amount.into(), true);
+    }
+
     pub fn run(&mut self, entities: &mut EntityMap, time: &GameTime) {
         for (_id, entity) in entities.iter_mut() {
             if entity.physics.use_rapier {
@@ -67,7 +75,8 @@ impl RapierSystem {
                         .lock_rotations()
                         .build();
                     let rigid_body_handle = self.rigid_body_set.insert(rigid_body);
-                    let collider = ColliderBuilder::cuboid(half_extents.x, half_extents.y);
+                    let collider =
+                        ColliderBuilder::cuboid(half_extents.x, half_extents.y).density(0.001);
                     let collider_handle = self.collider_set.insert_with_parent(
                         collider,
                         rigid_body_handle,
