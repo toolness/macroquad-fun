@@ -17,7 +17,6 @@ use crate::player::{
     teleport_entity,
 };
 use crate::push::PushSystem;
-use crate::rapier_system::RapierSystem;
 use crate::route::{draw_route_debug_targets, route_system};
 use crate::switch::SwitchSystem;
 use crate::text::draw_level_text;
@@ -46,7 +45,6 @@ pub struct LevelRuntime {
     next_id: u64,
     time: GameTime,
     physics_system: PhysicsSystem,
-    rapier_system: RapierSystem,
     attachment_system: AttachmentSystem,
     switch_system: SwitchSystem,
     push_system: PushSystem,
@@ -55,7 +53,6 @@ pub struct LevelRuntime {
     z_indexed_drawing_system: ZIndexedDrawingSystem,
     last_fps_update_time: f64,
     fps: i32,
-    level_changes: u64,
 }
 
 impl LevelRuntime {
@@ -68,7 +65,6 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
-            rapier_system: RapierSystem::new(level),
             attachment_system: AttachmentSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -83,7 +79,6 @@ impl LevelRuntime {
             debug_text_lines: None,
             last_fps_update_time: 0.,
             fps: 0,
-            level_changes: 0,
         };
         instance.change_level(&level);
         instance
@@ -91,12 +86,8 @@ impl LevelRuntime {
 
     fn change_level(&mut self, level: &'static Level) {
         self.level = level;
-        if self.level_changes > 0 {
-            self.rapier_system = RapierSystem::new(level);
-        }
         self.entities.retain(|&key, _value| key == PLAYER_ENTITY_ID);
         self.spawn_entities();
-        self.level_changes += 1;
     }
 
     fn spawn_entities(&mut self) {
@@ -167,15 +158,13 @@ impl LevelRuntime {
         self.physics_system
             .update_positions(&mut self.entities, &self.time);
         self.dynamic_collider_system.run(&mut self.entities);
-        self.push_system
-            .run(&mut self.entities, &mut self.rapier_system);
+        self.push_system.run(&mut self.entities);
         self.switch_system.run(&mut self.entities);
         self.physics_system.resolve_collisions(
             &mut self.entities,
             &self.level,
             &mut self.dynamic_collider_system,
         );
-        self.rapier_system.run(&mut self.entities, &self.time);
         floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, &self.time);
         mushroom_movement_system(&mut self.entities, &self.time);

@@ -18,17 +18,6 @@ pub fn floor_rect(rect: &Rect) -> Rect {
     )
 }
 
-/// Scale the rect's position and size. This is different
-/// from Rect.scale(), which only scales the size.
-pub fn scale_rect_position_and_size(rect: &Rect, amount: f32) -> Rect {
-    Rect::new(
-        rect.x * amount,
-        rect.y * amount,
-        rect.w * amount,
-        rect.h * amount,
-    )
-}
-
 /// Shrink the rectangle by the given x and y amounts, using
 /// its center as the origin.
 pub fn contract_rect_xy(rect: &Rect, x_amount: f32, y_amount: f32) -> Rect {

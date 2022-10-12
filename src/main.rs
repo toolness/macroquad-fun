@@ -35,7 +35,6 @@ mod mushroom;
 mod physics;
 mod player;
 mod push;
-mod rapier_system;
 mod route;
 mod running;
 mod sprite_component;
