@@ -4,6 +4,7 @@
     "screen_height": 224,
     "ms_per_animation_frame": 100.0,
     "ms_to_max_run_speed": 200.0,
+    "rapier_pixel_scaling": 0.4,
     "run_speed": 150.0,
     "gravity": 800.0,
     "vertical_collision_leeway": 1.5,

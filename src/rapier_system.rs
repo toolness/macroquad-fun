@@ -1,6 +1,9 @@
 use rapier2d::prelude::*;
 
-use crate::{config::config, entity::EntityMap, level::Level, time::GameTime};
+use crate::{
+    config::config, entity::EntityMap, level::Level, math_util::scale_rect_position_and_size,
+    time::GameTime,
+};
 
 #[derive(Default)]
 pub struct RapierComponent {
@@ -9,6 +12,7 @@ pub struct RapierComponent {
 
 pub struct RapierSystem {
     gravity: Vector<Real>,
+    pixel_scaling: f32,
     rigid_body_set: RigidBodySet,
     collider_set: ColliderSet,
     integration_parameters: IntegrationParameters,
@@ -27,9 +31,11 @@ impl RapierSystem {
     pub fn new(level: &'static Level) -> Self {
         let mut rigid_body_set = RigidBodySet::new();
         let mut collider_set = ColliderSet::new();
+        let pixel_scaling = config().rapier_pixel_scaling;
         for collider in level.iter_colliders(&level.pixel_bounds()) {
-            let half_extents = vector![collider.rect.w / 2., collider.rect.h / 2.];
-            let origin: Vector<Real> = collider.rect.point().into();
+            let rect = scale_rect_position_and_size(&collider.rect, pixel_scaling);
+            let half_extents = vector![rect.w / 2., rect.h / 2.];
+            let origin: Vector<Real> = rect.point().into();
             let rigid_body = RigidBodyBuilder::fixed()
                 .translation(origin + half_extents)
                 .build();
@@ -40,6 +46,7 @@ impl RapierSystem {
         RapierSystem {
             // We manually apply gravity ourselves, so it's set to zero here.
             gravity: vector![0.0, 0.0],
+            pixel_scaling,
             rigid_body_set,
             collider_set,
             integration_parameters: IntegrationParameters::default(),
@@ -67,7 +74,8 @@ impl RapierSystem {
         for (_id, entity) in entities.iter_mut() {
             if entity.physics.use_rapier {
                 if entity.rapier.is_none() {
-                    let bbox = entity.sprite.bbox();
+                    let bbox =
+                        scale_rect_position_and_size(&entity.sprite.bbox(), self.pixel_scaling);
                     let half_extents = vector![bbox.w / 2., bbox.h / 2.];
                     let origin: Vector<Real> = bbox.point().into();
                     let mut rigid_body = RigidBodyBuilder::dynamic()
@@ -78,8 +86,7 @@ impl RapierSystem {
                         rigid_body.add_force(vector![0.0, config().gravity], true);
                     }
                     let rigid_body_handle = self.rigid_body_set.insert(rigid_body);
-                    let collider =
-                        ColliderBuilder::cuboid(half_extents.x, half_extents.y).density(0.001);
+                    let collider = ColliderBuilder::cuboid(half_extents.x, half_extents.y);
                     let _collider_handle = self.collider_set.insert_with_parent(
                         collider,
                         rigid_body_handle,
@@ -110,7 +117,7 @@ impl RapierSystem {
                 let bbox = entity.sprite.bbox();
                 let half_extents = vector![bbox.w / 2., bbox.h / 2.];
                 let center = body.translation();
-                let top_left = center - half_extents;
+                let top_left = center / self.pixel_scaling - half_extents;
                 entity.sprite.pos = top_left.into();
             }
         }
