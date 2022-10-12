@@ -24,6 +24,7 @@ pub struct Config {
     pub coyote_time_ms: f64,
     pub debug_text_size: f32,
     pub rapier_pixel_scaling: f32,
+    pub rapier_collider_density: f32,
 }
 
 pub fn parse_config(config: &str) -> Result<Config> {

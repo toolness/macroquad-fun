@@ -86,7 +86,8 @@ impl RapierSystem {
                         rigid_body.add_force(vector![0.0, config().gravity], true);
                     }
                     let rigid_body_handle = self.rigid_body_set.insert(rigid_body);
-                    let collider = ColliderBuilder::cuboid(half_extents.x, half_extents.y);
+                    let collider = ColliderBuilder::cuboid(half_extents.x, half_extents.y)
+                        .density(config().rapier_collider_density);
                     let _collider_handle = self.collider_set.insert_with_parent(
                         collider,
                         rigid_body_handle,
