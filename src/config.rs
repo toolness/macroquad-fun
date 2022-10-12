@@ -23,6 +23,8 @@ pub struct Config {
     pub vertical_collision_leeway: f32,
     pub coyote_time_ms: f64,
     pub debug_text_size: f32,
+    pub rapier_pixel_scaling: f32,
+    pub rapier_collider_density: f32,
 }
 
 pub fn parse_config(config: &str) -> Result<Config> {
@@ -39,6 +41,7 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.fall_off_level_threshold *= config.sprite_scale;
     config.moving_platform_speed *= config.sprite_scale;
     config.vertical_collision_leeway *= config.sprite_scale;
+    config.rapier_pixel_scaling *= 1. / config.sprite_scale;
 
     Ok(config)
 }

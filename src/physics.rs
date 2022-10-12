@@ -34,6 +34,9 @@ pub enum PhysicsCollisionBehavior {
 
 #[derive(Default)]
 pub struct PhysicsComponent {
+    /// Whether to use the Rapier physics engine to simulate this object's physics.
+    pub use_rapier: bool,
+
     /// The current velocity of the entity.
     pub velocity: Vec2,
 
@@ -98,6 +101,10 @@ impl PhysicsSystem {
         let gravity_this_frame = gravity * time_since_last_frame;
 
         for entity in entities.values_mut() {
+            if entity.physics.use_rapier {
+                continue;
+            }
+
             if !entity.physics.defies_gravity {
                 entity.physics.velocity.y +=
                     gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
@@ -136,6 +143,9 @@ impl PhysicsSystem {
 
         for &id in self.entities.iter() {
             let entity = entities.get_mut(&id).unwrap();
+            if entity.physics.use_rapier {
+                continue;
+            }
             let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
                 physics_collision_resolution(
                     id,

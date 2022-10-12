@@ -9,6 +9,7 @@ use crate::{
     physics::PhysicsComponent,
     player::PlayerComponent,
     push::PushComponent,
+    rapier_system::RapierComponent,
     route::RouteComponent,
     running::RunComponent,
     sprite_component::SpriteComponent,
@@ -32,6 +33,7 @@ pub struct Entity {
     pub push: Option<PushComponent>,
     pub switch: Option<SwitchComponent>,
     pub floor_switch: Option<FloorSwitchComponent>,
+    pub rapier: Option<RapierComponent>,
     pub iid: Option<&'static str>,
 }
 

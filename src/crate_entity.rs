@@ -24,6 +24,7 @@ pub fn create_crate(start_rect: Rect) -> Entity {
             ..Default::default()
         },
         physics: PhysicsComponent {
+            use_rapier: true,
             collision_behavior: PhysicsCollisionBehavior::Stop,
             collision_flags: CollisionFlags::PLAYER_ONLY | CollisionFlags::ENVIRONMENT,
             ..Default::default()

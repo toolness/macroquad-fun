@@ -1,4 +1,8 @@
-use crate::entity::{EntityMap, EntityProcessor};
+use crate::{
+    entity::{EntityMap, EntityProcessor},
+    rapier_system::RapierSystem,
+};
+use macroquad::prelude::Vec2;
 
 #[derive(Default)]
 pub struct PushComponent {
@@ -16,7 +20,7 @@ pub struct PushSystem {
 }
 
 impl PushSystem {
-    pub fn run(&mut self, entities: &mut EntityMap) {
+    pub fn run(&mut self, entities: &mut EntityMap, rapier_system: &mut RapierSystem) {
         self.processor.filter_and_process_entities(
             entities,
             |entity| {
@@ -42,7 +46,12 @@ impl PushSystem {
                                         1.
                                     };
                                     let x_delta = intersection.w * push.pushable_coefficient * sign;
-                                    pushed.sprite.pos.x += x_delta;
+                                    if let Some(rapier) = &pushed.rapier {
+                                        rapier_system
+                                            .apply_impulse(rapier, Vec2::new(x_delta * 300.0, 0.));
+                                    } else {
+                                        pushed.sprite.pos.x += x_delta;
+                                    }
                                 }
                             }
                         }
