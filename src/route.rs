@@ -1,9 +1,14 @@
 use macroquad::{
-    prelude::{Vec2, YELLOW},
+    prelude::{Rect, Vec2, PURPLE, YELLOW},
     shapes::draw_line,
 };
 
-use crate::entity::{Entity, EntityMap, EntityProcessor};
+use crate::{
+    config::config,
+    drawing::draw_rect_lines,
+    entity::{Entity, EntityMap, EntityProcessor},
+    sprite_component::SpriteComponent,
+};
 
 pub struct RouteComponent {
     pub start_point: Vec2,
@@ -34,9 +39,13 @@ impl RouteSystem {
         self.processor.filter_and_process_entities(
             entities,
             |entity| entity.route.is_some(),
-            |entity, _entities| {
+            |entity, entities| {
                 let route = entity.route.as_mut().unwrap();
                 if !route.is_moving {
+                    return;
+                }
+                if route.can_be_blocked && is_route_blocked(&route, &entity.sprite, entities) {
+                    entity.physics.velocity = Vec2::ZERO;
                     return;
                 }
                 let target = route.target();
@@ -58,6 +67,46 @@ impl RouteSystem {
                 }
             },
         );
+    }
+}
+
+fn is_route_blocked(
+    route: &RouteComponent,
+    sprite: &SpriteComponent,
+    entities: &EntityMap,
+) -> bool {
+    if let Some(edge_bbox) = get_route_edge_bbox(route, sprite) {
+        for entity in entities.values() {
+            if entity.sprite.bbox().overlaps(&edge_bbox) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn get_route_edge_bbox(route: &RouteComponent, sprite: &SpriteComponent) -> Option<Rect> {
+    let thickness = config().blocked_route_edge_thickness;
+    let bbox = sprite.bbox();
+    let target = route.target();
+    let direction_to_target = target - sprite.pos;
+
+    if direction_to_target == Vec2::ZERO {
+        None
+    } else if direction_to_target.x != 0. {
+        let x = if direction_to_target.x > 0. {
+            bbox.right()
+        } else {
+            bbox.left() - thickness
+        };
+        Some(Rect::new(x, bbox.y, thickness, bbox.h))
+    } else {
+        let y = if direction_to_target.y > 0. {
+            bbox.bottom()
+        } else {
+            bbox.top() - thickness
+        };
+        Some(Rect::new(bbox.x, y, bbox.w, thickness))
     }
 }
 
@@ -84,6 +133,11 @@ pub fn draw_route_debug_targets(entities: &EntityMap) {
                 1.,
                 YELLOW,
             );
+            if route.can_be_blocked {
+                if let Some(edge_bbox) = get_route_edge_bbox(&route, &entity.sprite) {
+                    draw_rect_lines(&edge_bbox, 1., PURPLE)
+                }
+            }
         }
     }
 }

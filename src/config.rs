@@ -12,6 +12,7 @@ pub struct Config {
     pub gravity: f32,
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
+    pub blocked_route_edge_thickness: f32,
     pub attach_velocity_coefficient: f32,
     pub flying_eye_speed: f32,
     pub moving_platform_speed: f32,
@@ -39,6 +40,7 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.fall_off_level_threshold *= config.sprite_scale;
     config.moving_platform_speed *= config.sprite_scale;
     config.vertical_collision_leeway *= config.sprite_scale;
+    config.blocked_route_edge_thickness *= config.sprite_scale;
 
     Ok(config)
 }
