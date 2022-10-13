@@ -14,7 +14,7 @@ pub struct RouteComponent {
     pub start_point: Vec2,
     pub end_point: Vec2,
     pub is_moving_towards_start: bool,
-    pub can_be_blocked: bool,
+    pub stop_when_blocked: bool,
     pub is_moving: bool,
     pub ping_pong: bool,
     pub speed: f32,
@@ -44,7 +44,7 @@ impl RouteSystem {
                 if !route.is_moving {
                     return;
                 }
-                if route.can_be_blocked && is_route_blocked(&route, &entity.sprite, entities) {
+                if route.stop_when_blocked && is_route_blocked(&route, &entity.sprite, entities) {
                     entity.physics.velocity = Vec2::ZERO;
                     return;
                 }
@@ -133,7 +133,7 @@ pub fn draw_route_debug_targets(entities: &EntityMap) {
                 1.,
                 YELLOW,
             );
-            if route.can_be_blocked {
+            if route.stop_when_blocked {
                 if let Some(edge_bbox) = get_route_edge_bbox(&route, &entity.sprite) {
                     draw_rect_lines(&edge_bbox, 1., PURPLE)
                 }
