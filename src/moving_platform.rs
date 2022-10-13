@@ -35,6 +35,7 @@ pub fn create_moving_platform(start_rect: Rect, end_point: Vec2, ping_pong: bool
         route: Some(RouteComponent {
             start_point,
             end_point,
+            can_be_blocked: true, // TODO CHANGE THIS
             is_moving: ping_pong,
             ping_pong,
             is_moving_towards_start: false,
