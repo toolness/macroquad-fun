@@ -1,16 +1,17 @@
-use macroquad::prelude::{Rect, Vec2};
+use macroquad::prelude::Rect;
 
 use crate::{
     collision::CollisionFlags,
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
+    level::MovingPlatformArgs,
     physics::PhysicsComponent,
     route::RouteComponent,
     sprite_component::{Renderer, SpriteComponent},
 };
 
-pub fn create_moving_platform(start_rect: Rect, end_point: Vec2, ping_pong: bool) -> Entity {
+pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> Entity {
     let start_point = start_rect.point();
     let relative_bbox = start_rect.offset(-start_point);
     return Entity {
@@ -34,9 +35,10 @@ pub fn create_moving_platform(start_rect: Rect, end_point: Vec2, ping_pong: bool
         })),
         route: Some(RouteComponent {
             start_point,
-            end_point,
-            is_moving: ping_pong,
-            ping_pong,
+            end_point: args.end_point,
+            stop_when_blocked: args.stop_when_blocked,
+            is_moving: args.ping_pong,
+            ping_pong: args.ping_pong,
             is_moving_towards_start: false,
             speed: config().moving_platform_speed,
         }),

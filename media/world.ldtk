@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 26,
+	"nextUid": 27,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -489,6 +489,35 @@
 					"allowedRefs": "OnlySame",
 					"allowedRefTags": [],
 					"tilesetUid": null
+				},
+				{
+					"identifier": "stop_when_blocked",
+					"__type": "Bool",
+					"uid": 26,
+					"type": "F_Bool",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayPos": "Above",
+					"editorAlwaysShow": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefTags": [],
+					"tilesetUid": null
 				}
 			]
 		},
@@ -790,7 +819,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "288bcf80-2a00-11ed-83b7-6f1253113b1e"
+								"worldIid": "2da8a410-2a00-11ed-973b-2326220d2d58"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -816,6 +845,10 @@
 								{ "__identifier": "ping_pong", "__value": false, "__type": "Bool", "__tile": null, "defUid": 24, "realEditorValues": [{
 									"id": "V_Bool",
 									"params": [ false ]
+								}] },
+								{ "__identifier": "stop_when_blocked", "__value": true, "__type": "Bool", "__tile": null, "defUid": 26, "realEditorValues": [{
+									"id": "V_Bool",
+									"params": [ true ]
 								}] }
 							]
 						}
@@ -1928,7 +1961,8 @@
 								{ "__identifier": "ping_pong", "__value": true, "__type": "Bool", "__tile": null, "defUid": 24, "realEditorValues": [{
 									"id": "V_Bool",
 									"params": [ true ]
-								}] }
+								}] },
+								{ "__identifier": "stop_when_blocked", "__value": false, "__type": "Bool", "__tile": null, "defUid": 26, "realEditorValues": [] }
 							]
 						},
 						{

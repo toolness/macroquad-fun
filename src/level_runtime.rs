@@ -17,7 +17,7 @@ use crate::player::{
     teleport_entity,
 };
 use crate::push::PushSystem;
-use crate::route::{draw_route_debug_targets, route_system};
+use crate::route::{draw_route_debug_targets, RouteSystem};
 use crate::switch::SwitchSystem;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
@@ -45,6 +45,7 @@ pub struct LevelRuntime {
     next_id: u64,
     time: GameTime,
     physics_system: PhysicsSystem,
+    route_system: RouteSystem,
     attachment_system: AttachmentSystem,
     switch_system: SwitchSystem,
     push_system: PushSystem,
@@ -65,6 +66,9 @@ impl LevelRuntime {
             camera: Camera::new(),
             time: GameTime::new(),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
+            route_system: RouteSystem {
+                processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
+            },
             attachment_system: AttachmentSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -107,9 +111,7 @@ impl LevelRuntime {
             let opt_instance = match &entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
-                EntityKind::MovingPlatform(endpoint, ping_pong) => {
-                    Some(create_moving_platform(entity.rect, *endpoint, *ping_pong))
-                }
+                EntityKind::MovingPlatform(args) => Some(create_moving_platform(entity.rect, args)),
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
                     entity.rect,
@@ -154,7 +156,7 @@ impl LevelRuntime {
         process_player_input(&mut self.entities, &self.time);
         self.attachment_system
             .run(&mut self.entities, &self.level, &self.time);
-        route_system(&mut self.entities);
+        self.route_system.run(&mut self.entities);
         self.physics_system
             .update_positions(&mut self.entities, &self.time);
         self.dynamic_collider_system.run(&mut self.entities);

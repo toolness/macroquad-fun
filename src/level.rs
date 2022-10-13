@@ -97,12 +97,19 @@ pub struct Entity {
 }
 
 #[derive(PartialEq)]
+pub struct MovingPlatformArgs {
+    pub end_point: Vec2,
+    pub ping_pong: bool,
+    pub stop_when_blocked: bool,
+}
+
+#[derive(PartialEq)]
 pub enum EntityKind {
     PlayerStart(String),
     Text(Vec<String>),
     FlyingEye(Vec2),
     Mushroom,
-    MovingPlatform(Vec2, bool),
+    MovingPlatform(MovingPlatformArgs),
     Crate,
     FloorSwitch(Option<String>),
 }
@@ -162,7 +169,13 @@ impl Level {
                         "MovingPlatform" => {
                             let end_point = entity.get_point_field_instance("endpoint")?;
                             let ping_pong: bool = entity.get_bool_field_instance("ping_pong")?;
-                            EntityKind::MovingPlatform(end_point * grid_size, ping_pong)
+                            let stop_when_blocked =
+                                entity.get_bool_field_instance("stop_when_blocked")?;
+                            EntityKind::MovingPlatform(MovingPlatformArgs {
+                                end_point: end_point * grid_size,
+                                ping_pong,
+                                stop_when_blocked,
+                            })
                         }
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
