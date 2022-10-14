@@ -255,7 +255,7 @@ impl EntityInstance {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct FieldInstance {
     /// Field definition identifier
     #[serde(rename = "__identifier")]
