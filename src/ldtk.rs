@@ -161,109 +161,90 @@ where
 }
 
 impl EntityInstance {
-    pub fn get_point_field_instance(&self, identifier: &str) -> Result<Vec2> {
+    fn get_field_instance(&self, identifier: &str) -> Result<&FieldInstance> {
         if let Some(field) = self.field_instances.get(identifier) {
-            if let Some(serde_json::Value::Object(value)) = &field.value {
-                match (value.get("cx"), value.get("cy")) {
-                    (Some(serde_json::Value::Number(x)), Some(serde_json::Value::Number(y))) => {
-                        match (x.as_f64(), y.as_f64()) {
-                            (Some(x), Some(y)) => {
-                                return Ok(Vec2::new(x as f32, y as f32));
-                            }
-                            _ => {}
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            return Err(anyhow!(
+            Ok(field)
+        } else {
+            Err(anyhow!(
                 "Expected field instance with identifier '{}' to be a point",
                 identifier
-            ));
+            ))
         }
-
-        Err(anyhow!(
-            "Unable to find field instance with identifier '{}'",
-            identifier
-        ))
     }
 
-    pub fn get_opt_entity_ref_field_instance(&self, identifier: &str) -> Result<Option<String>> {
-        if let Some(field) = self.field_instances.get(identifier) {
-            match &field.value {
-                Some(serde_json::Value::Object(value)) => {
-                    if let Some(serde_json::Value::String(iid)) = &value.get("entityIid") {
-                        return Ok(Some(iid.to_owned()));
+    pub fn get_point_field_instance(&self, identifier: &str) -> Result<Vec2> {
+        let field = self.get_field_instance(identifier)?;
+        if let Some(serde_json::Value::Object(value)) = &field.value {
+            match (value.get("cx"), value.get("cy")) {
+                (Some(serde_json::Value::Number(x)), Some(serde_json::Value::Number(y))) => {
+                    match (x.as_f64(), y.as_f64()) {
+                        (Some(x), Some(y)) => {
+                            return Ok(Vec2::new(x as f32, y as f32));
+                        }
+                        _ => {}
                     }
-                }
-                Some(serde_json::Value::Null) => {
-                    return Ok(None);
                 }
                 _ => {}
             }
-            return Err(anyhow!(
-                "Expected field instance with identifier '{}' to be an EntityRef or null",
-                identifier
-            ));
         }
-
-        Err(anyhow!(
-            "Unable to find field instance with identifier '{}'",
+        return Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a point",
             identifier
-        ))
+        ));
+    }
+
+    pub fn get_opt_entity_ref_field_instance(&self, identifier: &str) -> Result<Option<String>> {
+        let field = self.get_field_instance(identifier)?;
+        match &field.value {
+            Some(serde_json::Value::Object(value)) => {
+                if let Some(serde_json::Value::String(iid)) = &value.get("entityIid") {
+                    return Ok(Some(iid.to_owned()));
+                }
+            }
+            Some(serde_json::Value::Null) => {
+                return Ok(None);
+            }
+            _ => {}
+        }
+        return Err(anyhow!(
+            "Expected field instance with identifier '{}' to be an EntityRef or null",
+            identifier
+        ));
     }
 
     pub fn get_bool_field_instance(&self, identifier: &str) -> Result<bool> {
-        if let Some(field) = self.field_instances.get(identifier) {
-            if let Some(serde_json::Value::Bool(value)) = &field.value {
-                return Ok(*value);
-            }
-            return Err(anyhow!(
-                "Expected field instance with identifier '{}' to be a boolean",
-                identifier
-            ));
+        let field = self.get_field_instance(identifier)?;
+        if let Some(serde_json::Value::Bool(value)) = &field.value {
+            return Ok(*value);
         }
-
-        Err(anyhow!(
-            "Unable to find field instance with identifier '{}'",
+        return Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a boolean",
             identifier
-        ))
+        ));
     }
 
     pub fn get_float_field_instance(&self, identifier: &str) -> Result<f64> {
-        if let Some(field) = self.field_instances.get(identifier) {
-            if let Some(serde_json::Value::Number(value)) = &field.value {
-                if let Some(number) = value.as_f64() {
-                    return Ok(number);
-                }
+        let field = self.get_field_instance(identifier)?;
+        if let Some(serde_json::Value::Number(value)) = &field.value {
+            if let Some(number) = value.as_f64() {
+                return Ok(number);
             }
-            return Err(anyhow!(
-                "Expected field instance with identifier '{}' to be a number",
-                identifier
-            ));
         }
-
-        Err(anyhow!(
-            "Unable to find field instance with identifier '{}'",
+        return Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a number",
             identifier
-        ))
+        ));
     }
 
     pub fn get_string_field_instance(&self, identifier: &str) -> Result<String> {
-        if let Some(field) = self.field_instances.get(identifier) {
-            if let Some(serde_json::Value::String(value)) = &field.value {
-                return Ok(value.to_owned());
-            }
-            return Err(anyhow!(
-                "Expected field instance with identifier '{}' to be a string",
-                identifier
-            ));
+        let field = self.get_field_instance(identifier)?;
+        if let Some(serde_json::Value::String(value)) = &field.value {
+            return Ok(value.to_owned());
         }
-
-        Err(anyhow!(
-            "Unable to find field instance with identifier '{}'",
+        return Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a string",
             identifier
-        ))
+        ));
     }
 }
 
