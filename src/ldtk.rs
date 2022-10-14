@@ -136,11 +136,13 @@ pub struct EntityInstance {
     pub width: i64,
 
     /// An array of all custom fields and their values.
-    #[serde(rename = "fieldInstances", deserialize_with = "field_instance")]
+    #[serde(rename = "fieldInstances", deserialize_with = "field_instance_hashmap")]
     pub field_instances: HashMap<String, FieldInstance>,
 }
 
-fn field_instance<'de, D>(deserializer: D) -> Result<HashMap<String, FieldInstance>, D::Error>
+fn field_instance_hashmap<'de, D>(
+    deserializer: D,
+) -> Result<HashMap<String, FieldInstance>, D::Error>
 where
     D: Deserializer<'de>,
 {
