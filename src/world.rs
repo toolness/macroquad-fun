@@ -27,8 +27,8 @@ impl World {
         }
         let mut levels = HashMap::with_capacity(world.levels.len());
 
-        for ldtk_level in world.levels.iter() {
-            let level = Level::from_ldtk(&ldtk_level)?;
+        for ldtk_level in world.levels {
+            let level = Level::from_ldtk(ldtk_level)?;
             levels.insert(level.identifier.clone(), level);
         }
 

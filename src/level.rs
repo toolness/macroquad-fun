@@ -5,7 +5,7 @@ use crate::{
     collision::{Collider, CollisionFlags},
     config::config,
     game_sprites::game_sprites,
-    ldtk::{self, LayerInstance, TileInstance},
+    ldtk::{self, EntityRef, LayerInstance, TileInstance},
     xy_range_iterator::XYRangeIterator,
 };
 
@@ -111,11 +111,11 @@ pub enum EntityKind {
     Mushroom,
     MovingPlatform(MovingPlatformArgs),
     Crate,
-    FloorSwitch(Option<String>),
+    FloorSwitch(Option<EntityRef>),
 }
 
 impl Level {
-    pub fn from_ldtk(level: &ldtk::Level) -> Result<Self> {
+    pub fn from_ldtk(level: ldtk::Level) -> Result<Self> {
         let mut colliders: Option<Vec<ColliderType>> = None;
         let scale = config().sprite_scale;
         let world_rect = Rect::new(
@@ -124,7 +124,7 @@ impl Level {
             level.px_wid as f32 * scale,
             level.px_hei as f32 * scale,
         );
-        let layers = level.layer_instances.as_ref().unwrap();
+        let layers = level.layer_instances.unwrap();
         let mut entities = vec![];
         let mut opt_tiles: Option<Vec<Option<Tile>>> = None;
         let mut opt_background_tiles: Option<Vec<Option<Tile>>> = None;
@@ -136,41 +136,59 @@ impl Level {
         let height: i64 = first_layer.c_hei;
         let unscaled_grid_size: i64 = first_layer.grid_size;
         let grid_size: f32 = first_layer.grid_size as f32 * scale;
-        for layer in layers.iter() {
+        for layer in layers {
             if layer.identifier == "IntGrid" {
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
                 opt_tiles = Some(load_tile_layer(&layer, &layer.auto_layer_tiles));
             } else if layer.identifier == "Entities" {
-                for entity in layer.entity_instances.iter() {
+                for mut entity in layer.entity_instances {
                     let rect = Rect::new(
                         entity.px[0] as f32 * scale,
                         entity.px[1] as f32 * scale,
                         entity.width as f32 * scale,
                         entity.height as f32 * scale,
                     );
-                    let iid = entity.iid.clone();
+                    let iid = entity.iid;
                     let kind = match entity.identifier.as_str() {
-                        "PlayerStart" => {
-                            EntityKind::PlayerStart(entity.get_string_field_instance("name")?)
-                        }
+                        "PlayerStart" => EntityKind::PlayerStart(
+                            entity.field_instances.remove("name").unwrap().try_into()?,
+                        ),
                         "Text" => {
-                            let lines: Vec<String> = entity
-                                .get_string_field_instance("text")?
-                                .split('\n')
-                                .map(|s| s.to_owned())
-                                .collect();
+                            let text: String =
+                                entity.field_instances.remove("text").unwrap().try_into()?;
+                            let lines: Vec<String> =
+                                text.split('\n').map(|s| s.to_owned()).collect();
                             EntityKind::Text(lines)
                         }
                         "FlyingEye" => EntityKind::FlyingEye(Vec2::new(
-                            entity.get_float_field_instance("x_velocity")? as f32,
-                            entity.get_float_field_instance("y_velocity")? as f32,
+                            entity
+                                .field_instances
+                                .remove("x_velocity")
+                                .unwrap()
+                                .try_into()?,
+                            entity
+                                .field_instances
+                                .remove("y_velocity")
+                                .unwrap()
+                                .try_into()?,
                         )),
                         "Mushroom" => EntityKind::Mushroom,
                         "MovingPlatform" => {
-                            let end_point = entity.get_point_field_instance("endpoint")?;
-                            let ping_pong: bool = entity.get_bool_field_instance("ping_pong")?;
-                            let stop_when_blocked =
-                                entity.get_bool_field_instance("stop_when_blocked")?;
+                            let end_point: Vec2 = entity
+                                .field_instances
+                                .remove("endpoint")
+                                .unwrap()
+                                .try_into()?;
+                            let ping_pong: bool = entity
+                                .field_instances
+                                .remove("ping_pong")
+                                .unwrap()
+                                .try_into()?;
+                            let stop_when_blocked: bool = entity
+                                .field_instances
+                                .remove("stop_when_blocked")
+                                .unwrap()
+                                .try_into()?;
                             EntityKind::MovingPlatform(MovingPlatformArgs {
                                 end_point: end_point * grid_size,
                                 ping_pong,
@@ -179,8 +197,12 @@ impl Level {
                         }
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
-                            let iid = entity.get_opt_entity_ref_field_instance("trigger")?;
-                            EntityKind::FloorSwitch(iid)
+                            let entity_ref: Option<EntityRef> = entity
+                                .field_instances
+                                .remove("trigger")
+                                .unwrap()
+                                .try_into()?;
+                            EntityKind::FloorSwitch(entity_ref)
                         }
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);

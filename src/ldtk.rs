@@ -164,94 +164,6 @@ where
     Ok(result)
 }
 
-impl EntityInstance {
-    fn get_field_instance(&self, identifier: &str) -> Result<&FieldInstance> {
-        if let Some(field) = self.field_instances.get(identifier) {
-            Ok(field)
-        } else {
-            Err(anyhow!(
-                "Expected field instance with identifier '{}' to be a point",
-                identifier
-            ))
-        }
-    }
-
-    pub fn get_point_field_instance(&self, identifier: &str) -> Result<Vec2> {
-        let field = self.get_field_instance(identifier)?;
-        if let Some(serde_json::Value::Object(value)) = &field.value {
-            match (value.get("cx"), value.get("cy")) {
-                (Some(serde_json::Value::Number(x)), Some(serde_json::Value::Number(y))) => {
-                    match (x.as_f64(), y.as_f64()) {
-                        (Some(x), Some(y)) => {
-                            return Ok(Vec2::new(x as f32, y as f32));
-                        }
-                        _ => {}
-                    }
-                }
-                _ => {}
-            }
-        }
-        return Err(anyhow!(
-            "Expected field instance with identifier '{}' to be a point",
-            identifier
-        ));
-    }
-
-    pub fn get_opt_entity_ref_field_instance(&self, identifier: &str) -> Result<Option<String>> {
-        let field = self.get_field_instance(identifier)?;
-        match &field.value {
-            Some(serde_json::Value::Object(value)) => {
-                if let Some(serde_json::Value::String(iid)) = &value.get("entityIid") {
-                    return Ok(Some(iid.to_owned()));
-                }
-            }
-            Some(serde_json::Value::Null) => {
-                return Ok(None);
-            }
-            _ => {}
-        }
-        return Err(anyhow!(
-            "Expected field instance with identifier '{}' to be an EntityRef or null",
-            identifier
-        ));
-    }
-
-    pub fn get_bool_field_instance(&self, identifier: &str) -> Result<bool> {
-        let field = self.get_field_instance(identifier)?;
-        if let Some(serde_json::Value::Bool(value)) = &field.value {
-            return Ok(*value);
-        }
-        return Err(anyhow!(
-            "Expected field instance with identifier '{}' to be a boolean",
-            identifier
-        ));
-    }
-
-    pub fn get_float_field_instance(&self, identifier: &str) -> Result<f64> {
-        let field = self.get_field_instance(identifier)?;
-        if let Some(serde_json::Value::Number(value)) = &field.value {
-            if let Some(number) = value.as_f64() {
-                return Ok(number);
-            }
-        }
-        return Err(anyhow!(
-            "Expected field instance with identifier '{}' to be a number",
-            identifier
-        ));
-    }
-
-    pub fn get_string_field_instance(&self, identifier: &str) -> Result<String> {
-        let field = self.get_field_instance(identifier)?;
-        if let Some(serde_json::Value::String(value)) = &field.value {
-            return Ok(value.to_owned());
-        }
-        return Err(anyhow!(
-            "Expected field instance with identifier '{}' to be a string",
-            identifier
-        ));
-    }
-}
-
 #[derive(Deserialize)]
 pub struct FieldInstance {
     /// Field definition identifier
@@ -275,4 +187,107 @@ pub struct FieldInstance {
     /// array, then this `__value` will also be a JSON array.
     #[serde(rename = "__value")]
     pub value: Option<serde_json::Value>,
+}
+
+impl TryFrom<FieldInstance> for Vec2 {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        if let Some(serde_json::Value::Object(value)) = value.value {
+            match (value.get("cx"), value.get("cy")) {
+                (Some(serde_json::Value::Number(x)), Some(serde_json::Value::Number(y))) => {
+                    match (x.as_f64(), y.as_f64()) {
+                        (Some(x), Some(y)) => {
+                            return Ok(Vec2::new(x as f32, y as f32));
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {}
+            }
+        }
+        Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a point",
+            value.identifier
+        ))
+    }
+}
+
+#[derive(PartialEq)]
+pub struct EntityRef {
+    pub iid: String,
+}
+
+impl TryFrom<FieldInstance> for Option<EntityRef> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        match value.value {
+            Some(serde_json::Value::Object(mut value)) => {
+                if let serde_json::Value::String(iid) = value.remove("entityIid").unwrap() {
+                    return Ok(Some(EntityRef { iid }));
+                }
+            }
+            Some(serde_json::Value::Null) => {
+                return Ok(None);
+            }
+            _ => {}
+        }
+        Err(anyhow!(
+            "Expected field instance with identifier '{}' to be an EntityRef or null",
+            value.identifier
+        ))
+    }
+}
+
+impl TryFrom<FieldInstance> for bool {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        if let Some(serde_json::Value::Bool(value)) = value.value {
+            return Ok(value);
+        }
+        Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a boolean",
+            value.identifier
+        ))
+    }
+}
+
+impl TryFrom<FieldInstance> for f64 {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        if let Some(serde_json::Value::Number(value)) = value.value {
+            if let Some(number) = value.as_f64() {
+                return Ok(number);
+            }
+        }
+        Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a number",
+            value.identifier
+        ))
+    }
+}
+
+impl TryFrom<FieldInstance> for f32 {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        f64::try_from(value).map(|v| v as f32)
+    }
+}
+
+impl TryFrom<FieldInstance> for String {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        if let Some(serde_json::Value::String(value)) = value.value {
+            return Ok(value);
+        }
+        Err(anyhow!(
+            "Expected field instance with identifier '{}' to be a string",
+            value.identifier
+        ))
+    }
 }

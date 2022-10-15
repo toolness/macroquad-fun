@@ -115,7 +115,9 @@ impl LevelRuntime {
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
                     entity.rect,
-                    trigger_entity_iid.as_ref().map(|s| iid_id_map[s.as_str()]),
+                    trigger_entity_iid
+                        .as_ref()
+                        .map(|s| iid_id_map[s.iid.as_str()]),
                 )),
                 EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
             };
