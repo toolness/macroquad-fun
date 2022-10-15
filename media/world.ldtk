@@ -760,7 +760,7 @@
 						},
 						{
 							"__identifier": "PlayerStart",
-							"__grid": [8,8],
+							"__grid": [22,5],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -769,7 +769,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 3,
-							"px": [128,128],
+							"px": [352,80],
 							"fieldInstances": [{ "__identifier": "name", "__value": "default", "__type": "String", "__tile": null, "defUid": 19, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["default"]
@@ -805,7 +805,7 @@
 						},
 						{
 							"__identifier": "FloorSwitch",
-							"__grid": [20,6],
+							"__grid": [22,6],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -814,12 +814,12 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 23,
-							"px": [320,96],
+							"px": [352,96],
 							"fieldInstances": [{ "__identifier": "trigger", "__value": {
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "2da8a410-2a00-11ed-973b-2326220d2d58"
+								"worldIid": "b6f9ab30-2a00-11ed-ae1c-7b32d86a4e03"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
