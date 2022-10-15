@@ -140,6 +140,8 @@ pub struct EntityInstance {
     pub field_instances: HashMap<String, FieldInstance>,
 }
 
+/// LDtk serializes field instances as an array, I'm not sure why. It's much more
+/// convenient to consume them as a map, so we'll do that during deserialization.
 fn field_instance_hashmap<'de, D>(
     deserializer: D,
 ) -> Result<HashMap<String, FieldInstance>, D::Error>
