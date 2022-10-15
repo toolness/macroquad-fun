@@ -204,27 +204,37 @@ pub struct FieldInstance {
     pub value: Option<serde_json::Value>,
 }
 
+impl FieldInstance {
+    pub fn value_result(self) -> Result<serde_json::Value> {
+        if let Some(value) = self.value {
+            Ok(value)
+        } else {
+            Err(anyhow!(
+                "Expected field instance with identified '{}' to have a value",
+                self.identifier
+            ))
+        }
+    }
+}
+
+#[derive(Deserialize)]
+pub struct Point {
+    cx: f32,
+    cy: f32,
+}
+
+impl From<Point> for Vec2 {
+    fn from(point: Point) -> Self {
+        Vec2::new(point.cx, point.cy)
+    }
+}
+
 impl TryFrom<FieldInstance> for Vec2 {
     type Error = anyhow::Error;
 
     fn try_from(value: FieldInstance) -> Result<Self> {
-        if let Some(serde_json::Value::Object(value)) = value.value {
-            match (value.get("cx"), value.get("cy")) {
-                (Some(serde_json::Value::Number(x)), Some(serde_json::Value::Number(y))) => {
-                    match (x.as_f64(), y.as_f64()) {
-                        (Some(x), Some(y)) => {
-                            return Ok(Vec2::new(x as f32, y as f32));
-                        }
-                        _ => {}
-                    }
-                }
-                _ => {}
-            }
-        }
-        Err(anyhow!(
-            "Expected field instance with identifier '{}' to be a point",
-            value.identifier
-        ))
+        let point: Point = serde_json::from_value(value.value_result()?)?;
+        Ok(point.into())
     }
 }
 
