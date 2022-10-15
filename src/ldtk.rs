@@ -238,8 +238,9 @@ impl TryFrom<FieldInstance> for Vec2 {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Deserialize)]
 pub struct EntityRef {
+    #[serde(rename = "entityIid")]
     pub iid: String,
 }
 
@@ -247,21 +248,11 @@ impl TryFrom<FieldInstance> for Option<EntityRef> {
     type Error = anyhow::Error;
 
     fn try_from(value: FieldInstance) -> Result<Self> {
-        match value.value {
-            Some(serde_json::Value::Object(mut value)) => {
-                if let serde_json::Value::String(iid) = value.remove("entityIid").unwrap() {
-                    return Ok(Some(EntityRef { iid }));
-                }
-            }
-            Some(serde_json::Value::Null) => {
-                return Ok(None);
-            }
-            _ => {}
+        if value.value == Some(serde_json::Value::Null) {
+            Ok(None)
+        } else {
+            Ok(Some(serde_json::from_value(value.value_result()?)?))
         }
-        Err(anyhow!(
-            "Expected field instance with identifier '{}' to be an EntityRef or null",
-            value.identifier
-        ))
     }
 }
 
