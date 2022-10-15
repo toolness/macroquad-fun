@@ -111,9 +111,10 @@ impl AttachmentComponent {
             .flatten()
     }
 
-    pub fn reset(&mut self) {
-        self.attached_to_entity_id = None;
-        self.detached_from_entity_id = None;
+    pub fn reset(&mut self, physics: &mut PhysicsComponent) {
+        if self.is_attached() {
+            self.detach(physics);
+        }
     }
 
     fn update_while_attached(

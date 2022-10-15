@@ -54,7 +54,7 @@ pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
 pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     entity.sprite.pos = pos;
     if let Some(attachment) = entity.attachment.as_mut() {
-        attachment.reset();
+        attachment.reset(&mut entity.physics);
     }
 }
 
@@ -82,7 +82,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
         // The player just landed (or remains on the ground).
         player.is_in_air = false;
         player.coyote_time_start = None;
-        attachment.reset();
+        attachment.reset(physics);
     } else if !player.is_in_air {
         if let Some(coyote_start_time) = &player.coyote_time_start {
             if time.now - coyote_start_time > config().coyote_time_ms / 1000. {
