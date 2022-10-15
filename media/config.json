@@ -12,7 +12,7 @@
     "attach_velocity_coefficient": 2.5,
     "flying_eye_speed": 50.0,
     "mushroom_speed": 25.0,
-    "blocked_route_edge_thickness": 2.0,
+    "blocked_route_edge_thickness": 4.0,
     "fall_off_level_threshold": 300.0,
     "moving_platform_speed": 20.0,
     "crate_pushable_coefficient": 0.5,
