@@ -248,10 +248,9 @@ impl TryFrom<FieldInstance> for Option<EntityRef> {
     type Error = anyhow::Error;
 
     fn try_from(value: FieldInstance) -> Result<Self> {
-        if value.value == Some(serde_json::Value::Null) {
-            Ok(None)
-        } else {
-            Ok(Some(serde_json::from_value(value.value_result()?)?))
+        match value.value {
+            Some(serde_json::Value::Null) => Ok(None),
+            _ => Ok(Some(serde_json::from_value(value.value_result()?)?)),
         }
     }
 }
