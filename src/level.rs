@@ -5,7 +5,7 @@ use crate::{
     collision::{Collider, CollisionFlags},
     config::config,
     game_sprites::game_sprites,
-    ldtk::{self, EntityRef, LayerInstance, TileInstance},
+    ldtk::{self, field_into, EntityRef, LayerInstance, TileInstance},
     xy_range_iterator::XYRangeIterator,
 };
 
@@ -141,7 +141,7 @@ impl Level {
                 colliders = Some(ColliderType::from_vec(&layer.int_grid_csv)?);
                 opt_tiles = Some(load_tile_layer(&layer, &layer.auto_layer_tiles));
             } else if layer.identifier == "Entities" {
-                for mut entity in layer.entity_instances {
+                for entity in layer.entity_instances {
                     let rect = Rect::new(
                         entity.px[0] as f32 * scale,
                         entity.px[1] as f32 * scale,
@@ -149,46 +149,25 @@ impl Level {
                         entity.height as f32 * scale,
                     );
                     let iid = entity.iid;
+                    let mut fields = entity.field_instances;
                     let kind = match entity.identifier.as_str() {
-                        "PlayerStart" => EntityKind::PlayerStart(
-                            entity.field_instances.remove("name").unwrap().try_into()?,
-                        ),
+                        "PlayerStart" => EntityKind::PlayerStart(field_into(&mut fields, "name")?),
                         "Text" => {
-                            let text: String =
-                                entity.field_instances.remove("text").unwrap().try_into()?;
+                            let text: String = field_into(&mut fields, "text")?;
                             let lines: Vec<String> =
                                 text.split('\n').map(|s| s.to_owned()).collect();
                             EntityKind::Text(lines)
                         }
                         "FlyingEye" => EntityKind::FlyingEye(Vec2::new(
-                            entity
-                                .field_instances
-                                .remove("x_velocity")
-                                .unwrap()
-                                .try_into()?,
-                            entity
-                                .field_instances
-                                .remove("y_velocity")
-                                .unwrap()
-                                .try_into()?,
+                            field_into(&mut fields, "x_velocity")?,
+                            field_into(&mut fields, "y_velocity")?,
                         )),
                         "Mushroom" => EntityKind::Mushroom,
                         "MovingPlatform" => {
-                            let end_point: Vec2 = entity
-                                .field_instances
-                                .remove("endpoint")
-                                .unwrap()
-                                .try_into()?;
-                            let ping_pong: bool = entity
-                                .field_instances
-                                .remove("ping_pong")
-                                .unwrap()
-                                .try_into()?;
-                            let stop_when_blocked: bool = entity
-                                .field_instances
-                                .remove("stop_when_blocked")
-                                .unwrap()
-                                .try_into()?;
+                            let end_point: Vec2 = field_into(&mut fields, "endpoint")?;
+                            let ping_pong: bool = field_into(&mut fields, "ping_pong")?;
+                            let stop_when_blocked: bool =
+                                field_into(&mut fields, "stop_when_blocked")?;
                             EntityKind::MovingPlatform(MovingPlatformArgs {
                                 end_point: end_point * grid_size,
                                 ping_pong,
@@ -197,11 +176,7 @@ impl Level {
                         }
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
-                            let entity_ref: Option<EntityRef> = entity
-                                .field_instances
-                                .remove("trigger")
-                                .unwrap()
-                                .try_into()?;
+                            let entity_ref: Option<EntityRef> = field_into(&mut fields, "trigger")?;
                             EntityKind::FloorSwitch(entity_ref)
                         }
                         _ => {

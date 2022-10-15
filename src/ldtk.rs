@@ -4,7 +4,7 @@ extern crate serde_derive;
 
 use std::collections::HashMap;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::Vec2;
 use serde::{Deserialize, Deserializer};
 
@@ -162,6 +162,21 @@ where
     }
 
     Ok(result)
+}
+
+pub fn field_into<T>(fields: &mut HashMap<String, FieldInstance>, name: &'static str) -> Result<T>
+where
+    T: TryFrom<FieldInstance, Error = Error>,
+{
+    let opt_field = fields.remove(name);
+    if let Some(field) = opt_field {
+        field.try_into()
+    } else {
+        Err(anyhow!(
+            "Expected field instance with identifier '{}' to exist",
+            name
+        ))
+    }
 }
 
 #[derive(Deserialize)]
