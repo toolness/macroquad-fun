@@ -153,9 +153,10 @@ impl Level {
                     let kind = match entity.identifier.as_str() {
                         "PlayerStart" => EntityKind::PlayerStart(field_into(&mut fields, "name")?),
                         "Text" => {
-                            let text: String = field_into(&mut fields, "text")?;
-                            let lines: Vec<String> =
-                                text.split('\n').map(|s| s.to_owned()).collect();
+                            let lines: Vec<String> = field_into::<String>(&mut fields, "text")?
+                                .split('\n')
+                                .map(|s| s.to_owned())
+                                .collect();
                             EntityKind::Text(lines)
                         }
                         "FlyingEye" => EntityKind::FlyingEye(Vec2::new(
@@ -163,21 +164,14 @@ impl Level {
                             field_into(&mut fields, "y_velocity")?,
                         )),
                         "Mushroom" => EntityKind::Mushroom,
-                        "MovingPlatform" => {
-                            let end_point: Vec2 = field_into(&mut fields, "endpoint")?;
-                            let ping_pong: bool = field_into(&mut fields, "ping_pong")?;
-                            let stop_when_blocked: bool =
-                                field_into(&mut fields, "stop_when_blocked")?;
-                            EntityKind::MovingPlatform(MovingPlatformArgs {
-                                end_point: end_point * grid_size,
-                                ping_pong,
-                                stop_when_blocked,
-                            })
-                        }
+                        "MovingPlatform" => EntityKind::MovingPlatform(MovingPlatformArgs {
+                            end_point: field_into::<Vec2>(&mut fields, "endpoint")? * grid_size,
+                            ping_pong: field_into(&mut fields, "ping_pong")?,
+                            stop_when_blocked: field_into(&mut fields, "stop_when_blocked")?,
+                        }),
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
-                            let entity_ref: Option<EntityRef> = field_into(&mut fields, "trigger")?;
-                            EntityKind::FloorSwitch(entity_ref)
+                            EntityKind::FloorSwitch(field_into(&mut fields, "trigger")?)
                         }
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
