@@ -357,6 +357,12 @@ mod tests {
         }
     }
 
+    impl BoundingBoxHelpers for Collider {
+        fn get_bounding_box(&self) -> Rect {
+            self.rect
+        }
+    }
+
     #[test]
     fn test_no_colliders_result_in_no_displacement() {
         let results = simple_collision_resolution(&mut make_simple_10x10_entity(), vec![]);
@@ -366,10 +372,9 @@ mod tests {
     #[test]
     fn test_simple_collision_works() {
         let mut entity = make_simple_10x10_entity();
-        let collider_bbox = entity.offset_right_by(1);
-        let results =
-            simple_collision_resolution(&mut entity, vec![make_simple_collider(collider_bbox)]);
+        let collider = make_simple_collider(entity.offset_right_by(1));
+        let results = simple_collision_resolution(&mut entity, vec![collider]);
         assert!(results.was_displaced);
-        assert!(entity.is_just_left_of(collider_bbox));
+        assert!(entity.is_just_left_of(collider));
     }
 }
