@@ -69,7 +69,7 @@ pub struct PhysicsComponent {
     pub latest_frame: PhysicsFrameResults,
 }
 
-#[derive(Default, PartialEq, Debug)]
+#[derive(Default)]
 pub struct PhysicsFrameResults {
     pub is_on_any_surface: bool,
     pub is_on_moving_surface: bool,
@@ -330,24 +330,42 @@ mod tests {
         }
     }
 
+    trait BoundingBoxHelpers {
+        fn get_bounding_box(&self) -> Rect;
+
+        fn is_left_of<T: BoundingBoxHelpers>(&self, other: T) -> bool {
+            let my_bbox = self.get_bounding_box();
+            let other_bbox = other.get_bounding_box();
+            !my_bbox.overlaps(&other_bbox) && my_bbox.right() < other_bbox.left()
+        }
+    }
+
+    impl BoundingBoxHelpers for Rect {
+        fn get_bounding_box(&self) -> Rect {
+            *self
+        }
+    }
+
+    impl BoundingBoxHelpers for Entity {
+        fn get_bounding_box(&self) -> Rect {
+            self.sprite.bbox()
+        }
+    }
+
     #[test]
     fn test_no_colliders_result_in_no_displacement() {
         let results = simple_collision_resolution(&mut make_simple_entity(), vec![]);
-        assert_eq!(results, PhysicsFrameResults::default());
+        assert!(!results.was_displaced);
     }
 
     #[test]
     fn test_simple_collision_works() {
         let mut entity = make_simple_entity();
-        let orig_bbox = entity.sprite.bbox();
-        let colliders = vec![make_simple_collider(orig_bbox.offset(Vec2::new(1., 0.)))];
-        let results = simple_collision_resolution(&mut entity, colliders);
-        assert_eq!(
-            results,
-            PhysicsFrameResults {
-                was_displaced: true,
-                ..Default::default()
-            }
-        );
+        let collider_bbox = entity.sprite.bbox().offset(Vec2::new(1., 0.));
+        assert!(!entity.is_left_of(collider_bbox));
+        let results =
+            simple_collision_resolution(&mut entity, vec![make_simple_collider(collider_bbox)]);
+        assert!(results.was_displaced);
+        assert!(entity.is_left_of(collider_bbox));
     }
 }
