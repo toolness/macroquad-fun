@@ -115,6 +115,7 @@ impl AttachmentComponent {
         if self.is_attached() {
             self.detach(physics);
         }
+        self.detached_from_entity_id = None;
     }
 
     fn update_while_attached(
