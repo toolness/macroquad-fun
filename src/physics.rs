@@ -282,7 +282,7 @@ mod tests {
     use macroquad::prelude::{Rect, Vec2};
 
     use crate::{
-        collision::{Collider, CollisionFlags},
+        collision::{Collider, CollisionFlags, EXTRA_DISPLACEMENT},
         entity::Entity,
         physics::PhysicsComponent,
         sprite_component::SpriteComponent,
@@ -297,7 +297,7 @@ mod tests {
         physics_collision_resolution(1, entity, |_bbox| colliders.iter().copied(), 0.)
     }
 
-    fn make_simple_entity() -> Entity {
+    fn make_simple_10x10_entity() -> Entity {
         let sprite = SpriteComponent {
             pos: Vec2::new(10., 10.),
             relative_bbox: Rect::new(0., 0., 10., 10.),
@@ -333,10 +333,15 @@ mod tests {
     trait BoundingBoxHelpers {
         fn get_bounding_box(&self) -> Rect;
 
-        fn is_left_of<T: BoundingBoxHelpers>(&self, other: T) -> bool {
+        fn is_just_left_of<T: BoundingBoxHelpers>(&self, other: T) -> bool {
             let my_bbox = self.get_bounding_box();
             let other_bbox = other.get_bounding_box();
-            !my_bbox.overlaps(&other_bbox) && my_bbox.right() < other_bbox.left()
+            let delta = other_bbox.left() - my_bbox.right();
+            !my_bbox.overlaps(&other_bbox) && delta > 0. && delta < EXTRA_DISPLACEMENT * 2.
+        }
+
+        fn offset_right_by(&self, amount: u32) -> Rect {
+            self.get_bounding_box().offset(Vec2::new(amount as f32, 0.))
         }
     }
 
@@ -354,18 +359,17 @@ mod tests {
 
     #[test]
     fn test_no_colliders_result_in_no_displacement() {
-        let results = simple_collision_resolution(&mut make_simple_entity(), vec![]);
+        let results = simple_collision_resolution(&mut make_simple_10x10_entity(), vec![]);
         assert!(!results.was_displaced);
     }
 
     #[test]
     fn test_simple_collision_works() {
-        let mut entity = make_simple_entity();
-        let collider_bbox = entity.sprite.bbox().offset(Vec2::new(1., 0.));
-        assert!(!entity.is_left_of(collider_bbox));
+        let mut entity = make_simple_10x10_entity();
+        let collider_bbox = entity.offset_right_by(1);
         let results =
             simple_collision_resolution(&mut entity, vec![make_simple_collider(collider_bbox)]);
         assert!(results.was_displaced);
-        assert!(entity.is_left_of(collider_bbox));
+        assert!(entity.is_just_left_of(collider_bbox));
     }
 }
