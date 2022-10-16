@@ -279,14 +279,20 @@ fn physics_collision_resolution<F: Fn(&Rect) -> I, I: Iterator<Item = Collider>>
 
 #[cfg(test)]
 mod tests {
-    use crate::entity::Entity;
+    use crate::{collision::Collider, entity::Entity};
 
-    use super::physics_collision_resolution;
+    use super::{physics_collision_resolution, PhysicsFrameResults};
+
+    fn simple_collision_resolution(
+        entity: &mut Entity,
+        colliders: Vec<Collider>,
+    ) -> PhysicsFrameResults {
+        physics_collision_resolution(1, entity, |_bbox| colliders.iter().copied(), 0.)
+    }
 
     #[test]
     fn test_no_colliders_result_in_no_displacement() {
-        let results =
-            physics_collision_resolution(1, &mut Entity::default(), |_bbox| std::iter::empty(), 0.);
+        let results = simple_collision_resolution(&mut Entity::default(), vec![]);
         assert!(!results.was_displaced);
     }
 }
