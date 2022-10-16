@@ -276,3 +276,17 @@ fn physics_collision_resolution<F: Fn(&Rect) -> I, I: Iterator<Item = Collider>>
 
     results
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::entity::Entity;
+
+    use super::physics_collision_resolution;
+
+    #[test]
+    fn test_no_colliders_result_in_no_displacement() {
+        let results =
+            physics_collision_resolution(1, &mut Entity::default(), |_bbox| std::iter::empty(), 0.);
+        assert!(!results.was_displaced);
+    }
+}
