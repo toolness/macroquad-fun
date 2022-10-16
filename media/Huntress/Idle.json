@@ -20,7 +20,7 @@
    { "name": "Layer", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
-   { "name": "idle_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 66, "y": 58, "w": 14, "h": 39 } }] }
+   { "name": "idle_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 67, "y": 58, "w": 13, "h": 39 } }] }
   ]
  }
 }
