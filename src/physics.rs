@@ -74,6 +74,7 @@ pub struct PhysicsFrameResults {
     pub is_on_any_surface: bool,
     pub is_on_moving_surface: bool,
     pub was_displaced: bool,
+    pub is_penetrating_collider: bool,
 }
 
 pub struct PhysicsSystem {
@@ -272,6 +273,7 @@ fn physics_collision_resolution<F: Fn(&Rect) -> I, I: Iterator<Item = Collider>>
             "WARNING: aborting collision_resolution_loop for entity {} after {} iterations.",
             entity, loop_result.displacements
         );
+        results.is_penetrating_collider = true;
     }
 
     results
@@ -343,6 +345,15 @@ mod tests {
         fn offset_right_by(&self, amount: u32) -> Rect {
             self.get_bounding_box().offset(Vec2::new(amount as f32, 0.))
         }
+
+        fn offset_up_by(&self, amount: u32) -> Rect {
+            self.get_bounding_box()
+                .offset(Vec2::new(0., -(amount as f32)))
+        }
+
+        fn offset_down_by(&self, amount: u32) -> Rect {
+            self.get_bounding_box().offset(Vec2::new(0., amount as f32))
+        }
     }
 
     impl BoundingBoxHelpers for Rect {
@@ -376,5 +387,16 @@ mod tests {
         let results = simple_collision_resolution(&mut entity, vec![collider]);
         assert!(results.was_displaced);
         assert!(entity.is_just_left_of(collider));
+    }
+
+    #[test]
+    fn test_entites_are_displaced_horizontally_when_vertically_smooshed() {
+        let mut entity = make_simple_10x10_entity();
+        let top_collider = make_simple_collider(entity.offset_up_by(1));
+        let bottom_collider = make_simple_collider(entity.offset_down_by(1));
+        let results = simple_collision_resolution(&mut entity, vec![top_collider, bottom_collider]);
+        assert!(results.was_displaced);
+        assert!(!results.is_penetrating_collider);
+        assert!(entity.is_just_left_of(top_collider));
     }
 }
