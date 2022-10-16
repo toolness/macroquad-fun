@@ -69,7 +69,7 @@ pub struct PhysicsComponent {
     pub latest_frame: PhysicsFrameResults,
 }
 
-#[derive(Default)]
+#[derive(Default, PartialEq, Debug)]
 pub struct PhysicsFrameResults {
     pub is_on_any_surface: bool,
     pub is_on_moving_surface: bool,
@@ -279,7 +279,14 @@ fn physics_collision_resolution<F: Fn(&Rect) -> I, I: Iterator<Item = Collider>>
 
 #[cfg(test)]
 mod tests {
-    use crate::{collision::Collider, entity::Entity};
+    use macroquad::prelude::{Rect, Vec2};
+
+    use crate::{
+        collision::{Collider, CollisionFlags},
+        entity::Entity,
+        physics::PhysicsComponent,
+        sprite_component::SpriteComponent,
+    };
 
     use super::{physics_collision_resolution, PhysicsFrameResults};
 
@@ -290,9 +297,57 @@ mod tests {
         physics_collision_resolution(1, entity, |_bbox| colliders.iter().copied(), 0.)
     }
 
+    fn make_simple_entity() -> Entity {
+        let sprite = SpriteComponent {
+            pos: Vec2::new(10., 10.),
+            relative_bbox: Rect::new(0., 0., 10., 10.),
+            ..Default::default()
+        };
+        let velocity = Vec2::new(1., 0.);
+        let prev_bbox = sprite.bbox().offset(-velocity);
+        Entity {
+            sprite,
+            physics: PhysicsComponent {
+                velocity,
+                prev_bbox,
+                collision_flags: CollisionFlags::ENVIRONMENT,
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+    }
+
+    fn make_simple_collider(rect: Rect) -> Collider {
+        Collider {
+            rect,
+            prev_rect: rect,
+            flags: CollisionFlags::ENVIRONMENT,
+            enable_top: true,
+            enable_bottom: true,
+            enable_left: true,
+            enable_right: true,
+            ..Default::default()
+        }
+    }
+
     #[test]
     fn test_no_colliders_result_in_no_displacement() {
-        let results = simple_collision_resolution(&mut Entity::default(), vec![]);
-        assert!(!results.was_displaced);
+        let results = simple_collision_resolution(&mut make_simple_entity(), vec![]);
+        assert_eq!(results, PhysicsFrameResults::default());
+    }
+
+    #[test]
+    fn test_simple_collision_works() {
+        let mut entity = make_simple_entity();
+        let orig_bbox = entity.sprite.bbox();
+        let colliders = vec![make_simple_collider(orig_bbox.offset(Vec2::new(1., 0.)))];
+        let results = simple_collision_resolution(&mut entity, colliders);
+        assert_eq!(
+            results,
+            PhysicsFrameResults {
+                was_displaced: true,
+                ..Default::default()
+            }
+        );
     }
 }
