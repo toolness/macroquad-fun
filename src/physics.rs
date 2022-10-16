@@ -3,7 +3,7 @@ use macroquad::prelude::{Rect, Vec2};
 use crate::{
     collision::{
         collision_resolution_loop, maybe_reverse_direction_x, maybe_reverse_direction_xy,
-        process_collision, CollisionFlags, Side,
+        process_collision, Collider, CollisionFlags, Side,
     },
     config::config,
     dynamic_collider::DynamicColliderSystem,
@@ -137,27 +137,38 @@ impl PhysicsSystem {
         for &id in self.entities.iter() {
             let entity = entities.get_mut(id).unwrap();
             let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
+                let defies_level_bounds = entity.physics.defies_level_bounds;
                 physics_collision_resolution(
                     id,
                     entity,
-                    &level,
-                    dynamic_collider_system,
+                    |bbox| {
+                        level
+                            .iter_colliders_ex(bbox, !defies_level_bounds)
+                            .chain(dynamic_collider_system.colliders().copied())
+                    },
                     vertical_collision_leeway,
                 )
             } else {
                 Default::default()
             };
 
+            if results.was_displaced && entity.dynamic_collider.is_some() {
+                // This entity has a dynamic collider associated with it, so update its
+                // computed collider to reflect its displaced position. This will ensure
+                // anything above us that collides with us is displaced by our new
+                // position.
+                dynamic_collider_system.update_dynamic_collider(id, entity);
+            }
+
             entity.physics.latest_frame = results;
         }
     }
 }
 
-fn physics_collision_resolution(
+fn physics_collision_resolution<F: Fn(&Rect) -> I, I: Iterator<Item = Collider>>(
     entity_id: u64,
     entity: &mut Entity,
-    level: &Level,
-    dynamic_collider_system: &mut DynamicColliderSystem,
+    iter_colliders: F,
     vertical_collision_leeway: f32,
 ) -> PhysicsFrameResults {
     let prev_bbox = entity.physics.prev_bbox;
@@ -169,11 +180,7 @@ fn physics_collision_resolution(
     let loop_result = collision_resolution_loop(|displacements| {
         let bbox = sprite.bbox();
 
-        let colliders = level
-            .iter_colliders_ex(&bbox, !physics.defies_level_bounds)
-            .chain(dynamic_collider_system.colliders().copied());
-
-        for collider in colliders {
+        for collider in iter_colliders(&bbox) {
             if let Some(collider_entity_id) = collider.entity_id {
                 if collider_entity_id == entity_id {
                     // The collider represents the collider for the entity we're
@@ -265,14 +272,6 @@ fn physics_collision_resolution(
             "WARNING: aborting collision_resolution_loop for entity {} after {} iterations.",
             entity, loop_result.displacements
         );
-    }
-
-    if results.was_displaced && entity.dynamic_collider.is_some() {
-        // This entity has a dynamic collider associated with it, so update its
-        // computed collider to reflect its displaced position. This will ensure
-        // anything above us that collides with us is displaced by our new
-        // position.
-        dynamic_collider_system.update_dynamic_collider(entity_id, entity);
     }
 
     results
