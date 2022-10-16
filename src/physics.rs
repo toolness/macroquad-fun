@@ -370,7 +370,7 @@ mod tests {
     }
 
     #[test]
-    fn test_simple_collision_works() {
+    fn test_entites_are_displaced_leftward() {
         let mut entity = make_simple_10x10_entity();
         let collider = make_simple_collider(entity.offset_right_by(1));
         let results = simple_collision_resolution(&mut entity, vec![collider]);
