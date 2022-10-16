@@ -97,7 +97,7 @@ impl PhysicsSystem {
         let time_since_last_frame = time.time_since_last_frame as f32;
         let gravity_this_frame = gravity * time_since_last_frame;
 
-        for entity in entities.values_mut() {
+        for (_id, entity) in entities.iter_mut() {
             if !entity.physics.defies_gravity {
                 entity.physics.velocity.y +=
                     gravity_this_frame * entity.physics.gravity_coefficient.unwrap_or(1.0);
@@ -122,20 +122,20 @@ impl PhysicsSystem {
         let vertical_collision_leeway = config().vertical_collision_leeway;
 
         self.entities.clear();
-        self.entities.extend(entities.keys());
+        self.entities.extend(entities.ids());
 
         // Sort our entities from bottom to top. This ensures that any displacements
         // caused by the effects of gravity will propagate upwards, e.g. that the
         // displacement caused by a crate that hits the ground propagates to a
         // crate stacked atop it.
         self.entities.sort_by(|a, b| {
-            let a_y = entities.get(a).unwrap().sprite.pos.y;
-            let b_y = entities.get(b).unwrap().sprite.pos.y;
+            let a_y = entities.get(*a).unwrap().sprite.pos.y;
+            let b_y = entities.get(*b).unwrap().sprite.pos.y;
             b_y.partial_cmp(&a_y).unwrap()
         });
 
         for &id in self.entities.iter() {
-            let entity = entities.get_mut(&id).unwrap();
+            let entity = entities.get_mut(id).unwrap();
             let results = if entity.physics.collision_behavior != PhysicsCollisionBehavior::None {
                 physics_collision_resolution(
                     id,

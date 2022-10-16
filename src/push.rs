@@ -27,7 +27,7 @@ impl PushSystem {
                     .unwrap_or(false)
             },
             |pusher, entities| {
-                for pushed in entities.values_mut() {
+                for (_id, pushed) in entities.iter_mut() {
                     if let Some(push) = &pushed.push {
                         if push.pushable_coefficient > 0. {
                             let pusher_bbox = pusher.sprite.bbox();

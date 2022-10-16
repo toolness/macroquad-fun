@@ -53,17 +53,14 @@ impl DynamicColliderSystem {
     pub fn run(&mut self, entities: &mut EntityMap) {
         // Note that we can't just rebuild self.colliders from scratch every time,
         // because their new values depend on the old values.
-        for (&id, entity) in entities.iter_mut() {
+        for (id, entity) in entities.iter_mut() {
             self.update_dynamic_collider_impl(id, entity, true);
         }
 
         // Now remove any stale colliders that no longer exist.
         self.colliders_to_remove.clear();
-        self.colliders_to_remove.extend(
-            self.colliders
-                .keys()
-                .filter(|&id| !entities.contains_key(id)),
-        );
+        self.colliders_to_remove
+            .extend(self.colliders.keys().filter(|&id| !entities.contains(*id)));
         for id in self.colliders_to_remove.iter() {
             self.colliders.remove(id);
         }

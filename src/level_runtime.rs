@@ -6,7 +6,7 @@ use crate::config::config;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::DynamicColliderSystem;
-use crate::entity::{Entity, EntityMap, EntityMapHelpers, EntityProcessor, PLAYER_ENTITY_ID};
+use crate::entity::{Entity, EntityMap, EntityProcessor};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::moving_platform::create_moving_platform;
@@ -90,7 +90,7 @@ impl LevelRuntime {
 
     fn change_level(&mut self, level: &'static Level) {
         self.level = level;
-        self.entities.retain(|&key, _value| key == PLAYER_ENTITY_ID);
+        self.entities.clear_all_except_player();
         self.spawn_entities();
     }
 
@@ -136,7 +136,7 @@ impl LevelRuntime {
     }
 
     fn maybe_switch_level(&mut self) -> bool {
-        let player = self.entities.get_mut(&PLAYER_ENTITY_ID).unwrap();
+        let player = self.entities.player_mut();
         if let Some((new_level, new_pos)) = should_switch_levels(&player.sprite, &self.level) {
             teleport_entity(player, new_pos);
             self.change_level(new_level);
@@ -244,7 +244,7 @@ impl LevelRuntime {
             1.,
             WHITE,
         );
-        for entity in self.entities.values() {
+        for (_id, entity) in self.entities.iter() {
             entity.sprite.draw_debug_rects();
         }
         self.camera.draw_debug_info();

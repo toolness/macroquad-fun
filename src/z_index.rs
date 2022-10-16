@@ -30,12 +30,12 @@ impl ZIndexedDrawingSystem {
         self.entity_z_indices.extend(
             entities
                 .iter()
-                .map(|(id, entity)| (*id, entity.z_index.value)),
+                .map(|(id, entity)| (id, entity.z_index.value)),
         );
         self.entity_z_indices.sort_by(|a, b| a.1.cmp(&b.1));
 
         for (id, _) in self.entity_z_indices.iter() {
-            let entity = &entities[&id];
+            let entity = &entities.get(*id).unwrap();
             entity.sprite.draw_current_frame(level);
         }
     }

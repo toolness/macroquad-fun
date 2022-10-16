@@ -38,7 +38,7 @@ pub fn create_floor_switch(start_rect: Rect, trigger_entity: Option<u64>) -> Ent
 }
 
 pub fn floor_switch_system(entities: &mut EntityMap) {
-    for entity in entities.values_mut() {
+    for (_id, entity) in entities.iter_mut() {
         if entity.floor_switch.is_some() {
             let color = if entity.switch.as_ref().unwrap().is_switched_on {
                 WHITE

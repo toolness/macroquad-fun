@@ -70,7 +70,7 @@ impl AttachmentComponent {
             return;
         }
 
-        for (&id, carrier) in entities.iter() {
+        for (id, carrier) in entities.iter() {
             if carrier.attachable.is_none() {
                 continue;
             }
@@ -107,7 +107,7 @@ impl AttachmentComponent {
 
     fn attached_entity<'a>(&self, entities: &'a EntityMap) -> Option<&'a Entity> {
         self.attached_to_entity_id
-            .map(|id| entities.get(&id))
+            .map(|id| entities.get(id))
             .flatten()
     }
 

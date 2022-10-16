@@ -43,27 +43,65 @@ impl Display for Entity {
 
 pub const PLAYER_ENTITY_ID: u64 = 0;
 
-pub trait EntityMapHelpers {
-    fn new_ex(player: Entity, capacity: usize) -> Self;
-    fn player(&self) -> &Entity;
-    fn player_mut(&mut self) -> &mut Entity;
-    fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F);
+pub struct EntityMap {
+    map: HashMap<u64, Entity>,
 }
 
-pub type EntityMap = HashMap<u64, Entity>;
-
-impl EntityMapHelpers for EntityMap {
-    fn player(&self) -> &Entity {
-        &self[&PLAYER_ENTITY_ID]
+impl EntityMap {
+    pub fn iter(&self) -> impl Iterator<Item = (u64, &Entity)> {
+        self.map.iter().map(|(&id, entity)| (id, entity))
     }
 
-    fn player_mut(&mut self) -> &mut Entity {
-        self.get_mut(&PLAYER_ENTITY_ID).unwrap()
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (u64, &mut Entity)> {
+        self.map.iter_mut().map(|(&id, entity)| (id, entity))
     }
 
-    fn new_ex(player: Entity, capacity: usize) -> Self {
-        let mut map = EntityMap::with_capacity(capacity);
-        map.insert(PLAYER_ENTITY_ID, player);
+    pub fn contains(&self, id: u64) -> bool {
+        self.map.contains_key(&id)
+    }
+
+    pub fn insert(&mut self, id: u64, entity: Entity) {
+        assert!(!self.map.contains_key(&id), "Entity with id already exists");
+        self.map.insert(id, entity);
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.map.capacity()
+    }
+
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
+
+    pub fn ids(&self) -> impl Iterator<Item = &u64> {
+        self.map.keys()
+    }
+
+    pub fn get(&self, id: u64) -> Option<&Entity> {
+        self.map.get(&id)
+    }
+
+    pub fn get_mut(&mut self, id: u64) -> Option<&mut Entity> {
+        self.map.get_mut(&id)
+    }
+
+    pub fn player(&self) -> &Entity {
+        &self.map[&PLAYER_ENTITY_ID]
+    }
+
+    pub fn player_mut(&mut self) -> &mut Entity {
+        self.map.get_mut(&PLAYER_ENTITY_ID).unwrap()
+    }
+
+    pub fn clear_all_except_player(&mut self) {
+        self.map.retain(|&key, _value| key == PLAYER_ENTITY_ID);
+    }
+
+    pub fn new_ex(player: Entity, capacity: usize) -> Self {
+        let mut map = EntityMap {
+            map: HashMap::with_capacity(capacity),
+        };
+        map.map.insert(PLAYER_ENTITY_ID, player);
         map
     }
 
@@ -72,10 +110,10 @@ impl EntityMapHelpers for EntityMap {
     ///
     /// This is useful for situations where we need to be able to mutate an Entity,
     /// but also look at other Entities while mutating it.
-    fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F) {
-        let mut entity = self.remove(&id).unwrap();
+    pub fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F) {
+        let mut entity = self.map.remove(&id).unwrap();
         f(&mut entity, self);
-        self.insert(id, entity);
+        self.map.insert(id, entity);
     }
 }
 
@@ -104,7 +142,7 @@ impl EntityProcessor {
         self.entities_to_process.clear();
         self.entities_to_process
             .extend(entities.iter().filter_map(
-                |(&id, entity)| {
+                |(id, entity)| {
                     if filter(entity) {
                         Some(id)
                     } else {

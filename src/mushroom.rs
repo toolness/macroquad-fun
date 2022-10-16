@@ -4,7 +4,7 @@ use crate::{
     animator::Animator,
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
-    entity::{Entity, EntityMap, EntityMapHelpers},
+    entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{Renderer, SpriteComponent},
@@ -50,7 +50,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
 
 pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
     let player_bbox = entities.player().sprite.bbox();
-    for entity in entities.values_mut() {
+    for (_id, entity) in entities.iter_mut() {
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;

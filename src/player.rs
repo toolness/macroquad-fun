@@ -3,7 +3,7 @@ use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
 use crate::{
     collision::CollisionFlags,
     config::config,
-    entity::{Entity, EntityMap, EntityMapHelpers},
+    entity::{Entity, EntityMap},
     game_sprites::game_sprites,
     level::Level,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},

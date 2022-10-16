@@ -76,7 +76,7 @@ fn is_route_blocked(
     entities: &EntityMap,
 ) -> bool {
     if let Some(edge_bbox) = get_route_edge_bbox(route, sprite) {
-        for entity in entities.values() {
+        for (_id, entity) in entities.iter() {
             if entity.sprite.bbox().overlaps(&edge_bbox) {
                 return true;
             }
@@ -122,7 +122,7 @@ pub fn try_to_start_route(entity: &mut Entity, move_towards_start: bool) -> bool
 }
 
 pub fn draw_route_debug_targets(entities: &EntityMap) {
-    for entity in entities.values() {
+    for (_id, entity) in entities.iter() {
         if let Some(route) = &entity.route {
             let target = route.target();
             draw_line(
