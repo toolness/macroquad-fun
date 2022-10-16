@@ -194,6 +194,25 @@ fn physics_collision_resolution<F: Fn(&Rect) -> I, I: Iterator<Item = Collider>>
                 // The collider and the entity can't collide, skip this.
                 continue;
             }
+
+            // If we've had lots of displacements, it could be because we're sandwiched between two colliders.
+            // Since we normally prioritize vertical collisions over horizontal ones, let's see if we can
+            // prioritize horizontal displacement to see if it gets us out of an infinite displacement loop.
+            if displacements > LOTS_OF_DISPLACEMENTS
+                && (collider.enable_top || collider.enable_bottom)
+            {
+                let horizontal_collider = Collider {
+                    enable_top: false,
+                    enable_bottom: false,
+                    ..collider
+                };
+                if let Some(collision) =
+                    process_collision(&horizontal_collider, &prev_bbox, &bbox, 0.)
+                {
+                    sprite.pos += collision.displacement;
+                }
+            }
+
             if let Some(collision) =
                 process_collision(&collider, &prev_bbox, &bbox, vertical_collision_leeway)
             {
@@ -292,11 +311,19 @@ mod tests {
 
     use super::{physics_collision_resolution, PhysicsFrameResults};
 
+    const SIMPLE_ENTITY_ID: u64 = 1;
+    const SIMPLE_DYNAMIC_COLLIDER_ENTITY_ID: u64 = 2;
+
     fn simple_collision_resolution(
         entity: &mut Entity,
         colliders: Vec<Collider>,
     ) -> PhysicsFrameResults {
-        physics_collision_resolution(1, entity, |_bbox| colliders.iter().copied(), 0.)
+        physics_collision_resolution(
+            SIMPLE_ENTITY_ID,
+            entity,
+            |_bbox| colliders.iter().copied(),
+            0.,
+        )
     }
 
     fn make_simple_10x10_entity() -> Entity {
@@ -305,18 +332,15 @@ mod tests {
             relative_bbox: Rect::new(0., 0., 10., 10.),
             ..Default::default()
         };
-        let velocity = Vec2::new(1., 0.);
-        let prev_bbox = sprite.bbox().offset(-velocity);
         Entity {
             sprite,
             physics: PhysicsComponent {
-                velocity,
-                prev_bbox,
                 collision_flags: CollisionFlags::ENVIRONMENT,
                 ..Default::default()
             },
             ..Default::default()
         }
+        .with_previous_velocity(Vec2::ZERO)
     }
 
     fn make_simple_collider(rect: Rect) -> Collider {
@@ -329,6 +353,41 @@ mod tests {
             enable_left: true,
             enable_right: true,
             ..Default::default()
+        }
+    }
+
+    fn make_simple_dynamic_collider(rect: Rect, velocity: Vec2) -> Collider {
+        Collider {
+            rect,
+            prev_rect: rect.offset(-velocity),
+            entity_id: Some(SIMPLE_DYNAMIC_COLLIDER_ENTITY_ID),
+            flags: CollisionFlags::ENVIRONMENT,
+            enable_top: true,
+            enable_bottom: true,
+            enable_left: true,
+            enable_right: true,
+            ..Default::default()
+        }
+    }
+
+    trait EntityHelpers
+    where
+        Self: Sized,
+    {
+        fn into_entity(self) -> Entity;
+
+        fn with_previous_velocity(self, velocity: Vec2) -> Entity {
+            let mut entity = self.into_entity();
+            let prev_bbox = entity.sprite.bbox().offset(-velocity);
+            entity.physics.velocity = velocity;
+            entity.physics.prev_bbox = prev_bbox;
+            entity
+        }
+    }
+
+    impl<T: Into<Entity>> EntityHelpers for T {
+        fn into_entity(self) -> Entity {
+            self.into()
         }
     }
 
@@ -391,9 +450,10 @@ mod tests {
 
     #[test]
     fn test_entites_are_displaced_horizontally_when_vertically_smooshed() {
-        let mut entity = make_simple_10x10_entity();
-        let top_collider = make_simple_collider(entity.offset_up_by(1));
-        let bottom_collider = make_simple_collider(entity.offset_down_by(1));
+        let mut entity = make_simple_10x10_entity().with_previous_velocity(Vec2::new(1., 0.));
+        let top_collider = make_simple_collider(entity.offset_up_by(11));
+        let bottom_collider =
+            make_simple_dynamic_collider(entity.offset_down_by(9), Vec2::new(0., -2.));
         let results = simple_collision_resolution(&mut entity, vec![top_collider, bottom_collider]);
         assert!(results.was_displaced);
         assert!(!results.is_penetrating_collider);
