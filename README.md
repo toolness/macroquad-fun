@@ -11,7 +11,7 @@ cargo run
 ```
 cargo install basic-http-server
 
-cargo build --target wasm32-unknown-unknown --release
+sh ./build-wasm.sh
 
 basic-http-server .
 ```
