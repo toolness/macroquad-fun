@@ -3,8 +3,6 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use std::env::args;
-
 use config::load_config;
 use game_assets::load_game_assets;
 use level_runtime::{FrameResult, LevelRuntime};
@@ -75,11 +73,28 @@ fn window_conf() -> Conf {
     }
 }
 
+#[derive(Default)]
+#[cfg_attr(not(target_arch = "wasm32"), derive(clap::Parser))]
+struct Cli {
+    start_position: Option<String>,
+}
+
+impl Cli {
+    pub fn get_for_platform() -> Self {
+        #[cfg(target_arch = "wasm32")]
+        return Cli::default();
+
+        #[cfg(not(target_arch = "wasm32"))]
+        <Cli as clap::Parser>::parse()
+    }
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
-    let args: Vec<String> = args().collect();
+    let args = Cli::get_for_platform();
     let start_position = args
-        .get(1)
+        .start_position
+        .as_ref()
         .map(|s| s.as_str())
         .unwrap_or(&DEFAULT_START_POSITION);
 
