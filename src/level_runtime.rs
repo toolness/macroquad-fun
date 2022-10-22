@@ -9,6 +9,7 @@ use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap, EntityProcessor};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
+use crate::input::InputState;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::PhysicsSystem;
@@ -155,7 +156,11 @@ impl LevelRuntime {
             return FrameResult::PlayerDied;
         }
 
-        process_player_input(&mut self.entities, &self.time);
+        process_player_input(
+            &mut self.entities,
+            &self.time,
+            &InputState::from_macroquad(),
+        );
         self.attachment_system
             .run(&mut self.entities, &self.level, &self.time);
         self.route_system.run(&mut self.entities);

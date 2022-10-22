@@ -1,10 +1,11 @@
-use macroquad::prelude::{is_key_down, is_key_pressed, KeyCode, Rect, Vec2};
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     collision::CollisionFlags,
     config::config,
     entity::{Entity, EntityMap},
     game_assets::game_assets,
+    input::InputState,
     level::Level,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
@@ -58,15 +59,15 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     }
 }
 
-pub fn process_player_input(entities: &mut EntityMap, time: &GameTime) {
+pub fn process_player_input(entities: &mut EntityMap, time: &GameTime, input: &InputState) {
     let player = entities.player_mut();
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
-        if is_key_pressed(KeyCode::Space) {
+        if input.is_jump_key_pressed {
             attachment.detach(&mut player.physics);
         }
     } else {
-        unattached_player_process_input(player, time);
+        unattached_player_process_input(player, time, input);
     }
 }
 
@@ -113,7 +114,11 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     sprite.update_looping_frame_number(time);
 }
 
-fn unattached_player_process_input(player_entity: &mut Entity, time: &GameTime) {
+fn unattached_player_process_input(
+    player_entity: &mut Entity,
+    time: &GameTime,
+    input: &InputState,
+) {
     let time_since_last_frame = time.time_since_last_frame;
     let config = config();
     let physics = &mut player_entity.physics;
@@ -121,12 +126,12 @@ fn unattached_player_process_input(player_entity: &mut Entity, time: &GameTime) 
     let player = player_entity.player.as_mut().unwrap();
     run.update(
         time_since_last_frame,
-        is_key_down(KeyCode::A),
-        is_key_down(KeyCode::D),
+        input.is_left_key_down,
+        input.is_right_key_down,
     );
 
     if player.is_in_air {
-        if is_key_down(KeyCode::Space) && physics.velocity.y < 0. {
+        if input.is_jump_key_down && physics.velocity.y < 0. {
             physics.velocity.y -=
                 config.long_jump_keypress_extra_force * time_since_last_frame as f32;
         }
@@ -134,7 +139,7 @@ fn unattached_player_process_input(player_entity: &mut Entity, time: &GameTime) 
             physics.velocity.x = run.run_speed();
         }
     } else {
-        if is_key_pressed(KeyCode::Space) {
+        if input.is_jump_key_pressed {
             let new_velocity = Vec2::new(run.run_speed(), -config.jump_velocity);
             physics.velocity.x = new_velocity.x;
             physics.velocity.y = new_velocity.y;
