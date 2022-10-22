@@ -4,7 +4,7 @@ use macroquad::prelude::*;
 use crate::{
     collision::{Collider, CollisionFlags},
     config::config,
-    game_sprites::game_sprites,
+    game_assets::game_assets,
     ldtk::{self, field_into, EntityRef, LayerInstance, TileInstance},
     xy_range_iterator::XYRangeIterator,
 };
@@ -266,14 +266,14 @@ impl Level {
     }
 
     pub fn draw_entity_tiles(&self, bounding_rect: &Rect, point: &Vec2) {
-        let tileset = game_sprites().tileset;
+        let tileset = game_assets().tileset;
         // We're using floor() here to avoid weird visual artifacts between tiles.
         let final_point = (*point).floor() - bounding_rect.point();
         self.draw_tiles(&self.entity_tiles, tileset, &bounding_rect, &final_point);
     }
 
     pub fn draw(&self, bounding_rect: &Rect) {
-        let tileset = game_sprites().tileset;
+        let tileset = game_assets().tileset;
         self.draw_tiles(&self.background_tiles, tileset, &bounding_rect, &Vec2::ZERO);
         self.draw_tiles(&self.tiles, tileset, &bounding_rect, &Vec2::ZERO);
     }

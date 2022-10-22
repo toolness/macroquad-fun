@@ -5,7 +5,7 @@ use crate::{
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::{Entity, EntityMap},
-    game_sprites::game_sprites,
+    game_assets::game_assets,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{Renderer, SpriteComponent},
     time::GameTime,
@@ -22,11 +22,11 @@ pub enum MushroomState {
 }
 
 fn dead_frame() -> u32 {
-    game_sprites().mushroom.death.last_frame()
+    game_assets().mushroom.death.last_frame()
 }
 
 pub fn create_mushrom(start_rect: Rect) -> Entity {
-    let sprites = &game_sprites().mushroom;
+    let sprites = &game_assets().mushroom;
     let death_sprite = &sprites.death;
     Entity {
         sprite: SpriteComponent {
@@ -84,10 +84,10 @@ fn update_mushroom(
         MushroomState::Rezzing(animator) => {
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
-                sprite.renderer = Renderer::Sprite(&game_sprites().mushroom.run);
+                sprite.renderer = Renderer::Sprite(&game_assets().mushroom.run);
                 velocity.x = config().mushroom_speed;
                 let _ = dynamic_collider.insert(DynamicColliderComponent::new(RelativeCollider {
-                    rect: game_sprites().mushroom.platform_bbox,
+                    rect: game_assets().mushroom.platform_bbox,
                     enable_top: true,
                     ..Default::default()
                 }));

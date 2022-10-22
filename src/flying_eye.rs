@@ -4,7 +4,7 @@ use crate::{
     attachment::AttachableComponent,
     config::config,
     entity::{Entity, EntityMap},
-    game_sprites::game_sprites,
+    game_assets::game_assets,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{Renderer, SpriteComponent},
     time::GameTime,
@@ -15,8 +15,8 @@ pub struct FlyingEyeComponent();
 pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: game_sprites().flying_eye.flight_bbox,
-            renderer: Renderer::Sprite(&game_sprites().flying_eye.flight),
+            relative_bbox: game_assets().flying_eye.flight_bbox,
+            renderer: Renderer::Sprite(&game_assets().flying_eye.flight),
             flip_bbox_when_facing_left: true,
             ..Default::default()
         }

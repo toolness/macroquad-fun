@@ -8,7 +8,7 @@ use macroquad::{
 
 use crate::{aseprite::load_aseprite_slices, font::BitmapFont, sprite_renderer::SpriteRenderer};
 
-pub struct HuntressSprites {
+pub struct HuntressAssets {
     pub idle: SpriteRenderer,
     pub run: SpriteRenderer,
     pub jump: SpriteRenderer,
@@ -16,22 +16,22 @@ pub struct HuntressSprites {
     pub idle_bbox: Rect,
 }
 
-pub struct FlyingEyeSprites {
+pub struct FlyingEyeAssets {
     pub flight: SpriteRenderer,
     pub flight_bbox: Rect,
 }
 
-pub struct MushroomSprites {
+pub struct MushroomAssets {
     pub death: SpriteRenderer,
     pub idle_bbox: Rect,
     pub platform_bbox: Rect,
     pub run: SpriteRenderer,
 }
 
-pub struct GameSprites {
-    pub huntress: HuntressSprites,
-    pub flying_eye: FlyingEyeSprites,
-    pub mushroom: MushroomSprites,
+pub struct GameAssets {
+    pub huntress: HuntressAssets,
+    pub flying_eye: FlyingEyeAssets,
+    pub mushroom: MushroomAssets,
     pub tileset: Texture2D,
     pub font: BitmapFont,
     pub crt_material: Material,
@@ -67,10 +67,10 @@ async fn load_shader(stem: &str) -> Result<Material> {
     Ok(material)
 }
 
-pub async fn load_game_sprites() -> Result<()> {
+pub async fn load_game_assets() -> Result<()> {
     let mushroom_idle_slices = load_aseprite_slices("media/Mushroom/Idle.json").await?;
-    let sprites = GameSprites {
-        huntress: HuntressSprites {
+    let assets = GameAssets {
+        huntress: HuntressAssets {
             idle: SpriteRenderer::new(load_texture("media/Huntress/Idle.png").await?, 8),
             run: SpriteRenderer::new(load_texture("media/Huntress/Run.png").await?, 8),
             jump: SpriteRenderer::new(load_texture("media/Huntress/Jump.png").await?, 2),
@@ -80,14 +80,14 @@ pub async fn load_game_sprites() -> Result<()> {
                 "idle_bounding_box",
             )?,
         },
-        flying_eye: FlyingEyeSprites {
+        flying_eye: FlyingEyeAssets {
             flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
             flight_bbox: get_slice(
                 &load_aseprite_slices("media/FlyingEye/Flight.json").await?,
                 "flight_bounding_box",
             )?,
         },
-        mushroom: MushroomSprites {
+        mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
             platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
@@ -104,18 +104,18 @@ pub async fn load_game_sprites() -> Result<()> {
     };
 
     unsafe {
-        GAME_SPRITES = Some(sprites);
+        GAME_ASSETS = Some(assets);
     }
 
     Ok(())
 }
 
-pub fn game_sprites() -> &'static GameSprites {
+pub fn game_assets() -> &'static GameAssets {
     unsafe {
-        GAME_SPRITES
+        GAME_ASSETS
             .as_ref()
-            .expect("load_game_sprites() was not called or did not finish")
+            .expect("load_game_assets() was not called or did not finish")
     }
 }
 
-static mut GAME_SPRITES: Option<GameSprites> = None;
+static mut GAME_ASSETS: Option<GameAssets> = None;

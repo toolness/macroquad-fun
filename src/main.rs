@@ -6,7 +6,7 @@ extern crate serde_json;
 use std::env::args;
 
 use config::load_config;
-use game_sprites::load_game_sprites;
+use game_assets::load_game_assets;
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
@@ -25,7 +25,7 @@ mod entity;
 mod floor_switch;
 mod flying_eye;
 mod font;
-mod game_sprites;
+mod game_assets;
 mod ldtk;
 mod level;
 mod level_runtime;
@@ -85,7 +85,7 @@ async fn main() {
     load_config(CONFIG_PATH)
         .await
         .expect("load_config() must succeed");
-    load_game_sprites()
+    load_game_assets()
         .await
         .expect("load_game_sprites() must succeed");
     load_world("media/world.ldtk")

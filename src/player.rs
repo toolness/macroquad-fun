@@ -4,7 +4,7 @@ use crate::{
     collision::CollisionFlags,
     config::config,
     entity::{Entity, EntityMap},
-    game_sprites::game_sprites,
+    game_assets::game_assets,
     level::Level,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
@@ -26,7 +26,7 @@ pub struct PlayerComponent {
 pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: game_sprites().huntress.idle_bbox,
+            relative_bbox: game_assets().huntress.idle_bbox,
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
@@ -151,7 +151,7 @@ fn sprite_renderer(
     velocity: &Vec2,
     run_direction: f32,
 ) -> &'static SpriteRenderer {
-    let sprites = game_sprites();
+    let sprites = game_assets();
     if is_in_air {
         if velocity.y >= 0. {
             &sprites.huntress.fall
