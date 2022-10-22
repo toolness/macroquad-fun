@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use macroquad::{
-    prelude::Rect,
+    prelude::{load_material, load_string, Material, Rect},
     texture::{load_texture, FilterMode, Texture2D},
 };
 
@@ -34,6 +34,7 @@ pub struct GameSprites {
     pub mushroom: MushroomSprites,
     pub tileset: Texture2D,
     pub font: BitmapFont,
+    pub crt_material: Material,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -48,6 +49,22 @@ async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
     let texture = load_texture(path).await?;
     texture.set_filter(FilterMode::Nearest);
     Ok(texture)
+}
+
+const BASE_SHADER_PATH: &str = "media/shaders";
+
+async fn load_shader(stem: &str) -> Result<Material> {
+    let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
+    let fragment_source =
+        load_string(format!("{}/{}.frag", BASE_SHADER_PATH, stem).as_str()).await?;
+
+    let material = load_material(
+        vertex_source.as_str(),
+        fragment_source.as_str(),
+        Default::default(),
+    )?;
+
+    Ok(material)
 }
 
 pub async fn load_game_sprites() -> Result<()> {
@@ -83,6 +100,7 @@ pub async fn load_game_sprites() -> Result<()> {
             char_height: 8,
             chars_per_line: 16,
         },
+        crt_material: load_shader("crt").await?,
     };
 
     unsafe {

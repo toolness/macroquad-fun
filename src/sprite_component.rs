@@ -1,5 +1,7 @@
 use macroquad::{
-    prelude::{Color, Rect, Vec2, GREEN, PURPLE, WHITE},
+    prelude::{
+        gl_use_default_material, gl_use_material, Color, Material, Rect, Vec2, GREEN, PURPLE, WHITE,
+    },
     shapes::draw_rectangle,
 };
 
@@ -24,6 +26,7 @@ pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
     pub renderer: Renderer,
+    pub material: Option<Material>,
     pub color: Option<Color>,
     pub is_facing_left: bool,
     pub flip_bbox_when_facing_left: bool,
@@ -67,6 +70,9 @@ impl SpriteComponent {
     }
 
     pub fn draw_current_frame(&self, level: &Level) {
+        if let Some(material) = self.material {
+            gl_use_material(material);
+        }
         match self.renderer {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
@@ -93,6 +99,9 @@ impl SpriteComponent {
                 }
             }
             Renderer::EntityTiles(rect) => level.draw_entity_tiles(&rect, &self.bbox().point()),
+        }
+        if self.material.is_some() {
+            gl_use_default_material();
         }
     }
 
