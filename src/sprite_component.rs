@@ -29,22 +29,57 @@ pub struct SpriteComponent {
     pub material: Option<Material>,
     pub color: Option<Color>,
     pub is_facing_left: bool,
-    pub flip_bbox_when_facing_left: bool,
+    pub left_facing_rendering: LeftFacingRendering,
     pub current_frame_number: u32,
+}
+
+#[derive(Default)]
+/// Rendering/bounding box behavior of a sprite component when it's facing
+/// left (by default, we assume it's facing right).
+///
+/// We always horizontally flip the sprite itself, but any extra behavior
+/// is defined by this enum.
+pub enum LeftFacingRendering {
+    #[default]
+    /// Just horizontally flip the sprite, don't change its bounding box.
+    Default,
+
+    /// Don't change the sprite's bounding box (as this could result in weird
+    /// physics bugs); instead, shift the x-coordinate of where we render the
+    /// sprite by this amount.
+    XOffset(f32),
+
+    /// Horizontally flip the sprite's bounding box too.
+    FlipBoundingBox,
 }
 
 impl SpriteComponent {
     pub fn calculate_absolute_bounding_box(&self, relative_bbox: &Rect) -> Rect {
-        if self.flip_bbox_when_facing_left && self.is_facing_left {
-            if let Renderer::Sprite(sprite) = self.renderer {
-                let center_offset = sprite.frame_width() / 2. - relative_bbox.w / 2.;
-                let flipped_x = (self.relative_bbox.x - center_offset) * -1. + center_offset;
-                let mut flipped_relative_bbox = *relative_bbox;
-                flipped_relative_bbox.x = flipped_x;
-                return flipped_relative_bbox.offset(self.pos);
+        let final_relative_bbox = if self.is_facing_left {
+            match self.left_facing_rendering {
+                LeftFacingRendering::Default => *relative_bbox,
+
+                // Note that we're going to keep the bounding box the same here--the x-offset
+                // is used at *render* time, not to calculate the bounding box.
+                LeftFacingRendering::XOffset(..) => *relative_bbox,
+
+                LeftFacingRendering::FlipBoundingBox => {
+                    if let Renderer::Sprite(sprite) = self.renderer {
+                        let center_offset = sprite.frame_width() / 2. - relative_bbox.w / 2.;
+                        let flipped_x =
+                            (self.relative_bbox.x - center_offset) * -1. + center_offset;
+                        let mut flipped_relative_bbox = *relative_bbox;
+                        flipped_relative_bbox.x = flipped_x;
+                        flipped_relative_bbox
+                    } else {
+                        *relative_bbox
+                    }
+                }
             }
-        }
-        relative_bbox.offset(self.pos)
+        } else {
+            *relative_bbox
+        };
+        final_relative_bbox.offset(self.pos)
     }
 
     pub fn bbox(&self) -> Rect {
@@ -69,6 +104,16 @@ impl SpriteComponent {
         }
     }
 
+    fn get_sprite_x(&self) -> f32 {
+        let mut x = self.pos.x;
+        if self.is_facing_left {
+            if let LeftFacingRendering::XOffset(offset) = self.left_facing_rendering {
+                x += offset;
+            }
+        }
+        x
+    }
+
     pub fn draw_current_frame(&self, level: &Level) {
         if let Some(material) = self.material {
             gl_use_material(material);
@@ -77,7 +122,7 @@ impl SpriteComponent {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
                 sprite.draw_ex(
-                    self.pos.x,
+                    self.get_sprite_x(),
                     self.pos.y,
                     self.current_frame_number,
                     SpriteDrawParams {

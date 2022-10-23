@@ -6,7 +6,7 @@ use crate::{
     entity::{Entity, EntityMap},
     game_assets::game_assets,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
-    sprite_component::{Renderer, SpriteComponent},
+    sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
     time::GameTime,
 };
 
@@ -17,7 +17,7 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
         sprite: SpriteComponent {
             relative_bbox: game_assets().flying_eye.flight_bbox,
             renderer: Renderer::Sprite(&game_assets().flying_eye.flight),
-            flip_bbox_when_facing_left: true,
+            left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
         }
         .at_top_left(&start_rect),

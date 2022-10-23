@@ -7,7 +7,7 @@ use crate::{
     entity::{Entity, EntityMap},
     game_assets::game_assets,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
-    sprite_component::{Renderer, SpriteComponent},
+    sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
     time::GameTime,
 };
 
@@ -32,7 +32,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         sprite: SpriteComponent {
             relative_bbox: sprites.idle_bbox,
             renderer: Renderer::Sprite(&death_sprite),
-            flip_bbox_when_facing_left: true,
+            left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
         }
         .at_bottom_left(&start_rect),

@@ -10,6 +10,7 @@ pub struct Config {
     pub ms_to_max_run_speed: f64,
     pub run_speed: f32,
     pub gravity: f32,
+    pub player_left_facing_x_offset: f32,
     pub long_jump_keypress_extra_force: f32,
     pub jump_velocity: f32,
     pub blocked_route_edge_thickness: f32,
@@ -41,6 +42,7 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.moving_platform_speed *= config.sprite_scale;
     config.vertical_collision_leeway *= config.sprite_scale;
     config.blocked_route_edge_thickness *= config.sprite_scale;
+    config.player_left_facing_x_offset *= config.sprite_scale;
 
     Ok(config)
 }

@@ -10,7 +10,7 @@ use crate::{
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
     running::RunComponent,
-    sprite_component::{Renderer, SpriteComponent},
+    sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
     sprite_renderer::SpriteRenderer,
     time::GameTime,
     world::world,
@@ -28,6 +28,9 @@ pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
     Entity {
         sprite: SpriteComponent {
             relative_bbox: game_assets().huntress.idle_bbox,
+            left_facing_rendering: LeftFacingRendering::XOffset(
+                config().player_left_facing_x_offset,
+            ),
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
