@@ -27,6 +27,7 @@ mod entity;
 mod floor_switch;
 mod flying_eye;
 mod font;
+mod fps;
 mod game_assets;
 mod input;
 mod ldtk;

@@ -9,6 +9,7 @@ use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap, EntityProcessor};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
+use crate::fps::FpsCounter;
 use crate::input::InputState;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -27,7 +28,6 @@ use crate::{camera::Camera, level::EntityKind};
 use anyhow::Result;
 use macroquad::prelude::{PURPLE, WHITE, YELLOW};
 use macroquad::text::draw_text;
-use macroquad::time::get_fps;
 
 use crate::level::Level;
 
@@ -54,8 +54,7 @@ pub struct LevelRuntime {
     dynamic_collider_system: DynamicColliderSystem,
     debug_text_lines: Option<String>,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
-    last_fps_update_time: f64,
-    fps: i32,
+    fps: FpsCounter,
 }
 
 impl LevelRuntime {
@@ -82,8 +81,7 @@ impl LevelRuntime {
             dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
             debug_text_lines: None,
-            last_fps_update_time: 0.,
-            fps: 0,
+            fps: Default::default(),
         };
         instance.change_level(&level);
         instance
@@ -148,6 +146,8 @@ impl LevelRuntime {
     }
 
     pub fn advance_one_frame(&mut self, time: &GameTime, input: &InputState) -> FrameResult {
+        self.fps.update(time.now);
+
         if !self.maybe_switch_level()
             && did_fall_off_level(&self.entities.player().sprite, &self.level)
         {
@@ -186,7 +186,7 @@ impl LevelRuntime {
         );
 
         if self.debug_mode {
-            self.generate_debug_text(time)
+            self.generate_debug_text()
                 .expect("Generating debug text should work!");
             self.draw_debug_layer();
         }
@@ -194,20 +194,13 @@ impl LevelRuntime {
         return FrameResult::Ok;
     }
 
-    fn generate_debug_text(&mut self, time: &GameTime) -> Result<()> {
+    fn generate_debug_text(&mut self) -> Result<()> {
         let text = self
             .debug_text_lines
             .get_or_insert_with(|| String::with_capacity(DEBUG_TEXT_CAPACITY));
         text.clear();
 
-        // Macroquad's get_fps() fluctuates ridiculously which makes it difficult
-        // to read, so we'll limit how often it changes.
-        if time.now - self.last_fps_update_time >= 1. || self.fps == 0 {
-            self.fps = get_fps();
-            self.last_fps_update_time = time.now;
-        }
-
-        writeln!(text, "fps: {}", self.fps)?;
+        writeln!(text, "fps: {}", self.fps.value())?;
         let entity_size = std::mem::size_of::<Entity>();
         writeln!(
             text,
