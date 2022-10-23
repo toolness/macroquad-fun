@@ -89,14 +89,14 @@ impl Cli {
     }
 }
 
+fn str_or_default<'a>(value: &'a Option<String>, default: &'static str) -> &'a str {
+    value.as_ref().map(|s| s.as_str()).unwrap_or(&default)
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
-    let start_position = args
-        .start_position
-        .as_ref()
-        .map(|s| s.as_str())
-        .unwrap_or(&DEFAULT_START_POSITION);
+    let start_position = str_or_default(&args.start_position, &DEFAULT_START_POSITION);
 
     load_config(CONFIG_PATH)
         .await
