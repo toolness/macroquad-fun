@@ -65,7 +65,7 @@ impl LevelRuntime {
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
-            time: GameTime::new(),
+            time: GameTime::new(get_time()),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
             route_system: RouteSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
@@ -148,7 +148,7 @@ impl LevelRuntime {
     }
 
     pub fn advance_one_frame(&mut self) -> FrameResult {
-        self.time.update();
+        self.time.update(get_time());
 
         if !self.maybe_switch_level()
             && did_fall_off_level(&self.entities.player().sprite, &self.level)

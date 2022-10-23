@@ -1,5 +1,3 @@
-use macroquad::time::get_time;
-
 use crate::{config::config, sprite_renderer::SpriteRenderer};
 
 /// Our minimum FPS for timing purposes. Even if the system is really slow,
@@ -22,8 +20,7 @@ pub struct GameTime {
 }
 
 impl GameTime {
-    pub fn new() -> Self {
-        let now = get_time();
+    pub fn new(now: f64) -> Self {
         GameTime {
             now,
             absolute_frame_number: 0,
@@ -32,9 +29,9 @@ impl GameTime {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, now: f64) {
         let last_frame_time = self.now;
-        self.now = get_time() - self.excess_time_offset;
+        self.now = now - self.excess_time_offset;
         self.time_since_last_frame = self.now - last_frame_time;
         if self.time_since_last_frame > MAX_TIME_SINCE_LAST_FRAME {
             self.time_since_last_frame = MAX_TIME_SINCE_LAST_FRAME;
