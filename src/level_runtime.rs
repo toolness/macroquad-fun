@@ -25,7 +25,9 @@ use crate::time::GameTime;
 use crate::z_index::ZIndexedDrawingSystem;
 use crate::{camera::Camera, level::EntityKind};
 use anyhow::Result;
-use macroquad::prelude::*;
+use macroquad::prelude::{PURPLE, WHITE, YELLOW};
+use macroquad::text::draw_text;
+use macroquad::time::get_fps;
 
 use crate::level::Level;
 
@@ -41,10 +43,9 @@ pub enum FrameResult {
 pub struct LevelRuntime {
     level: &'static Level,
     entities: EntityMap,
-    debug_mode: bool,
+    pub debug_mode: bool,
     camera: Camera,
     next_id: u64,
-    time: GameTime,
     physics_system: PhysicsSystem,
     route_system: RouteSystem,
     attachment_system: AttachmentSystem,
@@ -65,7 +66,6 @@ impl LevelRuntime {
             next_id: 1,
             debug_mode: false,
             camera: Camera::new(),
-            time: GameTime::new(get_time()),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
             route_system: RouteSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
@@ -147,25 +147,19 @@ impl LevelRuntime {
         }
     }
 
-    pub fn advance_one_frame(&mut self) -> FrameResult {
-        self.time.update(get_time());
-
+    pub fn advance_one_frame(&mut self, time: &GameTime, input: &InputState) -> FrameResult {
         if !self.maybe_switch_level()
             && did_fall_off_level(&self.entities.player().sprite, &self.level)
         {
             return FrameResult::PlayerDied;
         }
 
-        process_player_input(
-            &mut self.entities,
-            &self.time,
-            &InputState::from_macroquad(),
-        );
+        process_player_input(&mut self.entities, time, input);
         self.attachment_system
-            .run(&mut self.entities, &self.level, &self.time);
+            .run(&mut self.entities, &self.level, time);
         self.route_system.run(&mut self.entities);
         self.physics_system
-            .update_positions(&mut self.entities, &self.time);
+            .update_positions(&mut self.entities, time);
         self.dynamic_collider_system.run(&mut self.entities);
         self.push_system.run(&mut self.entities);
         self.switch_system.run(&mut self.entities);
@@ -175,9 +169,9 @@ impl LevelRuntime {
             &mut self.dynamic_collider_system,
         );
         floor_switch_system(&mut self.entities);
-        flying_eye_movement_system(&mut self.entities, &self.time);
-        mushroom_movement_system(&mut self.entities, &self.time);
-        player_update_system(&mut self.entities, &self.time);
+        flying_eye_movement_system(&mut self.entities, time);
+        mushroom_movement_system(&mut self.entities, time);
+        player_update_system(&mut self.entities, time);
 
         // Draw stuff.
         self.camera.update(&self.entities.player(), &self.level);
@@ -191,14 +185,8 @@ impl LevelRuntime {
             &self.camera.rect(),
         );
 
-        // Process miscellaneous system input.
-
-        if is_key_pressed(KeyCode::G) {
-            self.debug_mode = !self.debug_mode;
-        }
-
         if self.debug_mode {
-            self.generate_debug_text()
+            self.generate_debug_text(time)
                 .expect("Generating debug text should work!");
             self.draw_debug_layer();
         }
@@ -206,7 +194,7 @@ impl LevelRuntime {
         return FrameResult::Ok;
     }
 
-    fn generate_debug_text(&mut self) -> Result<()> {
+    fn generate_debug_text(&mut self, time: &GameTime) -> Result<()> {
         let text = self
             .debug_text_lines
             .get_or_insert_with(|| String::with_capacity(DEBUG_TEXT_CAPACITY));
@@ -214,10 +202,9 @@ impl LevelRuntime {
 
         // Macroquad's get_fps() fluctuates ridiculously which makes it difficult
         // to read, so we'll limit how often it changes.
-        let now = get_time();
-        if now - self.last_fps_update_time >= 1. || self.fps == 0 {
+        if time.now - self.last_fps_update_time >= 1. || self.fps == 0 {
             self.fps = get_fps();
-            self.last_fps_update_time = now;
+            self.last_fps_update_time = time.now;
         }
 
         writeln!(text, "fps: {}", self.fps)?;

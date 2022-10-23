@@ -6,9 +6,11 @@ extern crate serde_json;
 use cli::Cli;
 use config::load_config;
 use game_assets::load_game_assets;
+use input::InputState;
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
+use time::GameTime;
 use world::load_world;
 
 mod animator;
@@ -101,8 +103,12 @@ async fn main() {
         next_frame().await;
     }
 
+    let mut time = GameTime::new(get_time());
+
     loop {
-        match level_runtime.advance_one_frame() {
+        time.update(get_time());
+
+        match level_runtime.advance_one_frame(&time, &InputState::from_macroquad()) {
             FrameResult::Ok => {}
             FrameResult::PlayerDied => {
                 level_runtime = new_game(&args.start_position);
@@ -112,6 +118,10 @@ async fn main() {
         #[cfg(not(target_arch = "wasm32"))]
         if is_key_released(KeyCode::Escape) {
             break;
+        }
+
+        if is_key_pressed(KeyCode::G) {
+            level_runtime.debug_mode = !level_runtime.debug_mode;
         }
 
         next_frame().await;
