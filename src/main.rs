@@ -109,6 +109,7 @@ async fn main() {
             }
         }
 
+        #[cfg(not(target_arch = "wasm32"))]
         if is_key_released(KeyCode::Escape) {
             break;
         }
