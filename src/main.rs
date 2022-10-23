@@ -3,6 +3,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use cli::Cli;
 use config::load_config;
 use game_assets::load_game_assets;
 use level_runtime::{FrameResult, LevelRuntime};
@@ -14,6 +15,7 @@ mod animator;
 mod aseprite;
 mod attachment;
 mod camera;
+mod cli;
 mod collision;
 mod config;
 mod crate_entity;
@@ -45,8 +47,6 @@ mod world;
 mod xy_range_iterator;
 mod z_index;
 
-const DEFAULT_START_POSITION: &str = "default";
-
 const CONFIG_PATH: &str = "media/config.json";
 
 fn window_conf() -> Conf {
@@ -73,30 +73,9 @@ fn window_conf() -> Conf {
     }
 }
 
-#[derive(Default)]
-#[cfg_attr(not(target_arch = "wasm32"), derive(clap::Parser))]
-struct Cli {
-    start_position: Option<String>,
-}
-
-impl Cli {
-    pub fn get_for_platform() -> Self {
-        #[cfg(target_arch = "wasm32")]
-        return Cli::default();
-
-        #[cfg(not(target_arch = "wasm32"))]
-        <Cli as clap::Parser>::parse()
-    }
-}
-
-fn str_or_default<'a>(value: &'a Option<String>, default: &'static str) -> &'a str {
-    value.as_ref().map(|s| s.as_str()).unwrap_or(&default)
-}
-
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
-    let start_position = str_or_default(&args.start_position, &DEFAULT_START_POSITION);
 
     load_config(CONFIG_PATH)
         .await
@@ -108,7 +87,7 @@ async fn main() {
         .await
         .expect("load_world() must succeed");
 
-    let mut level_runtime = new_game(start_position);
+    let mut level_runtime = new_game(&args.start_position);
 
     #[cfg(target_arch = "wasm32")]
     {
@@ -126,7 +105,7 @@ async fn main() {
         match level_runtime.advance_one_frame() {
             FrameResult::Ok => {}
             FrameResult::PlayerDied => {
-                level_runtime = new_game(start_position);
+                level_runtime = new_game(&args.start_position);
             }
         }
 
