@@ -28,9 +28,6 @@ pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
     Entity {
         sprite: SpriteComponent {
             relative_bbox: game_assets().huntress.idle_bbox,
-            left_facing_rendering: LeftFacingRendering::XOffset(
-                config().player_left_facing_x_offset,
-            ),
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
@@ -75,6 +72,7 @@ pub fn process_player_input(entities: &mut EntityMap, time: &GameTime, input: &I
 }
 
 pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
+    let config = config();
     let player_entity = entities.player_mut();
     let physics = &mut player_entity.physics;
     let sprite = &mut player_entity.sprite;
@@ -89,7 +87,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
         attachment.reset(physics);
     } else if !player.is_in_air {
         if let Some(coyote_start_time) = &player.coyote_time_start {
-            if time.now - coyote_start_time > config().coyote_time_ms / 1000. {
+            if time.now - coyote_start_time > config.coyote_time_ms / 1000. {
                 // The player fell off a ledge, and is out of coyote time.
                 player.is_in_air = true;
                 player.coyote_time_start = None;
@@ -114,6 +112,13 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
         &physics.velocity,
         player.run_direction,
     ));
+    sprite.left_facing_rendering = if attachment.is_attached() {
+        // The player juts out awkwardly from their carrier if offset,
+        // so don't offset.
+        LeftFacingRendering::Default
+    } else {
+        LeftFacingRendering::XOffset(config.player_left_facing_x_offset)
+    };
     sprite.update_looping_frame_number(time);
 }
 
