@@ -176,11 +176,11 @@ impl LevelRuntime {
         // Draw stuff.
         self.camera.update(&self.entities.player(), &self.level);
 
-        self.camera.activate();
-        self.level.draw(&self.camera.rect());
-        self.z_indexed_drawing_system
-            .draw_entities(&self.entities, &self.level);
-        self.camera.deactivate();
+        self.camera.with_active(|| {
+            self.level.draw(&self.camera.rect());
+            self.z_indexed_drawing_system
+                .draw_entities(&self.entities, &self.level);
+        });
 
         draw_level_text(&self.entities.player().sprite, &self.level);
 
@@ -217,23 +217,23 @@ impl LevelRuntime {
     }
 
     fn draw_debug_layer(&self) {
-        self.camera.activate();
-        let level = self.level;
-        for collider in level.iter_colliders(&level.pixel_bounds()) {
-            collider.draw_debug_rect(PURPLE);
-        }
-        self.dynamic_collider_system.draw_debug_rects();
-        draw_route_debug_targets(&self.entities);
-        draw_rect_lines(
-            &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
-            1.,
-            WHITE,
-        );
-        for (_id, entity) in self.entities.iter() {
-            entity.sprite.draw_debug_rects();
-        }
-        self.camera.draw_debug_info();
-        self.camera.deactivate();
+        self.camera.with_active(|| {
+            let level = self.level;
+            for collider in level.iter_colliders(&level.pixel_bounds()) {
+                collider.draw_debug_rect(PURPLE);
+            }
+            self.dynamic_collider_system.draw_debug_rects();
+            draw_route_debug_targets(&self.entities);
+            draw_rect_lines(
+                &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
+                1.,
+                WHITE,
+            );
+            for (_id, entity) in self.entities.iter() {
+                entity.sprite.draw_debug_rects();
+            }
+            self.camera.draw_debug_info();
+        });
 
         if let Some(text) = &self.debug_text_lines {
             let font_size = config().debug_text_size;

@@ -19,14 +19,20 @@ impl Camera {
         }
     }
 
-    pub fn activate(&self) {
+    pub fn with_active<F: FnOnce() -> ()>(&self, cb: F) {
+        self.activate();
+        cb();
+        self.deactivate();
+    }
+
+    fn activate(&self) {
         push_camera_state();
         // Clamp to integers to avoid weird visual artifacts.
         let int_rect = floor_rect(&self.current_rect);
         set_camera(&Camera2D::from_display_rect(int_rect));
     }
 
-    pub fn deactivate(&self) {
+    fn deactivate(&self) {
         pop_camera_state();
     }
 
