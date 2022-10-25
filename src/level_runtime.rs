@@ -175,15 +175,14 @@ impl LevelRuntime {
 
         // Draw stuff.
         self.camera.update(&self.entities.player(), &self.level);
+
+        self.camera.activate();
         self.level.draw(&self.camera.rect());
         self.z_indexed_drawing_system
             .draw_entities(&self.entities, &self.level);
+        self.camera.deactivate();
 
-        draw_level_text(
-            &self.entities.player().sprite,
-            &self.level,
-            &self.camera.rect(),
-        );
+        draw_level_text(&self.entities.player().sprite, &self.level);
 
         if self.debug_mode {
             self.generate_debug_text()
@@ -218,6 +217,7 @@ impl LevelRuntime {
     }
 
     fn draw_debug_layer(&self) {
+        self.camera.activate();
         let level = self.level;
         for collider in level.iter_colliders(&level.pixel_bounds()) {
             collider.draw_debug_rect(PURPLE);
@@ -233,12 +233,13 @@ impl LevelRuntime {
             entity.sprite.draw_debug_rects();
         }
         self.camera.draw_debug_info();
+        self.camera.deactivate();
 
         if let Some(text) = &self.debug_text_lines {
             let font_size = config().debug_text_size;
             let margin = 32.;
-            let x = self.camera.rect().x + margin;
-            let mut y = self.camera.rect().y + margin;
+            let x = margin;
+            let mut y = margin;
             for line in text.split("\n") {
                 draw_text(line, x, y, font_size, YELLOW);
                 y += font_size;

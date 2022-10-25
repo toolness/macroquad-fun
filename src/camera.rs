@@ -1,5 +1,5 @@
 use macroquad::{
-    prelude::{set_camera, Camera2D, Rect, Vec2, BLUE},
+    prelude::{pop_camera_state, push_camera_state, set_camera, Camera2D, Rect, Vec2, BLUE},
     window::{screen_height, screen_width},
 };
 
@@ -19,6 +19,17 @@ impl Camera {
         }
     }
 
+    pub fn activate(&self) {
+        push_camera_state();
+        // Clamp to integers to avoid weird visual artifacts.
+        let int_rect = floor_rect(&self.current_rect);
+        set_camera(&Camera2D::from_display_rect(int_rect));
+    }
+
+    pub fn deactivate(&self) {
+        pop_camera_state();
+    }
+
     pub fn update(&mut self, entity: &Entity, level: &Level) {
         let sprite = &entity.sprite;
         let bbox = sprite.bbox();
@@ -31,9 +42,6 @@ impl Camera {
         );
 
         self.current_rect = target_rect;
-        // Clamp to integers to avoid weird visual artifacts.
-        let int_rect = floor_rect(&self.current_rect);
-        set_camera(&Camera2D::from_display_rect(int_rect));
     }
 
     pub fn rect(&self) -> &Rect {
