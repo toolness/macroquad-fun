@@ -6,6 +6,7 @@ extern crate serde_json;
 use cli::Cli;
 use config::load_config;
 use debug_mode::DebugMode;
+use fps::FpsCounter;
 use game_assets::load_game_assets;
 use input::InputState;
 use level_runtime::{FrameResult, LevelRuntime};
@@ -109,9 +110,11 @@ async fn main() {
     let mut time = GameTime::new(get_time());
     let mut enable_debug_mode = false;
     let mut opt_debug_mode: Option<DebugMode> = None;
+    let mut fps = FpsCounter::default();
 
     loop {
         time.update(get_time());
+        fps.update(time.now);
 
         match level_runtime.advance_one_frame(&time, &InputState::from_macroquad()) {
             FrameResult::Ok => {}
@@ -132,7 +135,7 @@ async fn main() {
         if enable_debug_mode {
             let debug_mode = opt_debug_mode.get_or_insert_with(|| DebugMode::default());
             debug_mode
-                .update(&level_runtime, time.now)
+                .update(&level_runtime, &fps)
                 .expect("Generating debug text should work!");
             debug_mode.draw(&level_runtime);
         }

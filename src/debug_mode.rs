@@ -8,28 +8,24 @@ const DEBUG_TEXT_CAPACITY: usize = 3000;
 
 pub struct DebugMode {
     debug_text_lines: Option<String>,
-    fps: FpsCounter,
 }
 
 impl Default for DebugMode {
     fn default() -> Self {
         DebugMode {
             debug_text_lines: None,
-            fps: FpsCounter::default(),
         }
     }
 }
 
 impl DebugMode {
-    pub fn update(&mut self, runtime: &LevelRuntime, now: f64) -> Result<()> {
-        self.fps.update(now);
-
+    pub fn update(&mut self, runtime: &LevelRuntime, fps: &FpsCounter) -> Result<()> {
         let text = self
             .debug_text_lines
             .get_or_insert_with(|| String::with_capacity(DEBUG_TEXT_CAPACITY));
         text.clear();
 
-        writeln!(text, "fps: {}", self.fps.value())?;
+        writeln!(text, "fps: {}", fps.value())?;
 
         runtime.generate_debug_text(text)?;
 
