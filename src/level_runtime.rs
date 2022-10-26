@@ -2,14 +2,12 @@ use std::collections::HashMap;
 use std::fmt::Write;
 
 use crate::attachment::AttachmentSystem;
-use crate::config::config;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap, EntityProcessor};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
-use crate::fps::FpsCounter;
 use crate::input::InputState;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
@@ -26,12 +24,10 @@ use crate::time::GameTime;
 use crate::z_index::ZIndexedDrawingSystem;
 use crate::{camera::Camera, level::EntityKind};
 use anyhow::Result;
-use macroquad::prelude::{PURPLE, WHITE, YELLOW};
-use macroquad::text::draw_text;
+use macroquad::prelude::{PURPLE, WHITE};
 
 use crate::level::Level;
 
-const DEBUG_TEXT_CAPACITY: usize = 3000;
 const ENTITY_CAPACITY: usize = 200;
 
 #[derive(PartialEq)]
@@ -43,7 +39,6 @@ pub enum FrameResult {
 pub struct LevelRuntime {
     level: &'static Level,
     entities: EntityMap,
-    pub debug_mode: bool,
     camera: Camera,
     next_id: u64,
     physics_system: PhysicsSystem,
@@ -52,9 +47,7 @@ pub struct LevelRuntime {
     switch_system: SwitchSystem,
     push_system: PushSystem,
     dynamic_collider_system: DynamicColliderSystem,
-    debug_text_lines: Option<String>,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
-    fps: FpsCounter,
 }
 
 impl LevelRuntime {
@@ -63,7 +56,6 @@ impl LevelRuntime {
             level,
             entities: EntityMap::new_ex(player, ENTITY_CAPACITY),
             next_id: 1,
-            debug_mode: false,
             camera: Camera::new(),
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
             route_system: RouteSystem {
@@ -80,8 +72,6 @@ impl LevelRuntime {
             },
             dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
-            debug_text_lines: None,
-            fps: Default::default(),
         };
         instance.change_level(&level);
         instance
@@ -146,8 +136,6 @@ impl LevelRuntime {
     }
 
     pub fn advance_one_frame(&mut self, time: &GameTime, input: &InputState) -> FrameResult {
-        self.fps.update(time.now);
-
         if !self.maybe_switch_level()
             && did_fall_off_level(&self.entities.player().sprite, &self.level)
         {
@@ -184,22 +172,10 @@ impl LevelRuntime {
 
         draw_level_text(&self.entities.player().sprite, &self.level);
 
-        if self.debug_mode {
-            self.generate_debug_text()
-                .expect("Generating debug text should work!");
-            self.draw_debug_layer();
-        }
-
         return FrameResult::Ok;
     }
 
-    fn generate_debug_text(&mut self) -> Result<()> {
-        let text = self
-            .debug_text_lines
-            .get_or_insert_with(|| String::with_capacity(DEBUG_TEXT_CAPACITY));
-        text.clear();
-
-        writeln!(text, "fps: {}", self.fps.value())?;
+    pub fn generate_debug_text(&self, text: &mut String) -> Result<()> {
         let entity_size = std::mem::size_of::<Entity>();
         writeln!(
             text,
@@ -216,7 +192,7 @@ impl LevelRuntime {
         Ok(())
     }
 
-    fn draw_debug_layer(&self) {
+    pub fn draw_debug_layer(&self) {
         self.camera.with_active(|| {
             let level = self.level;
             for collider in level.iter_colliders(&level.pixel_bounds()) {
@@ -234,16 +210,5 @@ impl LevelRuntime {
             }
             self.camera.draw_debug_info();
         });
-
-        if let Some(text) = &self.debug_text_lines {
-            let font_size = config().debug_text_size;
-            let margin = 32.;
-            let x = margin;
-            let mut y = margin;
-            for line in text.split("\n") {
-                draw_text(line, x, y, font_size, YELLOW);
-                y += font_size;
-            }
-        }
     }
 }

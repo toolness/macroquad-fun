@@ -5,6 +5,7 @@ extern crate serde_json;
 
 use cli::Cli;
 use config::load_config;
+use debug_mode::DebugMode;
 use game_assets::load_game_assets;
 use input::InputState;
 use level_runtime::{FrameResult, LevelRuntime};
@@ -21,6 +22,7 @@ mod cli;
 mod collision;
 mod config;
 mod crate_entity;
+mod debug_mode;
 mod drawing;
 mod dynamic_collider;
 mod entity;
@@ -105,6 +107,8 @@ async fn main() {
     }
 
     let mut time = GameTime::new(get_time());
+    let mut enable_debug_mode = false;
+    let mut opt_debug_mode: Option<DebugMode> = None;
 
     loop {
         time.update(get_time());
@@ -122,7 +126,15 @@ async fn main() {
         }
 
         if is_key_pressed(KeyCode::G) {
-            level_runtime.debug_mode = !level_runtime.debug_mode;
+            enable_debug_mode = !enable_debug_mode;
+        }
+
+        if enable_debug_mode {
+            let debug_mode = opt_debug_mode.get_or_insert_with(|| DebugMode::default());
+            debug_mode
+                .update(&level_runtime, time.now)
+                .expect("Generating debug text should work!");
+            debug_mode.draw(&level_runtime);
         }
 
         next_frame().await;
