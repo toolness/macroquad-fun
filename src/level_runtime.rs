@@ -161,9 +161,12 @@ impl LevelRuntime {
         mushroom_movement_system(&mut self.entities, time);
         player_update_system(&mut self.entities, time);
 
-        // Draw stuff.
         self.camera.update(&self.entities.player(), &self.level);
 
+        return FrameResult::Ok;
+    }
+
+    pub fn draw(&self) {
         self.camera.with_active(|| {
             self.level.draw(&self.camera.rect());
             self.z_indexed_drawing_system
@@ -171,8 +174,6 @@ impl LevelRuntime {
         });
 
         draw_level_text(&self.entities.player().sprite, &self.level);
-
-        return FrameResult::Ok;
     }
 
     pub fn generate_debug_text(&self, text: &mut String) -> Result<()> {
