@@ -5,7 +5,7 @@ use crate::{
     config::config,
     entity::{Entity, EntityMap},
     game_assets::game_assets,
-    input::InputState,
+    input::{Buttons, InputState},
     level::Level,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
@@ -63,7 +63,7 @@ pub fn process_player_input(entities: &mut EntityMap, time: &GameTime, input: &I
     let player = entities.player_mut();
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
-        if input.is_jump_key_pressed {
+        if input.is_pressed(Buttons::JUMP) {
             attachment.detach(&mut player.physics);
         }
     } else {
@@ -134,12 +134,12 @@ fn unattached_player_process_input(
     let player = player_entity.player.as_mut().unwrap();
     run.update(
         time_since_last_frame,
-        input.is_left_key_down,
-        input.is_right_key_down,
+        input.is_down(Buttons::LEFT),
+        input.is_down(Buttons::RIGHT),
     );
 
     if player.is_in_air {
-        if input.is_jump_key_down && physics.velocity.y < 0. {
+        if input.is_down(Buttons::JUMP) && physics.velocity.y < 0. {
             physics.velocity.y -=
                 config.long_jump_keypress_extra_force * time_since_last_frame as f32;
         }
@@ -147,7 +147,7 @@ fn unattached_player_process_input(
             physics.velocity.x = run.run_speed();
         }
     } else {
-        if input.is_jump_key_pressed {
+        if input.is_pressed(Buttons::JUMP) {
             let new_velocity = Vec2::new(run.run_speed(), -config.jump_velocity);
             physics.velocity.x = new_velocity.x;
             physics.velocity.y = new_velocity.y;

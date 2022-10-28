@@ -8,7 +8,7 @@ use config::load_config;
 use debug_mode::DebugMode;
 use fps::FpsCounter;
 use game_assets::load_game_assets;
-use input::InputState;
+use input::{Buttons, InputState};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
@@ -117,7 +117,7 @@ async fn main() {
         time.update(get_time());
         fps.update(time.now);
 
-        input_state = InputState::from_macroquad(input_state);
+        input_state.update(Buttons::from_macroquad());
 
         match level_runtime.advance_one_frame(&time, &input_state) {
             FrameResult::Ok => {}
