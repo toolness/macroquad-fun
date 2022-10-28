@@ -111,12 +111,15 @@ async fn main() {
     let mut enable_debug_mode = false;
     let mut opt_debug_mode: Option<DebugMode> = None;
     let mut fps = FpsCounter::default();
+    let mut input_state = InputState::default();
 
     loop {
         time.update(get_time());
         fps.update(time.now);
 
-        match level_runtime.advance_one_frame(&time, &InputState::from_macroquad()) {
+        input_state = InputState::from_macroquad(input_state);
+
+        match level_runtime.advance_one_frame(&time, &input_state) {
             FrameResult::Ok => {}
             FrameResult::PlayerDied => {
                 level_runtime = new_game(&args.start_position);
