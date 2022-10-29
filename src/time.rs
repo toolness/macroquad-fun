@@ -57,12 +57,8 @@ impl FixedGameTime {
             self.now -= delta;
         }
     }
-}
 
-impl Iterator for FixedGameTime {
-    type Item = GameTime;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    pub fn next_fixed_frame(&mut self) -> Option<GameTime> {
         let time_passed = self.now - self.start;
         let total_frames = (time_passed / self.frame_duration) as u64;
         if total_frames > self.frames_so_far {
