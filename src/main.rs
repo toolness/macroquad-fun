@@ -12,6 +12,7 @@ use input::{create_macroquad_input_stream, InputState};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
+use recorder::InputRecorder;
 use time::FixedGameTime;
 use world::load_world;
 
@@ -42,6 +43,7 @@ mod mushroom;
 mod physics;
 mod player;
 mod push;
+mod recorder;
 mod route;
 mod running;
 mod sprite_component;
@@ -113,7 +115,14 @@ async fn main() {
     let mut render_fps = FpsCounter::default();
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
-    let mut input_stream = create_macroquad_input_stream();
+    let mut input_stream = if let Some(filename) = args.record {
+        InputRecorder::new(
+            create_macroquad_input_stream(),
+            std::fs::File::create(filename).expect("Unable to create recording file"),
+        )
+    } else {
+        create_macroquad_input_stream()
+    };
 
     loop {
         let now = get_time();

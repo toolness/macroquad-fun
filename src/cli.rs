@@ -8,6 +8,14 @@ pub struct Cli {
     #[argh(option, short = 'p', default = "String::from(DEFAULT_START_POSITION)")]
     /// starting position, defined by PlayerStart entities in LDtk
     pub start_position: String,
+
+    #[argh(option)]
+    /// filename to record to
+    pub record: Option<String>,
+
+    #[argh(option)]
+    /// filename to play back recording from
+    pub playback: Option<String>,
 }
 
 impl Cli {
