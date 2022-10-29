@@ -19,10 +19,20 @@ impl Default for DebugMode {
 }
 
 impl DebugMode {
-    pub fn update(&mut self, runtime: &LevelRuntime, fps: &FpsCounter) -> Result<()> {
+    pub fn update(
+        &mut self,
+        runtime: &LevelRuntime,
+        fps: &FpsCounter,
+        draw_fps: &FpsCounter,
+    ) -> Result<()> {
         self.text.clear();
 
-        writeln!(self.text, "fps: {}", fps.value())?;
+        writeln!(
+            self.text,
+            "fps: {}  draw fps: {}",
+            fps.value(),
+            draw_fps.value()
+        )?;
 
         runtime.generate_debug_text(&mut self.text)?;
 
