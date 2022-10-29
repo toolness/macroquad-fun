@@ -55,3 +55,19 @@ impl InputState {
         self.current.is_down(button) && !self.previous.is_down(button)
     }
 }
+
+pub type InputStream = Box<dyn Iterator<Item = Buttons>>;
+
+struct MacroquadInputStream;
+
+impl Iterator for MacroquadInputStream {
+    type Item = Buttons;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(Buttons::from_macroquad())
+    }
+}
+
+pub fn create_macroquad_input_stream() -> InputStream {
+    Box::new(MacroquadInputStream)
+}

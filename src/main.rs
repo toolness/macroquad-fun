@@ -8,7 +8,7 @@ use config::load_config;
 use debug_mode::DebugMode;
 use fps::FpsCounter;
 use game_assets::load_game_assets;
-use input::{Buttons, InputState};
+use input::{create_macroquad_input_stream, InputState};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
@@ -113,13 +113,14 @@ async fn main() {
     let mut render_fps = FpsCounter::default();
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
+    let mut input_stream = create_macroquad_input_stream();
 
     loop {
         let now = get_time();
         fixed_time.update(now);
 
         for time in fixed_time.iter_fixed_frames() {
-            input_state.update(Buttons::from_macroquad());
+            input_state.update(input_stream.next().unwrap());
             fixed_fps.update(time.now);
             match level_runtime.advance_one_frame(&time, &input_state) {
                 FrameResult::Ok => {}
