@@ -1,3 +1,5 @@
+use std::iter::Fuse;
+
 use crate::{config::config, sprite_renderer::SpriteRenderer};
 
 /// The maximum time we'll process between drawing frames. This prevents
@@ -58,7 +60,7 @@ impl FixedGameTime {
         }
     }
 
-    pub fn next_fixed_frame(&mut self) -> Option<GameTime> {
+    fn next_fixed_frame(&mut self) -> Option<GameTime> {
         let time_passed = self.now - self.start;
         let total_frames = (time_passed / self.frame_duration) as u64;
         if total_frames > self.frames_so_far {
@@ -73,5 +75,21 @@ impl FixedGameTime {
         } else {
             None
         }
+    }
+
+    pub fn iter_fixed_frames<'a>(&'a mut self) -> Fuse<FixedFrameIterator<'a>> {
+        (FixedFrameIterator { time: self }).fuse()
+    }
+}
+
+pub struct FixedFrameIterator<'a> {
+    time: &'a mut FixedGameTime,
+}
+
+impl<'a> Iterator for FixedFrameIterator<'a> {
+    type Item = GameTime;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.time.next_fixed_frame()
     }
 }

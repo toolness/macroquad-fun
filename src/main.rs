@@ -118,7 +118,7 @@ async fn main() {
         let now = get_time();
         fixed_time.update(now);
 
-        while let Some(time) = fixed_time.next_fixed_frame() {
+        for time in fixed_time.iter_fixed_frames() {
             input_state.update(Buttons::from_macroquad());
             fixed_fps.update(time.now);
             match level_runtime.advance_one_frame(&time, &input_state) {
