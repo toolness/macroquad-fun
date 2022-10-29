@@ -22,16 +22,16 @@ impl DebugMode {
     pub fn update(
         &mut self,
         runtime: &LevelRuntime,
-        fps: &FpsCounter,
-        draw_fps: &FpsCounter,
+        fixed_fps: &FpsCounter,
+        render_fps: &FpsCounter,
     ) -> Result<()> {
         self.text.clear();
 
         writeln!(
             self.text,
-            "fps: {}  draw fps: {}",
-            fps.value(),
-            draw_fps.value()
+            "fixed fps: {}  render fps: {}",
+            fixed_fps.value(),
+            render_fps.value()
         )?;
 
         runtime.generate_debug_text(&mut self.text)?;

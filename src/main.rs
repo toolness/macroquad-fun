@@ -110,18 +110,17 @@ async fn main() {
     let mut fixed_time = FixedGameTime::new(config.fixed_fps, get_time());
     let mut enable_debug_mode = false;
     let mut opt_debug_mode: Option<DebugMode> = None;
-    let mut draw_fps = FpsCounter::default();
-    let mut fps = FpsCounter::default();
+    let mut render_fps = FpsCounter::default();
+    let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
 
     loop {
         let now = get_time();
         fixed_time.update(now);
-        draw_fps.update(now);
 
         while let Some(time) = fixed_time.next() {
-            fps.update(time.now);
             input_state.update(Buttons::from_macroquad());
+            fixed_fps.update(time.now);
             match level_runtime.advance_one_frame(&time, &input_state) {
                 FrameResult::Ok => {}
                 FrameResult::PlayerDied => {
@@ -130,6 +129,7 @@ async fn main() {
             }
         }
 
+        render_fps.update(now);
         level_runtime.draw();
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -144,7 +144,7 @@ async fn main() {
         if enable_debug_mode {
             let debug_mode = opt_debug_mode.get_or_insert_with(|| DebugMode::default());
             debug_mode
-                .update(&level_runtime, &fps, &draw_fps)
+                .update(&level_runtime, &fixed_fps, &render_fps)
                 .expect("Generating debug text should work!");
             debug_mode.draw(&level_runtime);
         }
