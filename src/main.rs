@@ -12,7 +12,7 @@ use input::{Buttons, InputState};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
-use time::GameTime;
+use time::FixedGameTime;
 use world::load_world;
 
 mod animator;
@@ -79,6 +79,8 @@ fn window_conf() -> Conf {
     }
 }
 
+const FIXED_FPS: u64 = 60;
+
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
@@ -107,22 +109,24 @@ async fn main() {
         next_frame().await;
     }
 
-    let mut time = GameTime::new(get_time());
+    let mut fixed_time = FixedGameTime::new(FIXED_FPS, get_time());
     let mut enable_debug_mode = false;
     let mut opt_debug_mode: Option<DebugMode> = None;
     let mut fps = FpsCounter::default();
     let mut input_state = InputState::default();
 
     loop {
-        time.update(get_time());
-        fps.update(time.now);
+        let now = get_time();
+        fixed_time.update(now);
+        fps.update(now);
 
-        input_state.update(Buttons::from_macroquad());
-
-        match level_runtime.advance_one_frame(&time, &input_state) {
-            FrameResult::Ok => {}
-            FrameResult::PlayerDied => {
-                level_runtime = new_game(&args.start_position);
+        while let Some(time) = fixed_time.next() {
+            input_state.update(Buttons::from_macroquad());
+            match level_runtime.advance_one_frame(&time, &input_state) {
+                FrameResult::Ok => {}
+                FrameResult::PlayerDied => {
+                    level_runtime = new_game(&args.start_position);
+                }
             }
         }
 

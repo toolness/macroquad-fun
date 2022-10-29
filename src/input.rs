@@ -47,6 +47,10 @@ impl InputState {
         self.current = new_buttons;
     }
 
+    pub fn current(&self) -> Buttons {
+        self.current
+    }
+
     pub fn is_down(&self, button: Buttons) -> bool {
         self.current.is_down(button)
     }

@@ -49,3 +49,47 @@ impl GameTime {
         (self.absolute_frame_number % sprite.num_frames() as u64) as u32
     }
 }
+
+pub struct FixedGameTime {
+    now: f64,
+    frames_so_far: u64,
+    start: f64,
+    frame_duration: f64,
+}
+
+impl FixedGameTime {
+    pub fn new(fixed_frame_rate: u64, now: f64) -> Self {
+        FixedGameTime {
+            now,
+            start: now,
+            frames_so_far: 0,
+            frame_duration: 1. / (fixed_frame_rate as f64),
+        }
+    }
+
+    pub fn update(&mut self, now: f64) {
+        self.now = now;
+    }
+}
+
+impl Iterator for FixedGameTime {
+    type Item = GameTime;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let time_passed = self.now - self.start;
+        let total_frames = (time_passed / self.frame_duration) as u64;
+        if total_frames > self.frames_so_far {
+            self.frames_so_far += 1;
+            let synthetic_now = self.start + (self.frames_so_far as f64) * self.frame_duration;
+            Some(GameTime {
+                now: synthetic_now,
+                absolute_frame_number: (synthetic_now * 1000.0 / config().ms_per_animation_frame)
+                    as u64,
+                time_since_last_frame: self.frame_duration,
+                excess_time_offset: 0.,
+            })
+        } else {
+            None
+        }
+    }
+}
