@@ -19,10 +19,20 @@ impl Default for DebugMode {
 }
 
 impl DebugMode {
-    pub fn update(&mut self, runtime: &LevelRuntime, fps: &FpsCounter) -> Result<()> {
+    pub fn update(
+        &mut self,
+        runtime: &LevelRuntime,
+        fixed_fps: &FpsCounter,
+        render_fps: &FpsCounter,
+    ) -> Result<()> {
         self.text.clear();
 
-        writeln!(self.text, "fps: {}", fps.value())?;
+        writeln!(
+            self.text,
+            "fixed fps: {}  render fps: {}",
+            fixed_fps.value(),
+            render_fps.value()
+        )?;
 
         runtime.generate_debug_text(&mut self.text)?;
 

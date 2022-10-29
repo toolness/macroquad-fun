@@ -12,7 +12,7 @@ use input::{Buttons, InputState};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
-use time::GameTime;
+use time::FixedGameTime;
 use world::load_world;
 
 mod animator;
@@ -94,6 +94,7 @@ async fn main() {
         .expect("load_world() must succeed");
 
     let mut level_runtime = new_game(&args.start_position);
+    let config = config::config();
 
     #[cfg(target_arch = "wasm32")]
     {
@@ -102,30 +103,33 @@ async fn main() {
         //
         // (Note that native builds will have already set the screen size
         // properly via our window_conf function.)
-        let config = config::config();
         request_new_screen_size(config.screen_width, config.screen_height);
         next_frame().await;
     }
 
-    let mut time = GameTime::new(get_time());
+    let mut fixed_time = FixedGameTime::new(config.fixed_fps, get_time());
     let mut enable_debug_mode = false;
     let mut opt_debug_mode: Option<DebugMode> = None;
-    let mut fps = FpsCounter::default();
+    let mut render_fps = FpsCounter::default();
+    let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
 
     loop {
-        time.update(get_time());
-        fps.update(time.now);
+        let now = get_time();
+        fixed_time.update(now);
 
-        input_state.update(Buttons::from_macroquad());
-
-        match level_runtime.advance_one_frame(&time, &input_state) {
-            FrameResult::Ok => {}
-            FrameResult::PlayerDied => {
-                level_runtime = new_game(&args.start_position);
+        for time in fixed_time.iter_fixed_frames() {
+            input_state.update(Buttons::from_macroquad());
+            fixed_fps.update(time.now);
+            match level_runtime.advance_one_frame(&time, &input_state) {
+                FrameResult::Ok => {}
+                FrameResult::PlayerDied => {
+                    level_runtime = new_game(&args.start_position);
+                }
             }
         }
 
+        render_fps.update(now);
         level_runtime.draw();
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -140,7 +144,7 @@ async fn main() {
         if enable_debug_mode {
             let debug_mode = opt_debug_mode.get_or_insert_with(|| DebugMode::default());
             debug_mode
-                .update(&level_runtime, &fps)
+                .update(&level_runtime, &fixed_fps, &render_fps)
                 .expect("Generating debug text should work!");
             debug_mode.draw(&level_runtime);
         }
