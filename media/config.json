@@ -1,4 +1,5 @@
 {
+    "fixed_fps": 60,
     "sprite_scale": 3.0,
     "screen_width": 400,
     "screen_height": 224,

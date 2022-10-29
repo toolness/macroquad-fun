@@ -79,8 +79,6 @@ fn window_conf() -> Conf {
     }
 }
 
-const FIXED_FPS: u64 = 60;
-
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
@@ -96,6 +94,7 @@ async fn main() {
         .expect("load_world() must succeed");
 
     let mut level_runtime = new_game(&args.start_position);
+    let config = config::config();
 
     #[cfg(target_arch = "wasm32")]
     {
@@ -104,12 +103,11 @@ async fn main() {
         //
         // (Note that native builds will have already set the screen size
         // properly via our window_conf function.)
-        let config = config::config();
         request_new_screen_size(config.screen_width, config.screen_height);
         next_frame().await;
     }
 
-    let mut fixed_time = FixedGameTime::new(FIXED_FPS, get_time());
+    let mut fixed_time = FixedGameTime::new(config.fixed_fps, get_time());
     let mut enable_debug_mode = false;
     let mut opt_debug_mode: Option<DebugMode> = None;
     let mut fps = FpsCounter::default();
