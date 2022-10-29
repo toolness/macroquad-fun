@@ -1,16 +1,18 @@
 use crate::{config::config, sprite_renderer::SpriteRenderer};
 
-/// Our minimum FPS for timing purposes. Even if the system is really slow,
-/// or hiccups for some reason, this is the minimum rate at which we'll
-/// process each frame, to ensure that really weird things like tunneling
-/// don't happen. This does mean that really slow devices will appear to
+/// The maximum time we'll process between drawing frames. This prevents
+/// us from spending too long "catching up" with the time elapsed since
+/// the last frame. It also ensures resonable behavior in situations where
+/// e.g. the user puts their computer to sleep, or Macroquad's event
+/// loop takes a really long time to get back to us (see e.g.
+/// https://github.com/toolness/macroquad-fun/issues/4).
+///
+///  This does mean that really slow devices will appear to
 /// run in slow motion.
 ///
 /// (Note that if we actually want to play the game in slow motion, we can
 /// set this to a ridiculously high value!)
-const MIN_FPS: f64 = 30.0;
-
-const MAX_TIME_SINCE_LAST_FRAME: f64 = 1. / MIN_FPS;
+const MAX_TIME_BETWEEN_FRAMES: f64 = 1. / 30.;
 
 pub struct GameTime {
     pub now: f64,
@@ -33,12 +35,12 @@ impl GameTime {
         let last_frame_time = self.now;
         self.now = now - self.excess_time_offset;
         self.time_since_last_frame = self.now - last_frame_time;
-        if self.time_since_last_frame > MAX_TIME_SINCE_LAST_FRAME {
-            self.time_since_last_frame = MAX_TIME_SINCE_LAST_FRAME;
+        if self.time_since_last_frame > MAX_TIME_BETWEEN_FRAMES {
+            self.time_since_last_frame = MAX_TIME_BETWEEN_FRAMES;
 
             // Our "real" time as reported from macroquad is has now deviated from our
             // in-game concept of time, so adjust accordingly.
-            let delta = self.time_since_last_frame - MAX_TIME_SINCE_LAST_FRAME;
+            let delta = self.time_since_last_frame - MAX_TIME_BETWEEN_FRAMES;
             self.excess_time_offset += delta;
             self.now -= delta;
         }
