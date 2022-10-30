@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{cell::RefCell, io::Write, rc::Rc};
 
 use crate::input::{Buttons, InputStream};
 
@@ -10,27 +10,19 @@ struct RecordedFrame {
 
 pub struct InputRecorder<W: Write> {
     source: InputStream,
-    output: W,
+    output: Rc<RefCell<W>>,
     prev_buttons: Option<Buttons>,
     frame_number: u64,
 }
 
 impl<W: Write + 'static> InputRecorder<W> {
-    pub fn new(source: InputStream, output: W) -> InputStream {
+    pub fn new(source: InputStream, output: Rc<RefCell<W>>) -> InputStream {
         Box::new(InputRecorder {
             frame_number: 0,
             source,
             prev_buttons: None,
             output,
         })
-    }
-}
-
-impl<W: Write> Drop for InputRecorder<W> {
-    fn drop(&mut self) {
-        // TODO: It's probably not a great idea to do something that could
-        // panic during drop().
-        self.output.flush().unwrap();
     }
 }
 
@@ -54,7 +46,7 @@ impl<W: Write> Iterator for InputRecorder<W> {
                 let serialized_frame = postcard::to_slice(&frame, &mut buf).unwrap();
 
                 // Ideally we should have a separate thread that does this, to minimize latency.
-                self.output.write(&serialized_frame).unwrap();
+                self.output.borrow_mut().write(&serialized_frame).unwrap();
             }
             self.frame_number += 1;
         }
@@ -112,6 +104,8 @@ impl Iterator for InputPlayer {
 
 #[cfg(test)]
 mod tests {
+    use std::{cell::RefCell, rc::Rc};
+
     use crate::{input::Buttons, recorder::InputPlayer};
 
     use super::InputRecorder;
@@ -125,23 +119,13 @@ mod tests {
             Buttons::RIGHT,
         ];
 
-        // Ugh, I seem to have constructed the InputRecorder in a way that makes
-        // it impossible to *retrieve* the recording from memory, so we'll just
-        // use the external filesystem for now.
-        let temp_recording_filename = "__temp_recording";
-
-        let recorder = InputRecorder::new(
-            Box::new(buttons.clone().into_iter()),
-            std::fs::File::create(temp_recording_filename).unwrap(),
-        );
+        let recording = Rc::new(RefCell::new(vec![]));
+        let recorder = InputRecorder::new(Box::new(buttons.clone().into_iter()), recording.clone());
         let recorder_output: Vec<Buttons> = recorder.collect();
         assert_eq!(recorder_output, buttons);
 
-        let recording = std::fs::read(temp_recording_filename).unwrap();
-        let player = InputPlayer::new(recording);
+        let player = InputPlayer::new(recording.borrow().clone());
         let player_output: Vec<Buttons> = player.collect();
         assert_eq!(player_output, buttons);
-
-        std::fs::remove_file(temp_recording_filename).unwrap();
     }
 }
