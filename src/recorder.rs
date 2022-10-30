@@ -109,3 +109,26 @@ impl Iterator for InputPlayer {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::input::Buttons;
+
+    use super::InputRecorder;
+
+    #[test]
+    fn test_it_works() {
+        let buttons = vec![
+            Buttons::empty(),
+            Buttons::LEFT,
+            Buttons::LEFT,
+            Buttons::RIGHT,
+        ];
+        let recording = vec![];
+        let recorder = InputRecorder::new(Box::new(buttons.clone().into_iter()), recording);
+        let recorder_output: Vec<Buttons> = recorder.collect();
+        assert_eq!(recorder_output, buttons);
+
+        // TODO: Test that the recording can be played back.
+    }
+}
