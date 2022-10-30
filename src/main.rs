@@ -88,6 +88,10 @@ fn window_conf() -> Conf {
 fn create_input_stream(args: &Cli) -> InputStream {
     if let Some(filename) = &args.record {
         println!("Writing recording to '{}'.", filename);
+        // Ideally we should be keeping a reference to the output and flushing it explicitly
+        // when we're done recording, but eh, we'll just assume all filesystem operations are
+        // successful for now (the BufWriter will flush on drop, it will just silently fail
+        // if it doesn't work).
         let output = Rc::new(RefCell::new(BufWriter::new(
             std::fs::File::create(filename).expect("Unable to create recording file"),
         )));
