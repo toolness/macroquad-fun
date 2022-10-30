@@ -3,17 +3,22 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use std::{cell::RefCell, io::BufWriter, rc::Rc};
+
 use cli::Cli;
 use config::load_config;
 use debug_mode::DebugMode;
 use fps::FpsCounter;
 use game_assets::load_game_assets;
-use input::{create_macroquad_input_stream, InputState};
+use input::{create_macroquad_input_stream, InputState, InputStream};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
+use recorder::InputRecorder;
 use time::FixedGameTime;
 use world::load_world;
+
+use crate::recorder::InputPlayer;
 
 mod animator;
 mod aseprite;
@@ -42,6 +47,7 @@ mod mushroom;
 mod physics;
 mod player;
 mod push;
+mod recorder;
 mod route;
 mod running;
 mod sprite_component;
@@ -79,6 +85,30 @@ fn window_conf() -> Conf {
     }
 }
 
+fn create_input_stream(args: &Cli) -> InputStream {
+    if let Some(filename) = &args.record {
+        println!("Writing recording to '{}'.", filename);
+        // Ideally we should be keeping a reference to the output and flushing it explicitly
+        // when we're done recording, but eh, we'll just assume all filesystem operations are
+        // successful for now (the BufWriter will flush on drop, it will just silently fail
+        // if it doesn't work).
+        let output = Rc::new(RefCell::new(BufWriter::new(
+            std::fs::File::create(filename).expect("Unable to create recording file"),
+        )));
+        InputRecorder::new(create_macroquad_input_stream(), output)
+    } else if let Some(filename) = &args.playback {
+        println!("Playing back recording from '{}'.", filename);
+        Box::new(
+            InputPlayer::new(
+                std::fs::read(filename).expect("Unable to open recording file for reading"),
+            )
+            .chain(create_macroquad_input_stream()),
+        )
+    } else {
+        create_macroquad_input_stream()
+    }
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
@@ -113,7 +143,7 @@ async fn main() {
     let mut render_fps = FpsCounter::default();
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
-    let mut input_stream = create_macroquad_input_stream();
+    let mut input_stream = create_input_stream(&args);
 
     loop {
         let now = get_time();

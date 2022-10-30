@@ -2,6 +2,7 @@ use bitflags::bitflags;
 use macroquad::prelude::{is_key_down, KeyCode};
 
 bitflags! {
+    #[derive(Serialize, Deserialize)]
     pub struct Buttons: u32 {
         const LEFT = 0b00000001;
         const RIGHT = 0b00000010;
