@@ -16,6 +16,8 @@ use recorder::InputRecorder;
 use time::FixedGameTime;
 use world::load_world;
 
+use crate::recorder::InputPlayer;
+
 mod animator;
 mod aseprite;
 mod attachment;
@@ -120,6 +122,14 @@ async fn main() {
         InputRecorder::new(
             create_macroquad_input_stream(),
             std::fs::File::create(filename).expect("Unable to create recording file"),
+        )
+    } else if let Some(filename) = args.playback {
+        println!("Playing back recording from '{}'.", filename);
+        Box::new(
+            InputPlayer::new(
+                std::fs::File::open(filename).expect("Unable to open recording file for reading"),
+            )
+            .chain(create_macroquad_input_stream()),
         )
     } else {
         create_macroquad_input_stream()

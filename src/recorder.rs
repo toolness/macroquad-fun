@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{BufWriter, Write},
+    io::{BufReader, BufWriter, Write},
 };
 
 use crate::input::{Buttons, InputStream};
@@ -62,5 +62,29 @@ impl Iterator for InputRecorder {
             self.frame_number += 1;
         }
         next
+    }
+}
+
+pub struct InputPlayer {
+    input: BufReader<File>,
+    next_frame: Option<RecordedFrame>,
+}
+
+impl InputPlayer {
+    pub fn new(input: File) -> InputStream {
+        Box::new(InputPlayer {
+            input: BufReader::new(input),
+            next_frame: None,
+        })
+    }
+}
+
+impl Iterator for InputPlayer {
+    type Item = Buttons;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // TODO
+        println!("Recording playback ended.");
+        None
     }
 }
