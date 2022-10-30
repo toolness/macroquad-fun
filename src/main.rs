@@ -116,6 +116,7 @@ async fn main() {
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
     let mut input_stream = if let Some(filename) = args.record {
+        println!("Writing recording to '{}'.", filename);
         InputRecorder::new(
             create_macroquad_input_stream(),
             std::fs::File::create(filename).expect("Unable to create recording file"),
