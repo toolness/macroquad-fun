@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    io::{BufWriter, Write},
-};
+use std::io::Write;
 
 use crate::input::{Buttons, InputStream};
 
@@ -11,25 +8,25 @@ struct RecordedFrame {
     buttons: Buttons,
 }
 
-pub struct InputRecorder {
+pub struct InputRecorder<W: Write> {
     source: InputStream,
-    output: BufWriter<File>,
+    output: W,
     prev_buttons: Option<Buttons>,
     frame_number: u64,
 }
 
-impl InputRecorder {
-    pub fn new(source: InputStream, output: File) -> InputStream {
+impl<W: Write + 'static> InputRecorder<W> {
+    pub fn new(source: InputStream, output: W) -> InputStream {
         Box::new(InputRecorder {
             frame_number: 0,
             source,
             prev_buttons: None,
-            output: BufWriter::new(output),
+            output,
         })
     }
 }
 
-impl Drop for InputRecorder {
+impl<W: Write> Drop for InputRecorder<W> {
     fn drop(&mut self) {
         // TODO: It's probably not a great idea to do something that could
         // panic during drop().
@@ -37,7 +34,7 @@ impl Drop for InputRecorder {
     }
 }
 
-impl Iterator for InputRecorder {
+impl<W: Write> Iterator for InputRecorder<W> {
     type Item = Buttons;
 
     fn next(&mut self) -> Option<Self::Item> {

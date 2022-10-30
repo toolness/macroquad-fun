@@ -3,6 +3,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use std::io::BufWriter;
+
 use cli::Cli;
 use config::load_config;
 use debug_mode::DebugMode;
@@ -86,10 +88,10 @@ fn window_conf() -> Conf {
 fn create_input_stream(args: &Cli) -> InputStream {
     if let Some(filename) = &args.record {
         println!("Writing recording to '{}'.", filename);
-        InputRecorder::new(
-            create_macroquad_input_stream(),
+        let output = BufWriter::new(
             std::fs::File::create(filename).expect("Unable to create recording file"),
-        )
+        );
+        InputRecorder::new(create_macroquad_input_stream(), output)
     } else if let Some(filename) = &args.playback {
         println!("Playing back recording from '{}'.", filename);
         Box::new(
