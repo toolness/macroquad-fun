@@ -112,7 +112,7 @@ impl Iterator for InputPlayer {
 
 #[cfg(test)]
 mod tests {
-    use crate::input::Buttons;
+    use crate::{input::Buttons, recorder::InputPlayer};
 
     use super::InputRecorder;
 
@@ -124,11 +124,24 @@ mod tests {
             Buttons::LEFT,
             Buttons::RIGHT,
         ];
-        let recording = vec![];
-        let recorder = InputRecorder::new(Box::new(buttons.clone().into_iter()), recording);
+
+        // Ugh, I seem to have constructed the InputRecorder in a way that makes
+        // it impossible to *retrieve* the recording from memory, so we'll just
+        // use the external filesystem for now.
+        let temp_recording_filename = "__temp_recording";
+
+        let recorder = InputRecorder::new(
+            Box::new(buttons.clone().into_iter()),
+            std::fs::File::create(temp_recording_filename).unwrap(),
+        );
         let recorder_output: Vec<Buttons> = recorder.collect();
         assert_eq!(recorder_output, buttons);
 
-        // TODO: Test that the recording can be played back.
+        let recording = std::fs::read(temp_recording_filename).unwrap();
+        let player = InputPlayer::new(recording);
+        let player_output: Vec<Buttons> = player.collect();
+        assert_eq!(player_output, buttons);
+
+        std::fs::remove_file(temp_recording_filename).unwrap();
     }
 }
