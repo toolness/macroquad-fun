@@ -127,7 +127,7 @@ async fn main() {
         println!("Playing back recording from '{}'.", filename);
         Box::new(
             InputPlayer::new(
-                std::fs::File::open(filename).expect("Unable to open recording file for reading"),
+                std::fs::read(filename).expect("Unable to open recording file for reading"),
             )
             .chain(create_macroquad_input_stream()),
         )
