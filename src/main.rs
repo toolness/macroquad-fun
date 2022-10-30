@@ -8,7 +8,7 @@ use config::load_config;
 use debug_mode::DebugMode;
 use fps::FpsCounter;
 use game_assets::load_game_assets;
-use input::{create_macroquad_input_stream, InputState};
+use input::{create_macroquad_input_stream, InputState, InputStream};
 use level_runtime::{FrameResult, LevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
@@ -83,6 +83,26 @@ fn window_conf() -> Conf {
     }
 }
 
+fn create_input_stream(args: &Cli) -> InputStream {
+    if let Some(filename) = &args.record {
+        println!("Writing recording to '{}'.", filename);
+        InputRecorder::new(
+            create_macroquad_input_stream(),
+            std::fs::File::create(filename).expect("Unable to create recording file"),
+        )
+    } else if let Some(filename) = &args.playback {
+        println!("Playing back recording from '{}'.", filename);
+        Box::new(
+            InputPlayer::new(
+                std::fs::read(filename).expect("Unable to open recording file for reading"),
+            )
+            .chain(create_macroquad_input_stream()),
+        )
+    } else {
+        create_macroquad_input_stream()
+    }
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
@@ -117,23 +137,7 @@ async fn main() {
     let mut render_fps = FpsCounter::default();
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
-    let mut input_stream = if let Some(filename) = args.record {
-        println!("Writing recording to '{}'.", filename);
-        InputRecorder::new(
-            create_macroquad_input_stream(),
-            std::fs::File::create(filename).expect("Unable to create recording file"),
-        )
-    } else if let Some(filename) = args.playback {
-        println!("Playing back recording from '{}'.", filename);
-        Box::new(
-            InputPlayer::new(
-                std::fs::read(filename).expect("Unable to open recording file for reading"),
-            )
-            .chain(create_macroquad_input_stream()),
-        )
-    } else {
-        create_macroquad_input_stream()
-    };
+    let mut input_stream = create_input_stream(&args);
 
     loop {
         let now = get_time();
