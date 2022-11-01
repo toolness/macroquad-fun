@@ -109,6 +109,30 @@ fn create_input_stream(args: &Cli) -> InputStream {
     }
 }
 
+fn draw_pause_overlay(is_browser: bool) {
+    draw_rectangle(
+        0.,
+        0.,
+        screen_width(),
+        screen_height(),
+        color_u8!(0., 0., 0., 128.),
+    );
+    let font = &game_assets::game_assets().font;
+    let text = if is_browser {
+        "Game paused"
+    } else {
+        "Game paused (press Q to quit)"
+    };
+    let line_width = (font.char_width * text.len() as u32) as f32 * config::config().sprite_scale;
+    let line_height = font.char_height as f32 * config::config().sprite_scale;
+    font.draw_text(
+        text,
+        screen_width() / 2. - line_width / 2.,
+        screen_height() / 2. - line_height / 2.,
+        WHITE,
+    );
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
@@ -144,18 +168,21 @@ async fn main() {
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
     let mut input_stream = create_input_stream(&args);
+    let is_browser = cfg!(target_arch = "wasm32");
 
     loop {
         let now = get_time();
-        fixed_time.update(now);
+        if !fixed_time.is_paused() {
+            fixed_time.update(now);
 
-        for time in fixed_time.iter_fixed_frames() {
-            input_state.update(input_stream.next().unwrap());
-            fixed_fps.update(time.now);
-            match level_runtime.advance_one_frame(&time, &input_state) {
-                FrameResult::Ok => {}
-                FrameResult::PlayerDied => {
-                    level_runtime = new_game(&args.start_position);
+            for time in fixed_time.iter_fixed_frames() {
+                input_state.update(input_stream.next().unwrap());
+                fixed_fps.update(time.now);
+                match level_runtime.advance_one_frame(&time, &input_state) {
+                    FrameResult::Ok => {}
+                    FrameResult::PlayerDied => {
+                        level_runtime = new_game(&args.start_position);
+                    }
                 }
             }
         }
@@ -163,9 +190,8 @@ async fn main() {
         render_fps.update(now);
         level_runtime.draw();
 
-        #[cfg(not(target_arch = "wasm32"))]
         if is_key_released(KeyCode::Escape) {
-            break;
+            fixed_time.toggle_pause(now);
         }
 
         if is_key_pressed(KeyCode::G) {
@@ -178,6 +204,13 @@ async fn main() {
                 .update(&level_runtime, &fixed_fps, &render_fps)
                 .expect("Generating debug text should work!");
             debug_mode.draw(&level_runtime);
+        }
+
+        if fixed_time.is_paused() {
+            draw_pause_overlay(is_browser);
+            if !is_browser && is_key_released(KeyCode::Q) {
+                break;
+            }
         }
 
         next_frame().await;

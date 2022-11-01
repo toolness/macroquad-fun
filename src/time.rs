@@ -37,6 +37,7 @@ pub struct FixedGameTime {
     excess_time_offset: f64,
     max_time_between_frames: f64,
     ms_per_animation_frame: f64,
+    time_when_paused: Option<f64>,
 }
 
 impl FixedGameTime {
@@ -63,10 +64,27 @@ impl FixedGameTime {
             excess_time_offset: 0.,
             max_time_between_frames,
             ms_per_animation_frame,
+            time_when_paused: None,
         }
     }
 
+    pub fn toggle_pause(&mut self, now: f64) {
+        if let Some(time_when_paused) = self.time_when_paused {
+            self.excess_time_offset += now - time_when_paused;
+            self.time_when_paused = None;
+        } else {
+            self.time_when_paused = Some(now);
+        }
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.time_when_paused.is_some()
+    }
+
     pub fn update(&mut self, now: f64) {
+        if self.is_paused() {
+            return;
+        }
         let last_frame_time = self.now;
         self.now = now - self.excess_time_offset;
         let time_since_last_frame = self.now - last_frame_time;
@@ -161,6 +179,19 @@ mod tests {
                     time_since_last_frame: 1.0
                 }
             ]
+        );
+        fixed.toggle_pause(4.1);
+        assert_eq!(get_frames(&mut fixed), vec![]);
+        fixed.toggle_pause(5.);
+        assert_eq!(get_frames(&mut fixed), vec![]);
+        fixed.update(5.9);
+        assert_eq!(
+            get_frames(&mut fixed),
+            vec![GameTime {
+                now: 5.0,
+                absolute_frame_number: 50,
+                time_since_last_frame: 1.0
+            }]
         );
     }
 }
