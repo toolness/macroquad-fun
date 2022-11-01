@@ -19,6 +19,13 @@ pub struct BitmapFont {
 }
 
 impl BitmapFont {
+    pub fn draw_centered_text<T: AsRef<str>>(&self, text: T, x: f32, y: f32, color: Color) {
+        let scale = config().sprite_scale;
+        let line_width = (self.char_width * text.as_ref().len() as u32) as f32 * scale;
+        let line_height = self.char_height as f32 * scale;
+        self.draw_text(text, x - line_width / 2., y - line_height / 2., color);
+    }
+
     pub fn draw_text<T: AsRef<str>>(&self, text: T, x: f32, y: f32, color: Color) {
         let scale = config().sprite_scale;
         let scaled_size = Vec2::new(

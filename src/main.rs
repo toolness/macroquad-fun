@@ -123,14 +123,7 @@ fn draw_pause_overlay(is_browser: bool) {
     } else {
         "Game paused (press Q to quit)"
     };
-    let line_width = (font.char_width * text.len() as u32) as f32 * config::config().sprite_scale;
-    let line_height = font.char_height as f32 * config::config().sprite_scale;
-    font.draw_text(
-        text,
-        screen_width() / 2. - line_width / 2.,
-        screen_height() / 2. - line_height / 2.,
-        WHITE,
-    );
+    font.draw_centered_text(text, screen_width() / 2., screen_height() / 2., WHITE);
 }
 
 #[macroquad::main(window_conf)]
