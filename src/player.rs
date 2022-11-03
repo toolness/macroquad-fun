@@ -17,7 +17,7 @@ use crate::{
     z_index::ZIndexComponent,
 };
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct PlayerComponent {
     is_in_air: bool,
     coyote_time_start: Option<f64>,

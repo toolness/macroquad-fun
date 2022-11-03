@@ -16,7 +16,7 @@ use crate::{
 /// collision resolution, start logging debug information.
 const LOTS_OF_DISPLACEMENTS: u32 = 20;
 
-#[derive(Default, PartialEq)]
+#[derive(Default, PartialEq, Clone, Copy)]
 pub enum PhysicsCollisionBehavior {
     #[default]
     /// This effectively disables collisions for the entity.
@@ -32,7 +32,7 @@ pub enum PhysicsCollisionBehavior {
     ReverseDirectionXY,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct PhysicsComponent {
     /// The current velocity of the entity.
     pub velocity: Vec2,
@@ -69,7 +69,7 @@ pub struct PhysicsComponent {
     pub latest_frame: PhysicsFrameResults,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct PhysicsFrameResults {
     pub is_on_any_surface: bool,
     pub is_on_moving_surface: bool,

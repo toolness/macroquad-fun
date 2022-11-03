@@ -2,6 +2,7 @@ use macroquad::prelude::clamp;
 
 use crate::{config::config, time::GameTime};
 
+#[derive(Clone, Copy)]
 pub struct Animator {
     last_frame: u32,
     is_reversed: bool,

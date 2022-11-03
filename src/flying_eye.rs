@@ -10,6 +10,7 @@ use crate::{
     time::GameTime,
 };
 
+#[derive(Clone, Copy)]
 pub struct FlyingEyeComponent();
 
 pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {

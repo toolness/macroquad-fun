@@ -3,7 +3,7 @@ use crate::{
     route::try_to_start_route,
 };
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct SwitchComponent {
     pub is_switched_on: bool,
     pub trigger_entity: Option<u64>,

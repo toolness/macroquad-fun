@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use crate::{entity::EntityMap, level::Level};
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct ZIndexComponent {
     value: i32,
 }

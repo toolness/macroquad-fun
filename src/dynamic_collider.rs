@@ -7,7 +7,7 @@ use crate::{
     entity::{Entity, EntityMap},
 };
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct RelativeCollider {
     pub rect: Rect,
     pub collision_flags: CollisionFlags,
@@ -17,7 +17,7 @@ pub struct RelativeCollider {
     pub enable_left: bool,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct DynamicColliderComponent {
     relative_collider: RelativeCollider,
 }

@@ -45,7 +45,7 @@ impl AttachmentSystem {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct AttachmentComponent {
     attached_to_entity_id: Option<u64>,
     detached_from_entity_id: Option<u64>,
@@ -53,6 +53,7 @@ pub struct AttachmentComponent {
     pub should_attach: bool,
 }
 
+#[derive(Copy, Clone)]
 pub struct AttachableComponent();
 
 impl AttachmentComponent {

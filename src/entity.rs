@@ -16,7 +16,7 @@ use crate::{
     z_index::ZIndexComponent,
 };
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Entity {
     pub sprite: SpriteComponent,
     pub physics: PhysicsComponent,

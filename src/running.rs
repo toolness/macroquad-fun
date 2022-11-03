@@ -2,6 +2,7 @@ use macroquad::prelude::clamp;
 
 use crate::config::config;
 
+#[derive(Copy, Clone)]
 pub struct RunComponent {
     run_duration: f64,
     x_direction: f32,
