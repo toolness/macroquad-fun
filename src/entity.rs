@@ -43,6 +43,7 @@ impl Display for Entity {
 
 pub const PLAYER_ENTITY_ID: u64 = 0;
 
+#[derive(Clone)]
 pub struct EntityMap {
     map: HashMap<u64, Entity>,
 }

@@ -28,6 +28,19 @@ impl DynamicColliderComponent {
     }
 }
 
+#[derive(Clone)]
+pub struct SavedDynamicColliderSystem {
+    colliders: HashMap<u64, Collider>,
+}
+
+impl SavedDynamicColliderSystem {
+    pub fn with_capacity(capacity: usize) -> Self {
+        SavedDynamicColliderSystem {
+            colliders: HashMap::with_capacity(capacity),
+        }
+    }
+}
+
 pub struct DynamicColliderSystem {
     /// Computed values of all the dynamic colliders that currently exist.
     /// This is done partly, for efficiency, but also because it's hard
@@ -41,10 +54,17 @@ pub struct DynamicColliderSystem {
 }
 
 impl DynamicColliderSystem {
-    pub fn with_capacity(capacity: usize) -> Self {
+    pub fn from_saved(saved: SavedDynamicColliderSystem) -> Self {
+        let capacity = saved.colliders.capacity();
         DynamicColliderSystem {
-            colliders: HashMap::with_capacity(capacity),
+            colliders: saved.colliders,
             colliders_to_remove: Vec::with_capacity(capacity),
+        }
+    }
+
+    pub fn save(&self) -> SavedDynamicColliderSystem {
+        SavedDynamicColliderSystem {
+            colliders: self.colliders.clone(),
         }
     }
 
