@@ -161,7 +161,7 @@ async fn main() {
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
     let mut input_stream = create_input_stream(&args);
-    let mut saved_state: Option<SavedLevelRuntime> = None;
+    let mut saved_state: Option<(SavedLevelRuntime, FixedGameTime)> = None;
     let is_browser = cfg!(target_arch = "wasm32");
 
     loop {
@@ -193,14 +193,17 @@ async fn main() {
         }
 
         if is_key_released(KeyCode::F5) {
-            saved_state = Some(level_runtime.save());
+            saved_state = Some((level_runtime.save(), fixed_time.create_paused_clone()));
             println!("Saved state.");
         }
 
         if is_key_released(KeyCode::F9) {
-            if let Some(state) = saved_state.as_ref() {
-                level_runtime = LevelRuntime::from_saved(state.clone());
+            if let Some((saved_level_runtime, paused_time)) = saved_state.as_ref() {
+                level_runtime = LevelRuntime::from_saved(saved_level_runtime.clone());
                 input_state = InputState::default();
+                let mut new_fixed_time = paused_time.clone();
+                new_fixed_time.set_paused(fixed_time.is_paused(), now);
+                fixed_time = new_fixed_time;
                 println!("Loaded state.");
             } else {
                 println!("No saved state exists!");
