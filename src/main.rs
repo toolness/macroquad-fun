@@ -200,6 +200,7 @@ async fn main() {
         if is_key_released(KeyCode::F9) {
             if let Some(state) = saved_state.as_ref() {
                 level_runtime = LevelRuntime::from_saved(state.clone());
+                input_state = InputState::default();
                 println!("Loaded state.");
             } else {
                 println!("No saved state exists!");
