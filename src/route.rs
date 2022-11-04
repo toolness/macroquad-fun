@@ -10,6 +10,7 @@ use crate::{
     sprite_component::SpriteComponent,
 };
 
+#[derive(Clone, Copy)]
 pub struct RouteComponent {
     pub start_point: Vec2,
     pub end_point: Vec2,

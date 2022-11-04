@@ -5,7 +5,7 @@ use macroquad::{
 
 use crate::{drawing::draw_crosshair, entity::Entity, level::Level, math_util::floor_rect};
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Camera {
     current_rect: Rect,
     target: Vec2,

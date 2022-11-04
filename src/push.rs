@@ -1,6 +1,6 @@
 use crate::entity::{EntityMap, EntityProcessor};
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct PushComponent {
     /// Whether the entity can push other entities.
     pub can_push: bool,

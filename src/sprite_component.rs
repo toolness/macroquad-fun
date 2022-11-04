@@ -12,7 +12,7 @@ use crate::{
     time::GameTime,
 };
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub enum Renderer {
     #[default]
     None,
@@ -21,7 +21,7 @@ pub enum Renderer {
     EntityTiles(Rect),
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
@@ -33,7 +33,7 @@ pub struct SpriteComponent {
     pub current_frame_number: u32,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 /// Rendering/bounding box behavior of a sprite component when it's facing
 /// left (by default, we assume it's facing right).
 ///

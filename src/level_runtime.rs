@@ -4,7 +4,7 @@ use std::fmt::Write;
 use crate::attachment::AttachmentSystem;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
-use crate::dynamic_collider::DynamicColliderSystem;
+use crate::dynamic_collider::{DynamicColliderSystem, SavedDynamicColliderSystem};
 use crate::entity::{Entity, EntityMap, EntityProcessor};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
@@ -36,6 +36,15 @@ pub enum FrameResult {
     PlayerDied,
 }
 
+#[derive(Clone)]
+pub struct SavedLevelRuntime {
+    level: &'static Level,
+    entities: EntityMap,
+    camera: Camera,
+    next_id: u64,
+    dynamic_collider_system: SavedDynamicColliderSystem,
+}
+
 pub struct LevelRuntime {
     level: &'static Level,
     entities: EntityMap,
@@ -52,11 +61,23 @@ pub struct LevelRuntime {
 
 impl LevelRuntime {
     pub fn new(player: Entity, level: &'static Level) -> Self {
-        let mut instance = LevelRuntime {
+        let mut instance = Self::from_saved(SavedLevelRuntime {
             level,
             entities: EntityMap::new_ex(player, ENTITY_CAPACITY),
-            next_id: 1,
             camera: Camera::new(),
+            next_id: 1,
+            dynamic_collider_system: SavedDynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
+        });
+        instance.change_level(&level);
+        instance
+    }
+
+    pub fn from_saved(saved: SavedLevelRuntime) -> Self {
+        LevelRuntime {
+            level: saved.level,
+            entities: saved.entities,
+            next_id: saved.next_id,
+            camera: saved.camera,
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
             route_system: RouteSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
@@ -70,11 +91,21 @@ impl LevelRuntime {
             switch_system: SwitchSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
-            dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
+            dynamic_collider_system: DynamicColliderSystem::from_saved(
+                saved.dynamic_collider_system,
+            ),
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
-        };
-        instance.change_level(&level);
-        instance
+        }
+    }
+
+    pub fn save(&self) -> SavedLevelRuntime {
+        SavedLevelRuntime {
+            level: self.level,
+            entities: self.entities.clone(),
+            camera: self.camera,
+            next_id: self.next_id,
+            dynamic_collider_system: self.dynamic_collider_system.save(),
+        }
     }
 
     fn change_level(&mut self, level: &'static Level) {

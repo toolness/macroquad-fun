@@ -29,6 +29,7 @@ impl GameTime {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct FixedGameTime {
     now: f64,
     frames_so_far: u64,
@@ -68,12 +69,38 @@ impl FixedGameTime {
         }
     }
 
-    pub fn toggle_pause(&mut self, now: f64) {
+    pub fn create_paused_clone(&self) -> Self {
+        let mut clone = self.clone();
+        clone.pause();
+        clone
+    }
+
+    pub fn pause(&mut self) {
+        if !self.is_paused() {
+            self.time_when_paused = Some(self.now);
+        }
+    }
+
+    pub fn unpause(&mut self, now: f64) {
         if let Some(time_when_paused) = self.time_when_paused {
             self.excess_time_offset += now - time_when_paused;
             self.time_when_paused = None;
+        }
+    }
+
+    pub fn set_paused(&mut self, paused: bool, now: f64) {
+        if paused {
+            self.pause();
         } else {
-            self.time_when_paused = Some(now);
+            self.unpause(now);
+        }
+    }
+
+    pub fn toggle_pause(&mut self, now: f64) {
+        if self.is_paused() {
+            self.unpause(now);
+        } else {
+            self.pause();
         }
     }
 

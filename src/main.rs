@@ -11,7 +11,7 @@ use debug_mode::DebugMode;
 use fps::FpsCounter;
 use game_assets::load_game_assets;
 use input::{create_macroquad_input_stream, InputState, InputStream};
-use level_runtime::{FrameResult, LevelRuntime};
+use level_runtime::{FrameResult, LevelRuntime, SavedLevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
 use recorder::InputRecorder;
@@ -161,6 +161,7 @@ async fn main() {
     let mut fixed_fps = FpsCounter::default();
     let mut input_state = InputState::default();
     let mut input_stream = create_input_stream(&args);
+    let mut saved_state: Option<(SavedLevelRuntime, FixedGameTime)> = None;
     let is_browser = cfg!(target_arch = "wasm32");
 
     loop {
@@ -189,6 +190,24 @@ async fn main() {
 
         if is_key_pressed(KeyCode::G) {
             enable_debug_mode = !enable_debug_mode;
+        }
+
+        if is_key_released(KeyCode::F5) {
+            saved_state = Some((level_runtime.save(), fixed_time.create_paused_clone()));
+            println!("Saved state.");
+        }
+
+        if is_key_released(KeyCode::F9) {
+            if let Some((saved_level_runtime, paused_time)) = saved_state.as_ref() {
+                level_runtime = LevelRuntime::from_saved(saved_level_runtime.clone());
+                input_state = InputState::default();
+                let mut new_fixed_time = paused_time.clone();
+                new_fixed_time.set_paused(fixed_time.is_paused(), now);
+                fixed_time = new_fixed_time;
+                println!("Loaded state.");
+            } else {
+                println!("No saved state exists!");
+            }
         }
 
         if enable_debug_mode {

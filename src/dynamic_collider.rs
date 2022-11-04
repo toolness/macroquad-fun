@@ -7,7 +7,7 @@ use crate::{
     entity::{Entity, EntityMap},
 };
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct RelativeCollider {
     pub rect: Rect,
     pub collision_flags: CollisionFlags,
@@ -17,7 +17,7 @@ pub struct RelativeCollider {
     pub enable_left: bool,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct DynamicColliderComponent {
     relative_collider: RelativeCollider,
 }
@@ -25,6 +25,19 @@ pub struct DynamicColliderComponent {
 impl DynamicColliderComponent {
     pub fn new(relative_collider: RelativeCollider) -> Self {
         DynamicColliderComponent { relative_collider }
+    }
+}
+
+#[derive(Clone)]
+pub struct SavedDynamicColliderSystem {
+    colliders: HashMap<u64, Collider>,
+}
+
+impl SavedDynamicColliderSystem {
+    pub fn with_capacity(capacity: usize) -> Self {
+        SavedDynamicColliderSystem {
+            colliders: HashMap::with_capacity(capacity),
+        }
     }
 }
 
@@ -41,10 +54,17 @@ pub struct DynamicColliderSystem {
 }
 
 impl DynamicColliderSystem {
-    pub fn with_capacity(capacity: usize) -> Self {
+    pub fn from_saved(saved: SavedDynamicColliderSystem) -> Self {
+        let capacity = saved.colliders.capacity();
         DynamicColliderSystem {
-            colliders: HashMap::with_capacity(capacity),
+            colliders: saved.colliders,
             colliders_to_remove: Vec::with_capacity(capacity),
+        }
+    }
+
+    pub fn save(&self) -> SavedDynamicColliderSystem {
+        SavedDynamicColliderSystem {
+            colliders: self.colliders.clone(),
         }
     }
 

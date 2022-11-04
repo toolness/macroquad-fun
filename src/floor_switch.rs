@@ -9,6 +9,7 @@ use crate::{
     switch::SwitchComponent,
 };
 
+#[derive(Clone, Copy)]
 pub struct FloorSwitchComponent();
 
 pub fn create_floor_switch(start_rect: Rect, trigger_entity: Option<u64>) -> Entity {

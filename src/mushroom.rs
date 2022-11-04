@@ -11,10 +11,12 @@ use crate::{
     time::GameTime,
 };
 
+#[derive(Clone, Copy)]
 pub struct MushroomComponent {
     state: MushroomState,
 }
 
+#[derive(Clone, Copy)]
 pub enum MushroomState {
     Dead,
     Rezzing(Animator),
