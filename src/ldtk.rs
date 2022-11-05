@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::Vec2;
 use serde::{Deserialize, Deserializer};
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 pub struct Coordinate {
@@ -125,7 +126,7 @@ pub struct EntityInstance {
     pub height: i64,
 
     /// Unique instance identifier
-    pub iid: String,
+    pub iid: Uuid,
 
     /// Pixel coordinates (`[x,y]` format) in current level coordinate space. Don't forget
     /// optional layer offsets, if they exist!
@@ -241,7 +242,7 @@ impl TryFrom<FieldInstance> for Vec2 {
 #[derive(PartialEq, Deserialize)]
 pub struct EntityRef {
     #[serde(rename = "entityIid")]
-    pub iid: String,
+    pub iid: Uuid,
 }
 
 impl TryFrom<FieldInstance> for Option<EntityRef> {

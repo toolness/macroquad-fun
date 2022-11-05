@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
+use uuid::Uuid;
 
 use crate::{
     collision::{Collider, CollisionFlags},
@@ -109,7 +110,7 @@ pub struct Entity {
     pub rect: Rect,
 
     /// The entity's Instance Identifier (from LDtk).
-    pub iid: String,
+    pub iid: Uuid,
 }
 
 #[derive(PartialEq)]
