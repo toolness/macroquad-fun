@@ -19,6 +19,7 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
             relative_bbox: game_assets().flying_eye.flight_bbox,
             renderer: Renderer::Sprite(&game_assets().flying_eye.flight),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
+            material: Some(game_assets().replace_color_material),
             ..Default::default()
         }
         .at_top_left(&start_rect),

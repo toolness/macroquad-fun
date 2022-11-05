@@ -35,6 +35,7 @@ pub struct GameAssets {
     pub tileset: Texture2D,
     pub font: BitmapFont,
     pub crt_material: Material,
+    pub replace_color_material: Material,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -101,6 +102,7 @@ pub async fn load_game_assets() -> Result<()> {
             chars_per_line: 16,
         },
         crt_material: load_shader("crt").await?,
+        replace_color_material: load_shader("replace_color").await?,
     };
 
     unsafe {
