@@ -267,6 +267,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+ "uuid",
 ]
 
 [[package]]
@@ -507,6 +508,15 @@ name = "unicode-ident"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4f5b37a154999a8f3f98cc23a628d850e154479cd94decf3414696e12e31aaf"
+
+[[package]]
+name = "uuid"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "feb41e78f93363bb2df8b0e86a2ca30eed7806ea16ea0c790d757cf93f79be83"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "version_check"

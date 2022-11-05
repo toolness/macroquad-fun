@@ -16,7 +16,7 @@ use macroquad::prelude::*;
 use player::create_player;
 use recorder::InputRecorder;
 use time::FixedGameTime;
-use world::load_world;
+use world::World;
 
 use crate::recorder::InputPlayer;
 
@@ -136,11 +136,13 @@ async fn main() {
     load_game_assets()
         .await
         .expect("load_game_sprites() must succeed");
-    load_world("media/world.ldtk")
-        .await
-        .expect("load_world() must succeed");
+    let world = Rc::new(
+        World::load("media/world.ldtk")
+            .await
+            .expect("World::load() must succeed"),
+    );
 
-    let mut level_runtime = new_game(&args.start_position);
+    let mut level_runtime = new_game(&args.start_position, world.clone());
     let config = config::config();
 
     #[cfg(target_arch = "wasm32")]
@@ -175,7 +177,7 @@ async fn main() {
                 match level_runtime.advance_one_frame(&time, &input_state) {
                     FrameResult::Ok => {}
                     FrameResult::PlayerDied => {
-                        level_runtime = new_game(&args.start_position);
+                        level_runtime = new_game(&args.start_position, world.clone());
                     }
                 }
             }
@@ -229,10 +231,10 @@ async fn main() {
     }
 }
 
-fn new_game(start_position: &str) -> LevelRuntime {
-    let (level_start, player_start) = world::world().player_start(start_position).expect(&format!(
+fn new_game(start_position: &str, world: Rc<World>) -> LevelRuntime {
+    let (level_start, player_start) = world.player_start(start_position).expect(&format!(
         "World does not define a PlayerStart entity called '{}'!",
         start_position
     ));
-    LevelRuntime::new(create_player(player_start, "PLAYER"), level_start)
+    LevelRuntime::new(create_player(player_start, "PLAYER"), level_start, world)
 }

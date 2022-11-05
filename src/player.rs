@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
@@ -13,7 +15,7 @@ use crate::{
     sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
     sprite_renderer::SpriteRenderer,
     time::GameTime,
-    world::world,
+    world::World,
     z_index::ZIndexComponent,
 };
 
@@ -24,7 +26,7 @@ pub struct PlayerComponent {
     run_direction: f32,
 }
 
-pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
+pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
     Entity {
         sprite: SpriteComponent {
             relative_bbox: game_assets().huntress.idle_bbox,
@@ -35,7 +37,7 @@ pub fn create_player(start_rect: Rect, iid: &'static str) -> Entity {
         player: Some(PlayerComponent {
             ..Default::default()
         }),
-        iid: Some(iid),
+        name_for_debugging: Some(name_for_debugging),
         run: Some(RunComponent::new()),
         attachment: Some(Default::default()),
         physics: PhysicsComponent {
@@ -187,8 +189,8 @@ pub fn did_fall_off_level(sprite: &SpriteComponent, level: &Level) -> bool {
 pub fn should_switch_levels(
     sprite: &SpriteComponent,
     level: &Level,
-) -> Option<(&'static Level, Vec2)> {
-    let world = world();
+    world: &World,
+) -> Option<(Rc<Level>, Vec2)> {
     if !level.contains_majority_of(&sprite.bbox()) {
         let world_pos = level.to_world_coords(&sprite.pos);
         let result = world.find_level_containing_majority_of(&world_pos, &sprite.relative_bbox);

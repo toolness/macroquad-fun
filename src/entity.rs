@@ -1,5 +1,7 @@
 use std::{collections::HashMap, fmt::Display};
 
+use uuid::Uuid;
+
 use crate::{
     attachment::{AttachableComponent, AttachmentComponent},
     dynamic_collider::DynamicColliderComponent,
@@ -32,12 +34,19 @@ pub struct Entity {
     pub push: Option<PushComponent>,
     pub switch: Option<SwitchComponent>,
     pub floor_switch: Option<FloorSwitchComponent>,
-    pub iid: Option<&'static str>,
+    pub iid: Option<Uuid>,
+    pub name_for_debugging: Option<&'static str>,
 }
 
 impl Display for Entity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.iid.unwrap_or("UNKNOWN")))
+        if let Some(iid) = self.iid {
+            iid.fmt(f)
+        } else if let Some(name) = self.name_for_debugging {
+            name.fmt(f)
+        } else {
+            f.write_str("UNKNOWN")
+        }
     }
 }
 

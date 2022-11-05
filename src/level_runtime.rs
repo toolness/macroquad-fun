@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::Write;
+use std::rc::Rc;
 
 use crate::attachment::AttachmentSystem;
 use crate::crate_entity::create_crate;
@@ -21,10 +22,12 @@ use crate::route::{draw_route_debug_targets, RouteSystem};
 use crate::switch::SwitchSystem;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
+use crate::world::World;
 use crate::z_index::ZIndexedDrawingSystem;
 use crate::{camera::Camera, level::EntityKind};
 use anyhow::Result;
 use macroquad::prelude::{PURPLE, WHITE};
+use uuid::Uuid;
 
 use crate::level::Level;
 
@@ -38,7 +41,8 @@ pub enum FrameResult {
 
 #[derive(Clone)]
 pub struct SavedLevelRuntime {
-    level: &'static Level,
+    level: Rc<Level>,
+    world: Rc<World>,
     entities: EntityMap,
     camera: Camera,
     next_id: u64,
@@ -46,7 +50,8 @@ pub struct SavedLevelRuntime {
 }
 
 pub struct LevelRuntime {
-    level: &'static Level,
+    level: Rc<Level>,
+    world: Rc<World>,
     entities: EntityMap,
     camera: Camera,
     next_id: u64,
@@ -60,21 +65,23 @@ pub struct LevelRuntime {
 }
 
 impl LevelRuntime {
-    pub fn new(player: Entity, level: &'static Level) -> Self {
+    pub fn new(player: Entity, level: Rc<Level>, world: Rc<World>) -> Self {
         let mut instance = Self::from_saved(SavedLevelRuntime {
-            level,
+            level: level.clone(),
+            world,
             entities: EntityMap::new_ex(player, ENTITY_CAPACITY),
             camera: Camera::new(),
             next_id: 1,
             dynamic_collider_system: SavedDynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
         });
-        instance.change_level(&level);
+        instance.change_level(level);
         instance
     }
 
     pub fn from_saved(saved: SavedLevelRuntime) -> Self {
         LevelRuntime {
             level: saved.level,
+            world: saved.world,
             entities: saved.entities,
             next_id: saved.next_id,
             camera: saved.camera,
@@ -100,7 +107,8 @@ impl LevelRuntime {
 
     pub fn save(&self) -> SavedLevelRuntime {
         SavedLevelRuntime {
-            level: self.level,
+            level: self.level.clone(),
+            world: self.world.clone(),
             entities: self.entities.clone(),
             camera: self.camera,
             next_id: self.next_id,
@@ -108,7 +116,7 @@ impl LevelRuntime {
         }
     }
 
-    fn change_level(&mut self, level: &'static Level) {
+    fn change_level(&mut self, level: Rc<Level>) {
         self.level = level;
         self.entities.clear_all_except_player();
         self.spawn_entities();
@@ -118,16 +126,17 @@ impl LevelRuntime {
         // Create a mapping from LDtk Entity IIDs to our runtime entity IDs. We'll do this
         // up-front so we can convert EntityRefs in our Entities into entity IDs at spawn time,
         // rather than having to do it every frame.
-        let mut iid_id_map: HashMap<&str, u64> = HashMap::with_capacity(self.level.entities.len());
-        for entity in self.level.entities.iter() {
-            let result = iid_id_map.insert(&entity.iid, self.new_id());
+        let mut iid_id_map: HashMap<Uuid, u64> = HashMap::with_capacity(self.level.entities.len());
+        let level = self.level.clone();
+        for entity in level.entities.iter() {
+            let result = iid_id_map.insert(entity.iid, self.new_id());
             assert!(
                 result.is_none(),
                 "All level entities should have unique IIDs"
             );
         }
 
-        for entity in self.level.entities.iter() {
+        for entity in level.entities.iter() {
             let opt_instance = match &entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
@@ -135,16 +144,13 @@ impl LevelRuntime {
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
                     entity.rect,
-                    trigger_entity_iid
-                        .as_ref()
-                        .map(|s| iid_id_map[s.iid.as_str()]),
+                    trigger_entity_iid.as_ref().map(|s| iid_id_map[&s.iid]),
                 )),
                 EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
             };
             if let Some(mut instance) = opt_instance {
-                instance.iid = Some(&entity.iid);
-                self.entities
-                    .insert(iid_id_map[entity.iid.as_str()], instance);
+                instance.iid = Some(entity.iid);
+                self.entities.insert(iid_id_map[&entity.iid], instance);
             }
         }
     }
@@ -157,7 +163,9 @@ impl LevelRuntime {
 
     fn maybe_switch_level(&mut self) -> bool {
         let player = self.entities.player_mut();
-        if let Some((new_level, new_pos)) = should_switch_levels(&player.sprite, &self.level) {
+        if let Some((new_level, new_pos)) =
+            should_switch_levels(&player.sprite, &self.level, &self.world)
+        {
             teleport_entity(player, new_pos);
             self.change_level(new_level);
             true
@@ -226,7 +234,7 @@ impl LevelRuntime {
 
     pub fn draw_debug_layer(&self) {
         self.camera.with_active(|| {
-            let level = self.level;
+            let level = &self.level;
             for collider in level.iter_colliders(&level.pixel_bounds()) {
                 collider.draw_debug_rect(PURPLE);
             }

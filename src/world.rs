@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use macroquad::prelude::{load_string, Rect, Vec2};
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     ldtk,
@@ -11,7 +11,7 @@ use crate::{
 const EXPECTED_JSON_VERSION: &str = "1.1.3";
 
 pub struct World {
-    levels: HashMap<String, Level>,
+    levels: HashMap<String, Rc<Level>>,
 }
 
 impl World {
@@ -29,18 +29,18 @@ impl World {
 
         for ldtk_level in world.levels {
             let level = Level::from_ldtk(ldtk_level)?;
-            levels.insert(level.identifier.clone(), level);
+            levels.insert(level.identifier.clone(), Rc::new(level));
         }
 
         Ok(World { levels })
     }
 
-    pub fn player_start(&self, name: &str) -> Option<(&Level, Rect)> {
+    pub fn player_start(&self, name: &str) -> Option<(Rc<Level>, Rect)> {
         for level in self.levels.values() {
             for entity in level.entities.iter() {
                 match &entity.kind {
                     EntityKind::PlayerStart(entity_name) if entity_name == name => {
-                        return Some((&level, entity.rect));
+                        return Some((level.clone(), entity.rect));
                     }
                     _ => {}
                 }
@@ -57,33 +57,15 @@ impl World {
         &self,
         world_pos: &Vec2,
         relative_rect: &Rect,
-    ) -> Option<(&Level, Vec2)> {
+    ) -> Option<(Rc<Level>, Vec2)> {
         for level in self.levels.values() {
             let local_pos = level.from_world_coords(&world_pos);
             let local_rect = relative_rect.offset(local_pos);
             if level.contains_majority_of(&local_rect) {
-                return Some((level, local_pos));
+                return Some((level.clone(), local_pos));
             }
         }
 
         None
     }
-}
-
-static mut WORLD: Option<World> = None;
-
-pub fn world() -> &'static World {
-    unsafe {
-        WORLD
-            .as_ref()
-            .expect("load_world() was not called or did not finish")
-    }
-}
-
-pub async fn load_world(path: &str) -> Result<()> {
-    unsafe {
-        WORLD = Some(World::load(path).await?);
-    }
-
-    Ok(())
 }
