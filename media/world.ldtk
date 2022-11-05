@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 27,
+	"nextUid": 29,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -518,6 +518,35 @@
 					"allowedRefs": "OnlySame",
 					"allowedRefTags": [],
 					"tilesetUid": null
+				},
+				{
+					"identifier": "renderer",
+					"__type": "LocalEnum.Renderer",
+					"uid": 28,
+					"type": "F_Enum(27)",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayPos": "Above",
+					"editorAlwaysShow": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefTags": [],
+					"tilesetUid": null
 				}
 			]
 		},
@@ -649,7 +678,7 @@
 			"savedSelections": [],
 			"cachedPixelData": { "opaqueTiles": "11", "averageColors": "f878f333" }
 		}
-	], "enums": [], "externalEnums": [], "levelFields": [] },
+	], "enums": [{ "identifier": "Renderer", "uid": 27, "values": [ { "id": "EntityTiles", "tileId": null, "color": 0, "__tileSrcRect": null }, { "id": "SolidRectangle", "tileId": null, "color": 0, "__tileSrcRect": null } ], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }], "externalEnums": [], "levelFields": [] },
 	"levels": [
 		{
 			"identifier": "Level_0",
@@ -819,7 +848,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "2da8a410-2a00-11ed-973b-2326220d2d58"
+								"worldIid": "bf265b20-5110-11ed-83a8-4f2daf050271"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -849,6 +878,10 @@
 								{ "__identifier": "stop_when_blocked", "__value": true, "__type": "Bool", "__tile": null, "defUid": 26, "realEditorValues": [{
 									"id": "V_Bool",
 									"params": [ true ]
+								}] },
+								{ "__identifier": "renderer", "__value": "EntityTiles", "__type": "LocalEnum.Renderer", "__tile": null, "defUid": 28, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["EntityTiles"]
 								}] }
 							]
 						}
@@ -1962,7 +1995,11 @@
 									"id": "V_Bool",
 									"params": [ true ]
 								}] },
-								{ "__identifier": "stop_when_blocked", "__value": false, "__type": "Bool", "__tile": null, "defUid": 26, "realEditorValues": [] }
+								{ "__identifier": "stop_when_blocked", "__value": false, "__type": "Bool", "__tile": null, "defUid": 26, "realEditorValues": [] },
+								{ "__identifier": "renderer", "__value": "EntityTiles", "__type": "LocalEnum.Renderer", "__tile": null, "defUid": 28, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["EntityTiles"]
+								}] }
 							]
 						},
 						{

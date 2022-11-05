@@ -1,11 +1,11 @@
-use macroquad::prelude::Rect;
+use macroquad::prelude::{Rect, PINK};
 
 use crate::{
     collision::CollisionFlags,
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::Entity,
-    level::MovingPlatformArgs,
+    level::{MovingPlatformArgs, RendererType},
     physics::PhysicsComponent,
     route::RouteComponent,
     sprite_component::{Renderer, SpriteComponent},
@@ -18,7 +18,12 @@ pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> En
         sprite: SpriteComponent {
             pos: start_rect.point(),
             relative_bbox,
-            renderer: Renderer::EntityTiles(start_rect),
+            renderer: match args.renderer_type {
+                RendererType::EntityTiles => Renderer::EntityTiles(start_rect),
+                RendererType::SolidRectangle => Renderer::SolidRectangle(relative_bbox),
+            },
+            // Used only by RendererType::SolidRectangle, for prototyping
+            color: Some(PINK),
             ..Default::default()
         },
         physics: PhysicsComponent {

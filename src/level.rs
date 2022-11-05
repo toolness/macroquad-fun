@@ -5,7 +5,7 @@ use crate::{
     collision::{Collider, CollisionFlags},
     config::config,
     game_assets::game_assets,
-    ldtk::{self, field_into, EntityRef, LayerInstance, TileInstance},
+    ldtk::{self, field_into, EntityRef, FieldInstance, LayerInstance, TileInstance},
     xy_range_iterator::XYRangeIterator,
 };
 
@@ -13,6 +13,22 @@ use crate::{
 pub enum ColliderType {
     Empty,
     Solid,
+}
+
+#[derive(PartialEq, Deserialize)]
+pub enum RendererType {
+    EntityTiles,
+    SolidRectangle,
+}
+
+impl TryFrom<FieldInstance> for RendererType {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        Ok(serde_json::from_value::<RendererType>(
+            value.value_result()?,
+        )?)
+    }
 }
 
 impl ColliderType {
@@ -101,6 +117,7 @@ pub struct MovingPlatformArgs {
     pub end_point: Vec2,
     pub ping_pong: bool,
     pub stop_when_blocked: bool,
+    pub renderer_type: RendererType,
 }
 
 #[derive(PartialEq)]
@@ -168,6 +185,7 @@ impl Level {
                             end_point: field_into::<Vec2>(&mut fields, "endpoint")? * grid_size,
                             ping_pong: field_into(&mut fields, "ping_pong")?,
                             stop_when_blocked: field_into(&mut fields, "stop_when_blocked")?,
+                            renderer_type: field_into(&mut fields, "renderer")?,
                         }),
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
