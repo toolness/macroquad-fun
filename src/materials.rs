@@ -1,7 +1,7 @@
 use anyhow::Result;
 use macroquad::prelude::{
     gl_use_default_material, gl_use_material, load_material, load_string, Material, MaterialParams,
-    UniformType,
+    UniformType, Vec4,
 };
 
 use crate::{
@@ -66,8 +66,18 @@ fn use_replace_color_material(find_color: HexColor, replace_color: HexColor) {
     let materials = &game_assets().materials;
     let material = materials.replace_color_material;
     gl_use_material(material);
-    material.set_uniform("find_color", find_color.vec3());
-    material.set_uniform("replace_color", replace_color.vec3());
+    material.set_uniform("find_color_1", find_color.vec4());
+    material.set_uniform("find_color_2", Vec4::ZERO);
+    material.set_uniform("find_color_3", Vec4::ZERO);
+    material.set_uniform("find_color_4", Vec4::ZERO);
+    material.set_uniform("find_color_5", Vec4::ZERO);
+    material.set_uniform("find_color_6", Vec4::ZERO);
+    material.set_uniform("replace_color_1", replace_color.vec4());
+    material.set_uniform("replace_color_2", Vec4::ZERO);
+    material.set_uniform("replace_color_3", Vec4::ZERO);
+    material.set_uniform("replace_color_4", Vec4::ZERO);
+    material.set_uniform("replace_color_5", Vec4::ZERO);
+    material.set_uniform("replace_color_6", Vec4::ZERO);
 }
 
 pub async fn load_game_materials() -> Result<GameMaterials> {
@@ -76,8 +86,18 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
             "replace_color",
             MaterialParams {
                 uniforms: vec![
-                    ("find_color".to_string(), UniformType::Float3),
-                    ("replace_color".to_string(), UniformType::Float3),
+                    ("find_color_1".to_string(), UniformType::Float4),
+                    ("find_color_2".to_string(), UniformType::Float4),
+                    ("find_color_3".to_string(), UniformType::Float4),
+                    ("find_color_4".to_string(), UniformType::Float4),
+                    ("find_color_5".to_string(), UniformType::Float4),
+                    ("find_color_6".to_string(), UniformType::Float4),
+                    ("replace_color_1".to_string(), UniformType::Float4),
+                    ("replace_color_2".to_string(), UniformType::Float4),
+                    ("replace_color_3".to_string(), UniformType::Float4),
+                    ("replace_color_4".to_string(), UniformType::Float4),
+                    ("replace_color_5".to_string(), UniformType::Float4),
+                    ("replace_color_6".to_string(), UniformType::Float4),
                 ],
                 ..Default::default()
             },

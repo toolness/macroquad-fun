@@ -1,4 +1,4 @@
-use macroquad::prelude::{Color, Vec3};
+use macroquad::prelude::{Color, Vec4};
 
 const fn hex_to_u8(value: char) -> Option<u8> {
     match value {
@@ -78,11 +78,12 @@ pub struct HexColor {
 }
 
 impl HexColor {
-    pub fn vec3(&self) -> Vec3 {
-        Vec3::new(
+    pub fn vec4(&self) -> Vec4 {
+        Vec4::new(
             self.color[0] as f32 / 255.,
             self.color[1] as f32 / 255.,
             self.color[2] as f32 / 255.,
+            1.0,
         )
     }
 }
