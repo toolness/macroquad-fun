@@ -37,7 +37,6 @@ mod flying_eye;
 mod font;
 mod fps;
 mod game_assets;
-mod hex_color;
 mod input;
 mod ldtk;
 mod level;

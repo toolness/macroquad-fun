@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use macroquad::{
     prelude::Rect,
-    texture::{load_texture, FilterMode, Texture2D},
+    texture::{load_image, load_texture, FilterMode, Image, Texture2D},
 };
 
 use crate::{
@@ -24,6 +24,7 @@ pub struct HuntressAssets {
 pub struct FlyingEyeAssets {
     pub flight: SpriteRenderer,
     pub flight_bbox: Rect,
+    pub color_replacements: Image,
 }
 
 pub struct MushroomAssets {
@@ -31,6 +32,7 @@ pub struct MushroomAssets {
     pub idle_bbox: Rect,
     pub platform_bbox: Rect,
     pub run: SpriteRenderer,
+    pub color_replacements: Image,
 }
 
 pub struct GameAssets {
@@ -75,12 +77,14 @@ pub async fn load_game_assets() -> Result<()> {
                 &load_aseprite_slices("media/FlyingEye/Flight.json").await?,
                 "flight_bounding_box",
             )?,
+            color_replacements: load_image("media/FlyingEye/color_replacements.png").await?,
         },
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
             platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
+            color_replacements: load_image("media/Mushroom/color_replacements.png").await?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {
