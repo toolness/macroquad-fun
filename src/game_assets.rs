@@ -2,11 +2,16 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use macroquad::{
-    prelude::{load_material, load_string, Material, MaterialParams, Rect, UniformType},
+    prelude::Rect,
     texture::{load_texture, FilterMode, Texture2D},
 };
 
-use crate::{aseprite::load_aseprite_slices, font::BitmapFont, sprite_renderer::SpriteRenderer};
+use crate::{
+    aseprite::load_aseprite_slices,
+    font::BitmapFont,
+    materials::{load_game_materials, GameMaterials},
+    sprite_renderer::SpriteRenderer,
+};
 
 pub struct HuntressAssets {
     pub idle: SpriteRenderer,
@@ -34,8 +39,7 @@ pub struct GameAssets {
     pub mushroom: MushroomAssets,
     pub tileset: Texture2D,
     pub font: BitmapFont,
-    pub crt_material: Material,
-    pub replace_color_material: Material,
+    pub materials: GameMaterials,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -50,18 +54,6 @@ async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
     let texture = load_texture(path).await?;
     texture.set_filter(FilterMode::Nearest);
     Ok(texture)
-}
-
-const BASE_SHADER_PATH: &str = "media/shaders";
-
-async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
-    let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
-    let fragment_source =
-        load_string(format!("{}/{}.frag", BASE_SHADER_PATH, stem).as_str()).await?;
-
-    let material = load_material(vertex_source.as_str(), fragment_source.as_str(), params)?;
-
-    Ok(material)
 }
 
 pub async fn load_game_assets() -> Result<()> {
@@ -97,18 +89,7 @@ pub async fn load_game_assets() -> Result<()> {
             char_height: 8,
             chars_per_line: 16,
         },
-        crt_material: load_shader("crt", MaterialParams::default()).await?,
-        replace_color_material: load_shader(
-            "replace_color",
-            MaterialParams {
-                uniforms: vec![
-                    ("find_color".to_string(), UniformType::Float3),
-                    ("replace_color".to_string(), UniformType::Float3),
-                ],
-                ..Default::default()
-            },
-        )
-        .await?,
+        materials: load_game_materials().await?,
     };
 
     unsafe {
