@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use macroquad::{
-    prelude::{load_material, load_string, Material, MaterialParams, Rect},
+    prelude::{load_material, load_string, Material, MaterialParams, Rect, UniformType},
     texture::{load_texture, FilterMode, Texture2D},
 };
 
@@ -98,7 +98,17 @@ pub async fn load_game_assets() -> Result<()> {
             chars_per_line: 16,
         },
         crt_material: load_shader("crt", MaterialParams::default()).await?,
-        replace_color_material: load_shader("replace_color", MaterialParams::default()).await?,
+        replace_color_material: load_shader(
+            "replace_color",
+            MaterialParams {
+                uniforms: vec![
+                    ("find_color".to_string(), UniformType::Float3),
+                    ("replace_color".to_string(), UniformType::Float3),
+                ],
+                ..Default::default()
+            },
+        )
+        .await?,
     };
 
     unsafe {

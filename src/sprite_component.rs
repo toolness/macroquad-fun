@@ -1,6 +1,7 @@
 use macroquad::{
     prelude::{
-        gl_use_default_material, gl_use_material, Color, Material, Rect, Vec2, GREEN, PURPLE, WHITE,
+        gl_use_default_material, gl_use_material, vec3, Color, Material, Rect, Vec2, GREEN, PURPLE,
+        WHITE,
     },
     shapes::draw_rectangle,
 };
@@ -117,6 +118,9 @@ impl SpriteComponent {
     pub fn draw_current_frame(&self, level: &Level) {
         if let Some(material) = self.material {
             gl_use_material(material);
+            // TODO: We should not be hard-coding this here!
+            material.set_uniform("find_color", vec3(255., 24., 49.) / 255.);
+            material.set_uniform("replace_color", vec3(0., 0., 255.) / 255.);
         }
         match self.renderer {
             Renderer::None => {}
