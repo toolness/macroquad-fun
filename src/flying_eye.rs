@@ -15,13 +15,12 @@ use crate::{
 pub struct FlyingEyeComponent();
 
 pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
-    let assets = &game_assets().flying_eye;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: assets.flight_bbox,
-            renderer: Renderer::Sprite(&assets.flight),
+            relative_bbox: game_assets().flying_eye.flight_bbox,
+            renderer: Renderer::Sprite(&game_assets().flying_eye.flight),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
-            material: MaterialRenderer::ReplaceColor(assets.color_replacements),
+            material: MaterialRenderer::RedToBlack,
             ..Default::default()
         }
         .at_top_left(&start_rect),
