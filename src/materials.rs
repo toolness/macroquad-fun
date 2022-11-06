@@ -15,6 +15,8 @@ const LUIZ_MELO_RED: HexColor = hex_color("ff1831");
 
 const BLACK: HexColor = hex_color("000000");
 
+const WHITE: HexColor = hex_color("fbe9d1");
+
 async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
     let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
     let fragment_source =
@@ -34,6 +36,7 @@ pub enum MaterialRenderer {
     #[default]
     None,
     RedToBlack,
+    RedToWhite,
 }
 
 impl MaterialRenderer {
@@ -42,6 +45,9 @@ impl MaterialRenderer {
             MaterialRenderer::None => {}
             MaterialRenderer::RedToBlack => {
                 use_replace_color_material(LUIZ_MELO_RED, BLACK);
+            }
+            MaterialRenderer::RedToWhite => {
+                use_replace_color_material(LUIZ_MELO_RED, WHITE);
             }
         }
     }
