@@ -2,7 +2,7 @@ use anyhow::Result;
 use macroquad::{
     prelude::{
         gl_use_default_material, gl_use_material, load_material, load_string, Material,
-        MaterialParams, UniformType, Vec4,
+        MaterialParams, UniformType,
     },
     texture::Image,
 };
@@ -56,20 +56,36 @@ fn use_replace_color_material(image: &Image) {
     let materials = &game_assets().materials;
     let material = materials.replace_color_material;
     gl_use_material(material);
+    let num_replacements = (image.width / 2) as i32;
+
+    material.set_uniform("num_replacements", num_replacements);
 
     material.set_uniform("find_color_1", image.get_pixel(0, 0).to_vec());
     material.set_uniform("replace_color_1", image.get_pixel(1, 0).to_vec());
 
-    material.set_uniform("find_color_2", Vec4::ZERO);
-    material.set_uniform("find_color_3", Vec4::ZERO);
-    material.set_uniform("find_color_4", Vec4::ZERO);
-    material.set_uniform("find_color_5", Vec4::ZERO);
-    material.set_uniform("find_color_6", Vec4::ZERO);
-    material.set_uniform("replace_color_2", Vec4::ZERO);
-    material.set_uniform("replace_color_3", Vec4::ZERO);
-    material.set_uniform("replace_color_4", Vec4::ZERO);
-    material.set_uniform("replace_color_5", Vec4::ZERO);
-    material.set_uniform("replace_color_6", Vec4::ZERO);
+    if num_replacements > 1 {
+        material.set_uniform("find_color_2", image.get_pixel(2, 0).to_vec());
+        material.set_uniform("replace_color_2", image.get_pixel(3, 0).to_vec());
+        if num_replacements > 2 {
+            material.set_uniform("find_color_3", image.get_pixel(4, 0).to_vec());
+            material.set_uniform("replace_color_3", image.get_pixel(5, 0).to_vec());
+            if num_replacements > 3 {
+                material.set_uniform("find_color_4", image.get_pixel(6, 0).to_vec());
+                material.set_uniform("replace_color_4", image.get_pixel(7, 0).to_vec());
+                if num_replacements > 4 {
+                    material.set_uniform("find_color_5", image.get_pixel(8, 0).to_vec());
+                    material.set_uniform("replace_color_5", image.get_pixel(9, 0).to_vec());
+                    if num_replacements > 5 {
+                        material.set_uniform("find_color_6", image.get_pixel(10, 0).to_vec());
+                        material.set_uniform("replace_color_6", image.get_pixel(11, 0).to_vec());
+                        if num_replacements > 6 {
+                            println!("Replacement color image has more than current maximum of 6 replacements!");
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 pub async fn load_game_materials() -> Result<GameMaterials> {
@@ -78,6 +94,7 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
             "replace_color",
             MaterialParams {
                 uniforms: vec![
+                    ("num_replacements".to_string(), UniformType::Int1),
                     ("find_color_1".to_string(), UniformType::Float4),
                     ("find_color_2".to_string(), UniformType::Float4),
                     ("find_color_3".to_string(), UniformType::Float4),
