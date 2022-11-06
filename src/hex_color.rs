@@ -85,11 +85,6 @@ impl HexColor {
             self.color[2] as f32 / 255.,
         )
     }
-
-    #[allow(dead_code)]
-    pub fn color(&self) -> Color {
-        (*self).into()
-    }
 }
 
 impl Into<Color> for HexColor {
@@ -105,7 +100,7 @@ impl Into<Color> for HexColor {
 
 #[cfg(test)]
 mod tests {
-    use macroquad::prelude::BLACK;
+    use macroquad::prelude::{Color, BLACK};
 
     use crate::hex_color::{hex_color, HexColor};
 
@@ -144,7 +139,6 @@ mod tests {
     fn test_hex_color_works() {
         const BLACK_FROM_HEX: HexColor = hex_color("#000000");
         assert_eq!(BLACK_FROM_HEX, HexColor { color: [0, 0, 0] });
-        // No idea why the fuck I can't just use .into() here
-        assert_eq!(BLACK_FROM_HEX.color(), BLACK);
+        assert_eq!(<HexColor as Into<Color>>::into(BLACK_FROM_HEX), BLACK);
     }
 }
