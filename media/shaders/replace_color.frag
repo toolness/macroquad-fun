@@ -29,7 +29,7 @@ void replace_color(inout vec4 base_color, in vec4 find_color, in vec4 replace_co
     if (find_color.a != 1.0) {
         return;
     }
-    if (distance(find_color.rgb, base_color.rgb) < 0.01) {
+    if (find_color.rgb == base_color.rgb) {
         if (replace_color.a != 1.0) {
             discard;
         }
