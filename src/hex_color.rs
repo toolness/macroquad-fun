@@ -1,3 +1,5 @@
+use macroquad::prelude::{Color, Vec3};
+
 const fn hex_to_u8(value: char) -> Option<u8> {
     match value {
         '0' => Some(0),
@@ -32,7 +34,7 @@ const fn hex_duo_to_u8(first: char, second: char) -> Option<u8> {
     Some((first_u8 << 4) + second_u8)
 }
 
-const fn hex_color_to_u8_slice(value: &'static str) -> Option<[u8; 3]> {
+const fn hex_color_to_opt_u8_slice(value: &'static str) -> Option<[u8; 3]> {
     let bytes = value.as_bytes();
 
     if bytes.len() == 0 {
@@ -60,44 +62,89 @@ const fn hex_color_to_u8_slice(value: &'static str) -> Option<[u8; 3]> {
     Some([r, g, b])
 }
 
-const fn color_hex(value: &'static str) -> [u8; 3] {
-    let Some(slice) = hex_color_to_u8_slice(value) else {
+// It'd be nice to also convert this to floating point, but we can't yet:
+// https://github.com/rust-lang/rust/issues/57241
+pub const fn hex_color(value: &'static str) -> HexColor {
+    let Some(color) = hex_color_to_opt_u8_slice(value) else {
         panic!("Unable to parse hex color!");
     };
 
-    slice
+    HexColor { color }
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct HexColor {
+    color: [u8; 3],
+}
+
+impl HexColor {
+    pub fn vec3(&self) -> Vec3 {
+        Vec3::new(
+            self.color[0] as f32 / 255.,
+            self.color[1] as f32 / 255.,
+            self.color[2] as f32 / 255.,
+        )
+    }
+
+    #[allow(dead_code)]
+    pub fn color(&self) -> Color {
+        (*self).into()
+    }
+}
+
+impl Into<Color> for HexColor {
+    fn into(self) -> Color {
+        Color::new(
+            self.color[0] as f32 / 255.,
+            self.color[1] as f32 / 255.,
+            self.color[2] as f32 / 255.,
+            1.,
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::hex_color_to_u8_slice;
+    use macroquad::prelude::BLACK;
+
+    use crate::hex_color::{hex_color, HexColor};
+
+    use super::hex_color_to_opt_u8_slice;
 
     #[test]
     fn test_short_strings_return_none() {
-        assert_eq!(hex_color_to_u8_slice(""), None);
-        assert_eq!(hex_color_to_u8_slice("#"), None);
-        assert_eq!(hex_color_to_u8_slice("#abcde"), None);
+        assert_eq!(hex_color_to_opt_u8_slice(""), None);
+        assert_eq!(hex_color_to_opt_u8_slice("#"), None);
+        assert_eq!(hex_color_to_opt_u8_slice("#abcde"), None);
     }
 
     #[test]
     fn test_invalid_hex_codes_returns_none() {
-        assert_eq!(hex_color_to_u8_slice("zzzzzz"), None);
-        assert_eq!(hex_color_to_u8_slice("zz0000"), None);
-        assert_eq!(hex_color_to_u8_slice("00zz00"), None);
-        assert_eq!(hex_color_to_u8_slice("0000zz"), None);
+        assert_eq!(hex_color_to_opt_u8_slice("zzzzzz"), None);
+        assert_eq!(hex_color_to_opt_u8_slice("zz0000"), None);
+        assert_eq!(hex_color_to_opt_u8_slice("00zz00"), None);
+        assert_eq!(hex_color_to_opt_u8_slice("0000zz"), None);
     }
 
     #[test]
     fn test_without_hash_works() {
-        assert_eq!(hex_color_to_u8_slice("000000"), Some([0, 0, 0]));
-        assert_eq!(hex_color_to_u8_slice("ff1831"), Some([255, 24, 49]));
-        assert_eq!(hex_color_to_u8_slice("ffffff"), Some([255, 255, 255]));
+        assert_eq!(hex_color_to_opt_u8_slice("000000"), Some([0, 0, 0]));
+        assert_eq!(hex_color_to_opt_u8_slice("ff1831"), Some([255, 24, 49]));
+        assert_eq!(hex_color_to_opt_u8_slice("ffffff"), Some([255, 255, 255]));
     }
 
     #[test]
     fn test_with_hash_works() {
-        assert_eq!(hex_color_to_u8_slice("#000000"), Some([0, 0, 0]));
-        assert_eq!(hex_color_to_u8_slice("#ff1831"), Some([255, 24, 49]));
-        assert_eq!(hex_color_to_u8_slice("#ffffff"), Some([255, 255, 255]));
+        assert_eq!(hex_color_to_opt_u8_slice("#000000"), Some([0, 0, 0]));
+        assert_eq!(hex_color_to_opt_u8_slice("#ff1831"), Some([255, 24, 49]));
+        assert_eq!(hex_color_to_opt_u8_slice("#ffffff"), Some([255, 255, 255]));
+    }
+
+    #[test]
+    fn test_hex_color_works() {
+        const BLACK_FROM_HEX: HexColor = hex_color("#000000");
+        assert_eq!(BLACK_FROM_HEX, HexColor { color: [0, 0, 0] });
+        // No idea why the fuck I can't just use .into() here
+        assert_eq!(BLACK_FROM_HEX.color(), BLACK);
     }
 }

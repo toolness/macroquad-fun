@@ -1,12 +1,19 @@
 use anyhow::Result;
 use macroquad::prelude::{
-    gl_use_default_material, gl_use_material, load_material, load_string, vec3, Material,
-    MaterialParams, UniformType,
+    gl_use_default_material, gl_use_material, load_material, load_string, Material, MaterialParams,
+    UniformType,
 };
 
-use crate::game_assets::game_assets;
+use crate::{
+    game_assets::game_assets,
+    hex_color::{hex_color, HexColor},
+};
 
 const BASE_SHADER_PATH: &str = "media/shaders";
+
+const LUIZ_MELO_RED: HexColor = hex_color("ff1831");
+
+const BLUE: HexColor = hex_color("0000ff");
 
 async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
     let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
@@ -37,8 +44,8 @@ impl MaterialRenderer {
             MaterialRenderer::RedToBlue => {
                 let material = materials.replace_color_material;
                 gl_use_material(material);
-                material.set_uniform("find_color", vec3(255., 24., 49.) / 255.);
-                material.set_uniform("replace_color", vec3(0., 0., 255.) / 255.);
+                material.set_uniform("find_color", LUIZ_MELO_RED.vec3());
+                material.set_uniform("replace_color", BLUE.vec3());
             }
         }
     }
