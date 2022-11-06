@@ -13,7 +13,7 @@ const BASE_SHADER_PATH: &str = "media/shaders";
 
 const LUIZ_MELO_RED: HexColor = hex_color("ff1831");
 
-const BLUE: HexColor = hex_color("0000ff");
+const BLACK: HexColor = hex_color("000000");
 
 async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
     let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
@@ -33,19 +33,15 @@ pub struct GameMaterials {
 pub enum MaterialRenderer {
     #[default]
     None,
-    RedToBlue,
+    RedToBlack,
 }
 
 impl MaterialRenderer {
     pub fn start_using(&self) {
-        let materials = &game_assets().materials;
         match self {
             MaterialRenderer::None => {}
-            MaterialRenderer::RedToBlue => {
-                let material = materials.replace_color_material;
-                gl_use_material(material);
-                material.set_uniform("find_color", LUIZ_MELO_RED.vec3());
-                material.set_uniform("replace_color", BLUE.vec3());
+            MaterialRenderer::RedToBlack => {
+                use_replace_color_material(LUIZ_MELO_RED, BLACK);
             }
         }
     }
@@ -58,6 +54,14 @@ impl MaterialRenderer {
             }
         }
     }
+}
+
+fn use_replace_color_material(find_color: HexColor, replace_color: HexColor) {
+    let materials = &game_assets().materials;
+    let material = materials.replace_color_material;
+    gl_use_material(material);
+    material.set_uniform("find_color", find_color.vec3());
+    material.set_uniform("replace_color", replace_color.vec3());
 }
 
 pub async fn load_game_materials() -> Result<GameMaterials> {
