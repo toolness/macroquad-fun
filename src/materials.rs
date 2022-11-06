@@ -1,5 +1,10 @@
 use anyhow::Result;
-use macroquad::prelude::{load_material, load_string, vec3, Material, MaterialParams, UniformType};
+use macroquad::prelude::{
+    gl_use_default_material, gl_use_material, load_material, load_string, vec3, Material,
+    MaterialParams, UniformType,
+};
+
+use crate::game_assets::game_assets;
 
 const BASE_SHADER_PATH: &str = "media/shaders";
 
@@ -17,6 +22,37 @@ pub struct GameMaterials {
     pub replace_color_material: Material,
 }
 
+#[derive(Default, Clone, Copy)]
+pub enum MaterialRenderer {
+    #[default]
+    None,
+    RedToBlue,
+}
+
+impl MaterialRenderer {
+    pub fn start_using(&self) {
+        let materials = &game_assets().materials;
+        match self {
+            MaterialRenderer::None => {}
+            MaterialRenderer::RedToBlue => {
+                let material = materials.replace_color_material;
+                gl_use_material(material);
+                material.set_uniform("find_color", vec3(255., 24., 49.) / 255.);
+                material.set_uniform("replace_color", vec3(0., 0., 255.) / 255.);
+            }
+        }
+    }
+
+    pub fn stop_using(&self) {
+        match self {
+            MaterialRenderer::None => {}
+            _ => {
+                gl_use_default_material();
+            }
+        }
+    }
+}
+
 pub async fn load_game_materials() -> Result<GameMaterials> {
     Ok(GameMaterials {
         replace_color_material: load_shader(
@@ -31,9 +67,4 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
         )
         .await?,
     })
-}
-
-pub fn red_to_blue(material: Material) {
-    material.set_uniform("find_color", vec3(255., 24., 49.) / 255.);
-    material.set_uniform("replace_color", vec3(0., 0., 255.) / 255.);
 }
