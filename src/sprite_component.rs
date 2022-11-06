@@ -1,13 +1,12 @@
 use macroquad::{
-    prelude::{
-        gl_use_default_material, gl_use_material, Color, Material, Rect, Vec2, GREEN, PURPLE, WHITE,
-    },
+    prelude::{Color, Rect, Vec2, GREEN, PURPLE, WHITE},
     shapes::draw_rectangle,
 };
 
 use crate::{
     drawing::draw_rect_lines,
     level::Level,
+    materials::MaterialRenderer,
     sprite_renderer::{SpriteDrawParams, SpriteRenderer},
     time::GameTime,
 };
@@ -26,7 +25,7 @@ pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
     pub renderer: Renderer,
-    pub material: Option<Material>,
+    pub material: MaterialRenderer,
     pub color: Option<Color>,
     pub is_facing_left: bool,
     pub left_facing_rendering: LeftFacingRendering,
@@ -115,9 +114,7 @@ impl SpriteComponent {
     }
 
     pub fn draw_current_frame(&self, level: &Level) {
-        if let Some(material) = self.material {
-            gl_use_material(material);
-        }
+        self.material.start_using();
         match self.renderer {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
@@ -145,9 +142,7 @@ impl SpriteComponent {
             }
             Renderer::EntityTiles(rect) => level.draw_entity_tiles(&rect, &self.bbox().point()),
         }
-        if self.material.is_some() {
-            gl_use_default_material();
-        }
+        self.material.stop_using();
     }
 
     pub fn draw_debug_rects(&self) {
