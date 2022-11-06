@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use macroquad::{
-    prelude::{load_material, load_string, Material, Rect},
+    prelude::{load_material, load_string, Material, MaterialParams, Rect},
     texture::{load_texture, FilterMode, Texture2D},
 };
 
@@ -54,16 +54,12 @@ async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
 
 const BASE_SHADER_PATH: &str = "media/shaders";
 
-async fn load_shader(stem: &str) -> Result<Material> {
+async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
     let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
     let fragment_source =
         load_string(format!("{}/{}.frag", BASE_SHADER_PATH, stem).as_str()).await?;
 
-    let material = load_material(
-        vertex_source.as_str(),
-        fragment_source.as_str(),
-        Default::default(),
-    )?;
+    let material = load_material(vertex_source.as_str(), fragment_source.as_str(), params)?;
 
     Ok(material)
 }
@@ -101,8 +97,8 @@ pub async fn load_game_assets() -> Result<()> {
             char_height: 8,
             chars_per_line: 16,
         },
-        crt_material: load_shader("crt").await?,
-        replace_color_material: load_shader("replace_color").await?,
+        crt_material: load_shader("crt", MaterialParams::default()).await?,
+        replace_color_material: load_shader("replace_color", MaterialParams::default()).await?,
     };
 
     unsafe {
