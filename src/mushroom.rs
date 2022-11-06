@@ -29,13 +29,13 @@ fn dead_frame() -> u32 {
 }
 
 pub fn create_mushrom(start_rect: Rect) -> Entity {
-    let sprites = &game_assets().mushroom;
-    let death_sprite = &sprites.death;
+    let assets = &game_assets().mushroom;
+    let death_sprite = &assets.death;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: sprites.idle_bbox,
+            relative_bbox: assets.idle_bbox,
             renderer: Renderer::Sprite(&death_sprite),
-            material: MaterialRenderer::RedToWhite,
+            material: MaterialRenderer::ReplaceColor(assets.color_replacements),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
         }

@@ -1,21 +1,15 @@
 use anyhow::Result;
-use macroquad::prelude::{
-    gl_use_default_material, gl_use_material, load_material, load_string, Material, MaterialParams,
-    UniformType,
+use macroquad::{
+    prelude::{
+        gl_use_default_material, gl_use_material, load_material, load_string, Material,
+        MaterialParams,
+    },
+    texture::Texture2D,
 };
 
-use crate::{
-    game_assets::game_assets,
-    hex_color::{hex_color, HexColor},
-};
+use crate::game_assets::game_assets;
 
 const BASE_SHADER_PATH: &str = "media/shaders";
-
-const LUIZ_MELO_RED: HexColor = hex_color("ff1831");
-
-const BLACK: HexColor = hex_color("000000");
-
-const WHITE: HexColor = hex_color("fbe9d1");
 
 async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
     let vertex_source = load_string(format!("{}/{}.vert", BASE_SHADER_PATH, stem).as_str()).await?;
@@ -35,19 +29,15 @@ pub struct GameMaterials {
 pub enum MaterialRenderer {
     #[default]
     None,
-    RedToBlack,
-    RedToWhite,
+    ReplaceColor(Texture2D),
 }
 
 impl MaterialRenderer {
     pub fn start_using(&self) {
         match self {
             MaterialRenderer::None => {}
-            MaterialRenderer::RedToBlack => {
-                use_replace_color_material(LUIZ_MELO_RED, BLACK);
-            }
-            MaterialRenderer::RedToWhite => {
-                use_replace_color_material(LUIZ_MELO_RED, WHITE);
+            MaterialRenderer::ReplaceColor(texture) => {
+                use_replace_color_material(*texture);
             }
         }
     }
@@ -62,12 +52,11 @@ impl MaterialRenderer {
     }
 }
 
-fn use_replace_color_material(find_color: HexColor, replace_color: HexColor) {
+fn use_replace_color_material(color_replacement_texture: Texture2D) {
     let materials = &game_assets().materials;
     let material = materials.replace_color_material;
     gl_use_material(material);
-    material.set_uniform("find_color", find_color.vec3());
-    material.set_uniform("replace_color", replace_color.vec3());
+    material.set_texture("color_replacement_texture", color_replacement_texture);
 }
 
 pub async fn load_game_materials() -> Result<GameMaterials> {
@@ -75,10 +64,7 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
         replace_color_material: load_shader(
             "replace_color",
             MaterialParams {
-                uniforms: vec![
-                    ("find_color".to_string(), UniformType::Float3),
-                    ("replace_color".to_string(), UniformType::Float3),
-                ],
+                textures: vec!["color_replacement_texture".to_string()],
                 ..Default::default()
             },
         )

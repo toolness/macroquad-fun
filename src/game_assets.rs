@@ -24,6 +24,7 @@ pub struct HuntressAssets {
 pub struct FlyingEyeAssets {
     pub flight: SpriteRenderer,
     pub flight_bbox: Rect,
+    pub color_replacements: Texture2D,
 }
 
 pub struct MushroomAssets {
@@ -31,6 +32,7 @@ pub struct MushroomAssets {
     pub idle_bbox: Rect,
     pub platform_bbox: Rect,
     pub run: SpriteRenderer,
+    pub color_replacements: Texture2D,
 }
 
 pub struct GameAssets {
@@ -71,6 +73,10 @@ pub async fn load_game_assets() -> Result<()> {
         },
         flying_eye: FlyingEyeAssets {
             flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
+            color_replacements: load_pixel_perfect_texture(
+                "media/FlyingEye/color_replacements.png",
+            )
+            .await?,
             flight_bbox: get_slice(
                 &load_aseprite_slices("media/FlyingEye/Flight.json").await?,
                 "flight_bounding_box",
@@ -81,6 +87,8 @@ pub async fn load_game_assets() -> Result<()> {
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
             platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
+            color_replacements: load_pixel_perfect_texture("media/Mushroom/color_replacements.png")
+                .await?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {
