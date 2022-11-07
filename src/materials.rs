@@ -52,6 +52,15 @@ impl MaterialRenderer {
     }
 }
 
+/// Use an image to specify what colors to replace at render time.
+///
+/// The image should be structured in such a way that each pixel on the x-axis
+/// is immediately followed by the color that should replace it.
+///
+/// So for instance, if you have a 4x1 image that consists of a blue
+/// pixel, a red pixel, a green pixel, and a yellow pixel, this means that
+/// whenever this material is used, all blue pixels will be replaced by red
+/// ones, and all green pixels will be replaced by yellow ones.
 fn use_replace_color_material(image: &Image) {
     let materials = &game_assets().materials;
     let material = materials.replace_color_material;
@@ -59,6 +68,15 @@ fn use_replace_color_material(image: &Image) {
     let num_replacements = (image.width / 2) as i32;
 
     material.set_uniform("num_replacements", num_replacements);
+
+    // Ideally we'd just use a Texture2D for this, allowing the GPU to do all this work
+    // itself, and easily supporting an arbitrary number of replacements. However, there
+    // seems to be a bug in macroquad, or my own misunderstanding of how it works, that
+    // prevents it from working; see commit 643d19b627d5626d12e3affe567717bace37a247 or
+    // https://github.com/toolness/macroquad-fun/pull/57 for more details on that attempt.
+    //
+    // So for now we'll just load the image on the CPU-side and set a bunch of uniforms
+    // that tell the GPU what to replace.
 
     material.set_uniform("find_color_1", image.get_pixel(0, 0).to_vec());
     material.set_uniform("replace_color_1", image.get_pixel(1, 0).to_vec());
