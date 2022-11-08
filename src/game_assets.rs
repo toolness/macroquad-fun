@@ -19,6 +19,7 @@ pub struct HuntressAssets {
     pub jump: SpriteRenderer,
     pub fall: SpriteRenderer,
     pub idle_bbox: Rect,
+    pub no_spear_color_replacements: Image,
 }
 
 pub struct FlyingEyeAssets {
@@ -70,6 +71,10 @@ pub async fn load_game_assets() -> Result<()> {
                 &load_aseprite_slices("media/Huntress/Idle.json").await?,
                 "idle_bounding_box",
             )?,
+            no_spear_color_replacements: load_image(
+                "media/Huntress/no_spear_color_replacements.png",
+            )
+            .await?,
         },
         flying_eye: FlyingEyeAssets {
             flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),

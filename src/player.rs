@@ -9,6 +9,7 @@ use crate::{
     game_assets::game_assets,
     input::{Buttons, InputState},
     level::Level,
+    materials::MaterialRenderer,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
     running::RunComponent,
@@ -27,9 +28,11 @@ pub struct PlayerComponent {
 }
 
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
+    let assets = &game_assets().huntress;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: game_assets().huntress.idle_bbox,
+            relative_bbox: assets.idle_bbox,
+            material: MaterialRenderer::ReplaceColors(&assets.no_spear_color_replacements),
             ..Default::default()
         }
         .at_bottom_left(&start_rect),

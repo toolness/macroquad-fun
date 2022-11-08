@@ -27,6 +27,12 @@ uniform vec4 replace_color_5;
 uniform vec4 find_color_6;
 uniform vec4 replace_color_6;
 
+uniform vec4 find_color_7;
+uniform vec4 replace_color_7;
+
+uniform vec4 find_color_8;
+uniform vec4 replace_color_8;
+
 void replace_color(inout vec4 base_color, in vec4 find_color, in vec4 replace_color) {
     if (find_color.rgb == base_color.rgb) {
         if (replace_color.a != 1.0) {
@@ -55,6 +61,12 @@ void main() {
                     replace_color(base_color, find_color_5, replace_color_5);
                     if (num_replacements > 5) {
                         replace_color(base_color, find_color_6, replace_color_6);
+                        if (num_replacements > 6) {
+                            replace_color(base_color, find_color_7, replace_color_7);
+                            if (num_replacements > 7) {
+                                replace_color(base_color, find_color_8, replace_color_8);
+                            }
+                        }
                     }
                 }
             }

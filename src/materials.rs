@@ -97,7 +97,20 @@ fn use_replace_color_material(image: &Image) {
                         material.set_uniform("find_color_6", image.get_pixel(10, 0).to_vec());
                         material.set_uniform("replace_color_6", image.get_pixel(11, 0).to_vec());
                         if num_replacements > 6 {
-                            println!("Replacement color image has more than current maximum of 6 replacements!");
+                            material.set_uniform("find_color_7", image.get_pixel(12, 0).to_vec());
+                            material
+                                .set_uniform("replace_color_7", image.get_pixel(13, 0).to_vec());
+                            if num_replacements > 7 {
+                                material
+                                    .set_uniform("find_color_8", image.get_pixel(14, 0).to_vec());
+                                material.set_uniform(
+                                    "replace_color_8",
+                                    image.get_pixel(15, 0).to_vec(),
+                                );
+                                if num_replacements > 8 {
+                                    println!("Replacement color image has more than current maximum of 8 replacements!");
+                                }
+                            }
                         }
                     }
                 }
@@ -119,12 +132,16 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
                     ("find_color_4".to_string(), UniformType::Float4),
                     ("find_color_5".to_string(), UniformType::Float4),
                     ("find_color_6".to_string(), UniformType::Float4),
+                    ("find_color_7".to_string(), UniformType::Float4),
+                    ("find_color_8".to_string(), UniformType::Float4),
                     ("replace_color_1".to_string(), UniformType::Float4),
                     ("replace_color_2".to_string(), UniformType::Float4),
                     ("replace_color_3".to_string(), UniformType::Float4),
                     ("replace_color_4".to_string(), UniformType::Float4),
                     ("replace_color_5".to_string(), UniformType::Float4),
                     ("replace_color_6".to_string(), UniformType::Float4),
+                    ("replace_color_7".to_string(), UniformType::Float4),
+                    ("replace_color_8".to_string(), UniformType::Float4),
                 ],
                 ..Default::default()
             },
