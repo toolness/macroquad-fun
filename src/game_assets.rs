@@ -36,10 +36,16 @@ pub struct MushroomAssets {
     pub color_replacements: Image,
 }
 
+pub struct SpearAssets {
+    pub spear_move: SpriteRenderer,
+    pub spear_move_bbox: Rect,
+}
+
 pub struct GameAssets {
     pub huntress: HuntressAssets,
     pub flying_eye: FlyingEyeAssets,
     pub mushroom: MushroomAssets,
+    pub spear: SpearAssets,
     pub tileset: Texture2D,
     pub font: BitmapFont,
     pub materials: GameMaterials,
@@ -90,6 +96,16 @@ pub async fn load_game_assets() -> Result<()> {
             platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
             color_replacements: load_image("media/Mushroom/color_replacements.png").await?,
+        },
+        spear: SpearAssets {
+            spear_move: SpriteRenderer::new(
+                load_texture("media/Huntress/Spear move.png").await?,
+                4,
+            ),
+            spear_move_bbox: get_slice(
+                &load_aseprite_slices("media/Huntress/Spear move.json").await?,
+                "spear_bounding_box",
+            )?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {
