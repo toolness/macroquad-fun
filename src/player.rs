@@ -25,14 +25,13 @@ pub struct PlayerComponent {
     is_in_air: bool,
     coyote_time_start: Option<f64>,
     run_direction: f32,
+    pub has_spear: bool,
 }
 
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
-    let assets = &game_assets().huntress;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: assets.idle_bbox,
-            material: MaterialRenderer::ReplaceColors(&assets.no_spear_color_replacements),
+            relative_bbox: game_assets().huntress.idle_bbox,
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
@@ -125,6 +124,11 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
         LeftFacingRendering::XOffset(config.player_left_facing_x_offset)
     };
     sprite.update_looping_frame_number(time);
+    sprite.material = if player.has_spear {
+        MaterialRenderer::None
+    } else {
+        MaterialRenderer::ReplaceColors(&game_assets().huntress.no_spear_color_replacements)
+    };
 }
 
 fn unattached_player_process_input(

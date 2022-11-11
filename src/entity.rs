@@ -9,6 +9,7 @@ use crate::{
     flying_eye::FlyingEyeComponent,
     mushroom::MushroomComponent,
     physics::PhysicsComponent,
+    pickups::PickupComponent,
     player::PlayerComponent,
     push::PushComponent,
     route::RouteComponent,
@@ -34,6 +35,7 @@ pub struct Entity {
     pub push: Option<PushComponent>,
     pub switch: Option<SwitchComponent>,
     pub floor_switch: Option<FloorSwitchComponent>,
+    pub pickup: Option<PickupComponent>,
     pub iid: Option<Uuid>,
     pub name_for_debugging: Option<&'static str>,
 }

@@ -13,13 +13,13 @@ use crate::input::InputState;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::PhysicsSystem;
+use crate::pickups::{create_spear, pickup_system};
 use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
     teleport_entity,
 };
 use crate::push::push_system;
 use crate::route::{draw_route_debug_targets, route_system};
-use crate::spear::create_spear;
 use crate::switch::switch_system;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
@@ -191,6 +191,7 @@ impl LevelRuntime {
         flying_eye_movement_system(&mut self.entities, time);
         mushroom_movement_system(&mut self.entities, time);
         player_update_system(&mut self.entities, time);
+        pickup_system(&mut self.entity_processor, &mut self.entities, time);
 
         self.camera.update(&self.entities.player(), &self.level);
 
