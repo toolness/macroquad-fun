@@ -11,38 +11,37 @@ use crate::{
 
 const CARRY_Y_OFFSET: f32 = 10.0;
 
-pub struct AttachmentSystem {
-    pub processor: EntityProcessor,
-}
-
-impl AttachmentSystem {
-    pub fn run(&mut self, entities: &mut EntityMap, level: &Level, time: &GameTime) {
-        self.processor.filter_and_process_entities(
-            entities,
-            |entity| {
-                if let Some(attachment) = entity.attachment.as_ref() {
-                    attachment.is_attached() || attachment.should_attach
-                } else {
-                    false
-                }
-            },
-            |entity, entities| {
-                let sprite = &mut entity.sprite;
-                let attachment = entity.attachment.as_mut().unwrap();
-                if let Some(carrier_entity) = attachment.attached_entity(entities) {
-                    attachment.update_while_attached(
-                        &carrier_entity.sprite,
-                        &carrier_entity.physics,
-                        sprite,
-                        &mut entity.physics,
-                        time,
-                    );
-                } else if attachment.should_attach {
-                    attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
-                }
-            },
-        );
-    }
+pub fn attachment_system(
+    processor: &mut EntityProcessor,
+    entities: &mut EntityMap,
+    level: &Level,
+    time: &GameTime,
+) {
+    processor.filter_and_process_entities(
+        entities,
+        |entity| {
+            if let Some(attachment) = entity.attachment.as_ref() {
+                attachment.is_attached() || attachment.should_attach
+            } else {
+                false
+            }
+        },
+        |entity, entities| {
+            let sprite = &mut entity.sprite;
+            let attachment = entity.attachment.as_mut().unwrap();
+            if let Some(carrier_entity) = attachment.attached_entity(entities) {
+                attachment.update_while_attached(
+                    &carrier_entity.sprite,
+                    &carrier_entity.physics,
+                    sprite,
+                    &mut entity.physics,
+                    time,
+                );
+            } else if attachment.should_attach {
+                attachment.maybe_attach_to_entity(entities, sprite, &mut entity.physics, level);
+            }
+        },
+    );
 }
 
 #[derive(Default, Copy, Clone)]

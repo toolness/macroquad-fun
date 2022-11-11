@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Write;
 use std::rc::Rc;
 
-use crate::attachment::AttachmentSystem;
+use crate::attachment::attachment_system;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::{DynamicColliderSystem, SavedDynamicColliderSystem};
@@ -57,7 +57,6 @@ pub struct LevelRuntime {
     camera: Camera,
     next_id: u64,
     physics_system: PhysicsSystem,
-    attachment_system: AttachmentSystem,
     switch_system: SwitchSystem,
     push_system: PushSystem,
     dynamic_collider_system: DynamicColliderSystem,
@@ -87,9 +86,6 @@ impl LevelRuntime {
             next_id: saved.next_id,
             camera: saved.camera,
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
-            attachment_system: AttachmentSystem {
-                processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
-            },
             push_system: PushSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -182,8 +178,12 @@ impl LevelRuntime {
         }
 
         process_player_input(&mut self.entities, time, input);
-        self.attachment_system
-            .run(&mut self.entities, &self.level, time);
+        attachment_system(
+            &mut self.entity_processor,
+            &mut self.entities,
+            &self.level,
+            time,
+        );
         route_system(&mut self.entity_processor, &mut self.entities);
         self.physics_system
             .update_positions(&mut self.entities, time);
