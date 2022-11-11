@@ -77,6 +77,10 @@ impl EntityMap {
         self.map.insert(id, entity);
     }
 
+    pub fn remove(&mut self, id: u64) {
+        self.map.remove(&id);
+    }
+
     pub fn capacity(&self) -> usize {
         self.map.capacity()
     }
