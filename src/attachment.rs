@@ -2,7 +2,7 @@ use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     config::config,
-    entity::{Entity, EntityMap, EntityProcessor},
+    entity::{filter_and_process_entities, Entity, EntityMap},
     level::Level,
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
@@ -11,13 +11,8 @@ use crate::{
 
 const CARRY_Y_OFFSET: f32 = 10.0;
 
-pub fn attachment_system(
-    processor: &mut EntityProcessor,
-    entities: &mut EntityMap,
-    level: &Level,
-    time: &GameTime,
-) {
-    processor.filter_and_process_entities(
+pub fn attachment_system(entities: &mut EntityMap, level: &Level, time: &GameTime) {
+    filter_and_process_entities(
         entities,
         |entity| {
             if let Some(attachment) = entity.attachment.as_ref() {

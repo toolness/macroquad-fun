@@ -1,7 +1,7 @@
 use macroquad::prelude::Rect;
 
 use crate::{
-    entity::{Entity, EntityMap, EntityProcessor},
+    entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
     physics::PhysicsComponent,
     sprite_component::{Renderer, SpriteComponent},
@@ -42,8 +42,8 @@ fn grab_pickup(player_entity: &mut Entity, pickup: Pickup) {
     }
 }
 
-pub fn pickup_system(processor: &mut EntityProcessor, entities: &mut EntityMap, time: &GameTime) {
-    processor.filter_and_process_entities(
+pub fn pickup_system(entities: &mut EntityMap, time: &GameTime) {
+    filter_and_process_entities(
         entities,
         |entity| entity.player.is_some(),
         |player_entity, entities| {

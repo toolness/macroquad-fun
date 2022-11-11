@@ -1,5 +1,5 @@
 use crate::{
-    entity::{EntityMap, EntityProcessor},
+    entity::{filter_and_process_entities, EntityMap},
     route::try_to_start_route,
 };
 
@@ -9,8 +9,8 @@ pub struct SwitchComponent {
     pub trigger_entity: Option<u64>,
 }
 
-pub fn switch_system(processor: &mut EntityProcessor, entities: &mut EntityMap) {
-    processor.filter_and_process_entities(
+pub fn switch_system(entities: &mut EntityMap) {
+    filter_and_process_entities(
         entities,
         |entity| entity.switch.is_some(),
         |switch_entity, entities| {

@@ -6,7 +6,7 @@ use macroquad::{
 use crate::{
     config::config,
     drawing::draw_rect_lines,
-    entity::{Entity, EntityMap, EntityProcessor},
+    entity::{filter_and_process_entities, Entity, EntityMap},
     sprite_component::SpriteComponent,
 };
 
@@ -31,8 +31,8 @@ impl RouteComponent {
     }
 }
 
-pub fn route_system(processor: &mut EntityProcessor, entities: &mut EntityMap) {
-    processor.filter_and_process_entities(
+pub fn route_system(entities: &mut EntityMap) {
+    filter_and_process_entities(
         entities,
         |entity| entity.route.is_some(),
         |entity, entities| {

@@ -1,4 +1,4 @@
-use crate::entity::{EntityMap, EntityProcessor};
+use crate::entity::{filter_and_process_entities, EntityMap};
 
 #[derive(Default, Clone, Copy)]
 pub struct PushComponent {
@@ -11,8 +11,8 @@ pub struct PushComponent {
     pub pushable_coefficient: f32,
 }
 
-pub fn push_system(processor: &mut EntityProcessor, entities: &mut EntityMap) {
-    processor.filter_and_process_entities(
+pub fn push_system(entities: &mut EntityMap) {
+    filter_and_process_entities(
         entities,
         |entity| {
             entity

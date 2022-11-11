@@ -6,7 +6,7 @@ use crate::attachment::attachment_system;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::{DynamicColliderSystem, SavedDynamicColliderSystem};
-use crate::entity::{Entity, EntityMap, EntityProcessor};
+use crate::entity::{Entity, EntityMap};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::input::InputState;
@@ -59,7 +59,6 @@ pub struct LevelRuntime {
     physics_system: PhysicsSystem,
     dynamic_collider_system: DynamicColliderSystem,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
-    entity_processor: EntityProcessor,
 }
 
 impl LevelRuntime {
@@ -88,7 +87,6 @@ impl LevelRuntime {
                 saved.dynamic_collider_system,
             ),
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
-            entity_processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
         }
     }
 
@@ -170,18 +168,13 @@ impl LevelRuntime {
         }
 
         process_player_input(&mut self.entities, time, input);
-        attachment_system(
-            &mut self.entity_processor,
-            &mut self.entities,
-            &self.level,
-            time,
-        );
-        route_system(&mut self.entity_processor, &mut self.entities);
+        attachment_system(&mut self.entities, &self.level, time);
+        route_system(&mut self.entities);
         self.physics_system
             .update_positions(&mut self.entities, time);
         self.dynamic_collider_system.run(&mut self.entities);
-        push_system(&mut self.entity_processor, &mut self.entities);
-        switch_system(&mut self.entity_processor, &mut self.entities);
+        push_system(&mut self.entities);
+        switch_system(&mut self.entities);
         self.physics_system.resolve_collisions(
             &mut self.entities,
             &self.level,
@@ -190,7 +183,7 @@ impl LevelRuntime {
         floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, time);
         mushroom_movement_system(&mut self.entities, time);
-        pickup_system(&mut self.entity_processor, &mut self.entities, time);
+        pickup_system(&mut self.entities, time);
         player_update_system(&mut self.entities, time);
 
         self.camera.update(&self.entities.player(), &self.level);

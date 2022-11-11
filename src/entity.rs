@@ -133,42 +133,27 @@ impl EntityMap {
     }
 }
 
-pub struct EntityProcessor {
-    /// This solely exists as an instance variable so we can amortize
-    /// allocations across frames.
-    entities_to_process: Vec<u64>,
-}
+const MAX_ENTITIES_TO_PROCESS: usize = 1000;
 
-impl EntityProcessor {
-    pub fn with_capacity(capacity: usize) -> Self {
-        EntityProcessor {
-            entities_to_process: Vec::with_capacity(capacity),
+pub fn filter_and_process_entities<
+    Filter: Fn(&Entity) -> bool,
+    Processor: FnMut(&mut Entity, &mut EntityMap),
+>(
+    entities: &mut EntityMap,
+    filter: Filter,
+    mut processor: Processor,
+) {
+    let mut entities_to_process: heapless::Vec<u64, MAX_ENTITIES_TO_PROCESS> = heapless::Vec::new();
+
+    entities_to_process.extend(entities.iter().filter_map(|(id, entity)| {
+        if filter(entity) {
+            Some(id)
+        } else {
+            None
         }
-    }
+    }));
 
-    pub fn filter_and_process_entities<
-        Filter: Fn(&Entity) -> bool,
-        Processor: FnMut(&mut Entity, &mut EntityMap),
-    >(
-        &mut self,
-        entities: &mut EntityMap,
-        filter: Filter,
-        mut processor: Processor,
-    ) {
-        self.entities_to_process.clear();
-        self.entities_to_process
-            .extend(entities.iter().filter_map(
-                |(id, entity)| {
-                    if filter(entity) {
-                        Some(id)
-                    } else {
-                        None
-                    }
-                },
-            ));
-
-        for &id in self.entities_to_process.iter() {
-            entities.with_entity_removed(id, &mut processor);
-        }
+    for &id in entities_to_process.iter() {
+        entities.with_entity_removed(id, &mut processor);
     }
 }
