@@ -133,7 +133,9 @@ impl EntityMap {
     }
 }
 
-const MAX_ENTITIES_TO_PROCESS: usize = 1000;
+pub const ENTITY_MAX: usize = 1000;
+
+pub type HeaplessEntityVec = heapless::Vec<u64, ENTITY_MAX>;
 
 pub fn filter_and_process_entities<
     Filter: Fn(&Entity) -> bool,
@@ -143,7 +145,7 @@ pub fn filter_and_process_entities<
     filter: Filter,
     mut processor: Processor,
 ) {
-    let mut entities_to_process: heapless::Vec<u64, MAX_ENTITIES_TO_PROCESS> = heapless::Vec::new();
+    let mut entities_to_process: HeaplessEntityVec = heapless::Vec::new();
 
     entities_to_process.extend(entities.iter().filter_map(|(id, entity)| {
         if filter(entity) {

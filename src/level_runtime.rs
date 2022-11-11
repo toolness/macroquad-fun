@@ -12,7 +12,7 @@ use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::input::InputState;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
-use crate::physics::PhysicsSystem;
+use crate::physics::{physics_system_resolve_collisions, physics_system_update_positions};
 use crate::pickups::{create_spear, pickup_system};
 use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
@@ -56,7 +56,6 @@ pub struct LevelRuntime {
     entities: EntityMap,
     camera: Camera,
     next_id: u64,
-    physics_system: PhysicsSystem,
     dynamic_collider_system: DynamicColliderSystem,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
 }
@@ -82,7 +81,6 @@ impl LevelRuntime {
             entities: saved.entities,
             next_id: saved.next_id,
             camera: saved.camera,
-            physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
             dynamic_collider_system: DynamicColliderSystem::from_saved(
                 saved.dynamic_collider_system,
             ),
@@ -170,12 +168,11 @@ impl LevelRuntime {
         process_player_input(&mut self.entities, time, input);
         attachment_system(&mut self.entities, &self.level, time);
         route_system(&mut self.entities);
-        self.physics_system
-            .update_positions(&mut self.entities, time);
+        physics_system_update_positions(&mut self.entities, time);
         self.dynamic_collider_system.run(&mut self.entities);
         push_system(&mut self.entities);
         switch_system(&mut self.entities);
-        self.physics_system.resolve_collisions(
+        physics_system_resolve_collisions(
             &mut self.entities,
             &self.level,
             &mut self.dynamic_collider_system,
