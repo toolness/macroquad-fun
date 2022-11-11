@@ -4,7 +4,7 @@ use crate::{
     animator::Animator,
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
-    entity::{Entity, EntityMap},
+    entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
     materials::MaterialRenderer,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
@@ -53,22 +53,17 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
 }
 
 pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
-    let player_bbox = entities.main_player().sprite.bbox();
-    for (_id, entity) in entities.iter_mut() {
-        if let Some(mushroom) = entity.mushroom.as_mut() {
+    filter_and_process_entities(
+        entities,
+        |entity| entity.mushroom.is_some(),
+        |entity, entities| {
+            let mushroom = entity.mushroom.as_mut().unwrap();
             let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;
             let dynamic_collider = &mut entity.dynamic_collider;
-            update_mushroom(
-                mushroom,
-                velocity,
-                sprite,
-                dynamic_collider,
-                &player_bbox,
-                time,
-            );
-        }
-    }
+            update_mushroom(mushroom, velocity, sprite, dynamic_collider, entities, time);
+        },
+    );
 }
 
 fn update_mushroom(
@@ -76,13 +71,18 @@ fn update_mushroom(
     velocity: &mut Vec2,
     sprite: &mut SpriteComponent,
     dynamic_collider: &mut Option<DynamicColliderComponent>,
-    player_bbox: &Rect,
+    entities: &mut EntityMap,
     time: &GameTime,
 ) {
     match &mushroom.state {
         MushroomState::Dead => {
-            if player_bbox.overlaps(&sprite.bbox()) {
-                mushroom.state = MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
+            for (_id, player_entity) in entities.iter() {
+                if let Some(player) = player_entity.player {
+                    if player.has_spear && player_entity.sprite.bbox().overlaps(&sprite.bbox()) {
+                        mushroom.state =
+                            MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
+                    }
+                }
             }
         }
         MushroomState::Rezzing(animator) => {
