@@ -190,8 +190,8 @@ impl LevelRuntime {
         floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, time);
         mushroom_movement_system(&mut self.entities, time);
-        player_update_system(&mut self.entities, time);
         pickup_system(&mut self.entity_processor, &mut self.entities, time);
+        player_update_system(&mut self.entities, time);
 
         self.camera.update(&self.entities.player(), &self.level);
 
