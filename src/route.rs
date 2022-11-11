@@ -31,44 +31,38 @@ impl RouteComponent {
     }
 }
 
-pub struct RouteSystem {
-    pub processor: EntityProcessor,
-}
-
-impl RouteSystem {
-    pub fn run(&mut self, entities: &mut EntityMap) {
-        self.processor.filter_and_process_entities(
-            entities,
-            |entity| entity.route.is_some(),
-            |entity, entities| {
-                let route = entity.route.as_mut().unwrap();
-                if !route.is_moving {
-                    return;
-                }
-                if route.stop_when_blocked && is_route_blocked(&route, &entity.sprite, entities) {
+pub fn route_system(processor: &mut EntityProcessor, entities: &mut EntityMap) {
+    processor.filter_and_process_entities(
+        entities,
+        |entity| entity.route.is_some(),
+        |entity, entities| {
+            let route = entity.route.as_mut().unwrap();
+            if !route.is_moving {
+                return;
+            }
+            if route.stop_when_blocked && is_route_blocked(&route, &entity.sprite, entities) {
+                entity.physics.velocity = Vec2::ZERO;
+                return;
+            }
+            let target = route.target();
+            let direction_to_target = target - entity.sprite.pos;
+            if entity.physics.velocity == Vec2::ZERO {
+                entity.physics.velocity = direction_to_target.normalize() * route.speed;
+            } else {
+                let is_moving_towards_target =
+                    entity.physics.velocity.dot(direction_to_target) > 0.;
+                if !is_moving_towards_target {
+                    entity.sprite.pos = target;
                     entity.physics.velocity = Vec2::ZERO;
-                    return;
-                }
-                let target = route.target();
-                let direction_to_target = target - entity.sprite.pos;
-                if entity.physics.velocity == Vec2::ZERO {
-                    entity.physics.velocity = direction_to_target.normalize() * route.speed;
-                } else {
-                    let is_moving_towards_target =
-                        entity.physics.velocity.dot(direction_to_target) > 0.;
-                    if !is_moving_towards_target {
-                        entity.sprite.pos = target;
-                        entity.physics.velocity = Vec2::ZERO;
-                        if route.ping_pong {
-                            route.is_moving_towards_start = !route.is_moving_towards_start;
-                        } else {
-                            route.is_moving = false;
-                        }
+                    if route.ping_pong {
+                        route.is_moving_towards_start = !route.is_moving_towards_start;
+                    } else {
+                        route.is_moving = false;
                     }
                 }
-            },
-        );
-    }
+            }
+        },
+    );
 }
 
 fn is_route_blocked(
