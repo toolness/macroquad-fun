@@ -163,7 +163,7 @@ impl LevelRuntime {
             return FrameResult::PlayerDied;
         }
 
-        process_player_input(&mut self.entities, time, input);
+        process_player_input(self.entities.player_mut(), time, input);
         attachment_system(&mut self.entities, &self.level, time);
         route_system(&mut self.entities);
         physics_system_update_positions(&mut self.entities, time);

@@ -5,7 +5,7 @@ use macroquad::prelude::{Rect, Vec2};
 use crate::{
     collision::CollisionFlags,
     config::config,
-    entity::{Entity, EntityMap},
+    entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
     input::{Buttons, InputState},
     level::Level,
@@ -63,8 +63,7 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     }
 }
 
-pub fn process_player_input(entities: &mut EntityMap, time: &GameTime, input: &InputState) {
-    let player = entities.player_mut();
+pub fn process_player_input(player: &mut Entity, time: &GameTime, input: &InputState) {
     let attachment = player.attachment.as_mut().unwrap();
     if attachment.is_attached() {
         if input.is_pressed(Buttons::JUMP) {
@@ -77,58 +76,63 @@ pub fn process_player_input(entities: &mut EntityMap, time: &GameTime, input: &I
 
 pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     let config = config();
-    let player_entity = entities.player_mut();
-    let physics = &mut player_entity.physics;
-    let sprite = &mut player_entity.sprite;
-    let player = player_entity.player.as_mut().unwrap();
-    let push = player_entity.push.as_mut().unwrap();
-    let attachment = &mut player_entity.attachment.as_mut().unwrap();
+    filter_and_process_entities(
+        entities,
+        |entity| entity.player.is_some(),
+        |player_entity, _entities| {
+            let physics = &mut player_entity.physics;
+            let sprite = &mut player_entity.sprite;
+            let player = player_entity.player.as_mut().unwrap();
+            let push = player_entity.push.as_mut().unwrap();
+            let attachment = &mut player_entity.attachment.as_mut().unwrap();
 
-    if physics.latest_frame.is_on_any_surface {
-        // The player just landed (or remains on the ground).
-        player.is_in_air = false;
-        player.coyote_time_start = None;
-        attachment.reset(physics);
-    } else if !player.is_in_air {
-        if let Some(coyote_start_time) = &player.coyote_time_start {
-            if time.now - coyote_start_time > config.coyote_time_ms / 1000. {
-                // The player fell off a ledge, and is out of coyote time.
-                player.is_in_air = true;
+            if physics.latest_frame.is_on_any_surface {
+                // The player just landed (or remains on the ground).
+                player.is_in_air = false;
                 player.coyote_time_start = None;
+                attachment.reset(physics);
+            } else if !player.is_in_air {
+                if let Some(coyote_start_time) = &player.coyote_time_start {
+                    if time.now - coyote_start_time > config.coyote_time_ms / 1000. {
+                        // The player fell off a ledge, and is out of coyote time.
+                        player.is_in_air = true;
+                        player.coyote_time_start = None;
+                    }
+                } else {
+                    // Aside from the usual benefits of coyote time, this also
+                    // de-jitters weird situations where the player is on a
+                    // moving platform that has technically moved underneath them
+                    // for a single frame.
+                    player.coyote_time_start = Some(time.now);
+                }
             }
-        } else {
-            // Aside from the usual benefits of coyote time, this also
-            // de-jitters weird situations where the player is on a
-            // moving platform that has technically moved underneath them
-            // for a single frame.
-            player.coyote_time_start = Some(time.now);
-        }
-    }
 
-    if !player.is_in_air && player.run_direction != 0. {
-        sprite.is_facing_left = player.run_direction < 0.;
-    }
+            if !player.is_in_air && player.run_direction != 0. {
+                sprite.is_facing_left = player.run_direction < 0.;
+            }
 
-    attachment.should_attach = player.is_in_air;
-    push.can_push = !player.is_in_air;
-    sprite.renderer = Renderer::Sprite(sprite_renderer(
-        player.is_in_air,
-        &physics.velocity,
-        player.run_direction,
-    ));
-    sprite.left_facing_rendering = if attachment.is_attached() {
-        // The player juts out awkwardly from their carrier if offset,
-        // so don't offset.
-        LeftFacingRendering::Default
-    } else {
-        LeftFacingRendering::XOffset(config.player_left_facing_x_offset)
-    };
-    sprite.update_looping_frame_number(time);
-    sprite.material = if player.has_spear {
-        MaterialRenderer::None
-    } else {
-        MaterialRenderer::ReplaceColors(&game_assets().huntress.no_spear_color_replacements)
-    };
+            attachment.should_attach = player.is_in_air;
+            push.can_push = !player.is_in_air;
+            sprite.renderer = Renderer::Sprite(sprite_renderer(
+                player.is_in_air,
+                &physics.velocity,
+                player.run_direction,
+            ));
+            sprite.left_facing_rendering = if attachment.is_attached() {
+                // The player juts out awkwardly from their carrier if offset,
+                // so don't offset.
+                LeftFacingRendering::Default
+            } else {
+                LeftFacingRendering::XOffset(config.player_left_facing_x_offset)
+            };
+            sprite.update_looping_frame_number(time);
+            sprite.material = if player.has_spear {
+                MaterialRenderer::None
+            } else {
+                MaterialRenderer::ReplaceColors(&game_assets().huntress.no_spear_color_replacements)
+            };
+        },
+    );
 }
 
 fn unattached_player_process_input(
