@@ -1,7 +1,7 @@
 use macroquad::prelude::Rect;
 
 use crate::{
-    entity::{filter_and_process_entities, Entity, EntityMap},
+    entity::{filter_and_process_entities, Entity, EntityMap, HeaplessEntityVec},
     game_assets::game_assets,
     physics::PhysicsComponent,
     sprite_component::{Renderer, SpriteComponent},
@@ -47,17 +47,12 @@ pub fn pickup_system(entities: &mut EntityMap, time: &GameTime) {
         entities,
         |entity| entity.player.is_some(),
         |player_entity, entities| {
-            let mut entities_to_remove: heapless::Vec<u64, 10> = heapless::Vec::new();
+            let mut entities_to_remove: HeaplessEntityVec = heapless::Vec::new();
             for (id, entity) in entities.iter() {
                 if let Some(pickup) = entity.pickup {
                     if player_entity.sprite.bbox().overlaps(&entity.sprite.bbox()) {
                         grab_pickup(player_entity, pickup);
-                        if entities_to_remove.push(id).is_err() {
-                            println!(
-                                "WARNING: Unable to remove all pickups! (max {})",
-                                entities_to_remove.capacity()
-                            );
-                        }
+                        entities_to_remove.push(id).unwrap();
                     }
                 }
             }
