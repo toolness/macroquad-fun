@@ -178,7 +178,7 @@ async fn main() {
                 fixed_fps.update(time.now);
                 match level_runtime.advance_one_frame(&time, &input_state) {
                     FrameResult::Ok => {}
-                    FrameResult::PlayerDied => {
+                    FrameResult::MainPlayerDied => {
                         level_runtime = new_game(&args.start_position, world.clone());
                     }
                 }

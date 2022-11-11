@@ -53,7 +53,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
 }
 
 pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
-    let player_bbox = entities.player().sprite.bbox();
+    let player_bbox = entities.main_player().sprite.bbox();
     for (_id, entity) in entities.iter_mut() {
         if let Some(mushroom) = entity.mushroom.as_mut() {
             let velocity = &mut entity.physics.velocity;

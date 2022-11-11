@@ -52,7 +52,7 @@ impl Display for Entity {
     }
 }
 
-pub const PLAYER_ENTITY_ID: u64 = 0;
+pub const MAIN_PLAYER_ENTITY_ID: u64 = 0;
 
 #[derive(Clone)]
 pub struct EntityMap {
@@ -101,23 +101,23 @@ impl EntityMap {
         self.map.get_mut(&id)
     }
 
-    pub fn player(&self) -> &Entity {
-        &self.map[&PLAYER_ENTITY_ID]
+    pub fn main_player(&self) -> &Entity {
+        &self.map[&MAIN_PLAYER_ENTITY_ID]
     }
 
-    pub fn player_mut(&mut self) -> &mut Entity {
-        self.map.get_mut(&PLAYER_ENTITY_ID).unwrap()
+    pub fn main_player_mut(&mut self) -> &mut Entity {
+        self.map.get_mut(&MAIN_PLAYER_ENTITY_ID).unwrap()
     }
 
-    pub fn clear_all_except_player(&mut self) {
-        self.map.retain(|&key, _value| key == PLAYER_ENTITY_ID);
+    pub fn clear_all_except_main_player(&mut self) {
+        self.map.retain(|&key, _value| key == MAIN_PLAYER_ENTITY_ID);
     }
 
-    pub fn new_ex(player: Entity, capacity: usize) -> Self {
+    pub fn new_ex(main_player: Entity, capacity: usize) -> Self {
         let mut map = EntityMap {
             map: HashMap::with_capacity(capacity),
         };
-        map.map.insert(PLAYER_ENTITY_ID, player);
+        map.map.insert(MAIN_PLAYER_ENTITY_ID, main_player);
         map
     }
 

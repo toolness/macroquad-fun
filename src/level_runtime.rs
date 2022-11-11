@@ -37,7 +37,7 @@ const ENTITY_CAPACITY: usize = 200;
 #[derive(PartialEq)]
 pub enum FrameResult {
     Ok,
-    PlayerDied,
+    MainPlayerDied,
 }
 
 #[derive(Clone)]
@@ -99,7 +99,7 @@ impl LevelRuntime {
 
     fn change_level(&mut self, level: Rc<Level>) {
         self.level = level;
-        self.entities.clear_all_except_player();
+        self.entities.clear_all_except_main_player();
         self.spawn_entities();
     }
 
@@ -144,7 +144,7 @@ impl LevelRuntime {
     }
 
     fn maybe_switch_level(&mut self) -> bool {
-        let player = self.entities.player_mut();
+        let player = self.entities.main_player_mut();
         if let Some((new_level, new_pos)) =
             should_switch_levels(&player.sprite, &self.level, &self.world)
         {
@@ -158,12 +158,12 @@ impl LevelRuntime {
 
     pub fn advance_one_frame(&mut self, time: &GameTime, input: &InputState) -> FrameResult {
         if !self.maybe_switch_level()
-            && did_fall_off_level(&self.entities.player().sprite, &self.level)
+            && did_fall_off_level(&self.entities.main_player().sprite, &self.level)
         {
-            return FrameResult::PlayerDied;
+            return FrameResult::MainPlayerDied;
         }
 
-        process_player_input(self.entities.player_mut(), time, input);
+        process_player_input(self.entities.main_player_mut(), time, input);
         attachment_system(&mut self.entities, &self.level, time);
         route_system(&mut self.entities);
         physics_system_update_positions(&mut self.entities, time);
@@ -181,7 +181,8 @@ impl LevelRuntime {
         pickup_system(&mut self.entities, time);
         player_update_system(&mut self.entities, time);
 
-        self.camera.update(&self.entities.player(), &self.level);
+        self.camera
+            .update(&self.entities.main_player(), &self.level);
 
         return FrameResult::Ok;
     }
@@ -193,7 +194,7 @@ impl LevelRuntime {
                 .draw_entities(&self.entities, &self.level);
         });
 
-        draw_level_text(&self.entities.player().sprite, &self.level);
+        draw_level_text(&self.entities.main_player().sprite, &self.level);
     }
 
     pub fn generate_debug_text(&self, text: &mut String) -> Result<()> {
@@ -222,7 +223,7 @@ impl LevelRuntime {
             self.dynamic_collider_system.draw_debug_rects();
             draw_route_debug_targets(&self.entities);
             draw_rect_lines(
-                &level.get_bounding_cell_rect(&self.entities.player().sprite.bbox()),
+                &level.get_bounding_cell_rect(&self.entities.main_player().sprite.bbox()),
                 1.,
                 WHITE,
             );
