@@ -4,7 +4,7 @@ use macroquad::prelude::{Rect, PURPLE};
 
 use crate::{
     collision::{Collider, CollisionFlags},
-    entity::{Entity, EntityMap},
+    entity::{Entity, EntityMap, HeaplessEntityVec},
 };
 
 #[derive(Default, Clone, Copy)]
@@ -29,42 +29,18 @@ impl DynamicColliderComponent {
 }
 
 #[derive(Clone)]
-pub struct SavedDynamicColliderSystem {
-    colliders: HashMap<u64, Collider>,
-}
-
-impl SavedDynamicColliderSystem {
-    pub fn with_capacity(capacity: usize) -> Self {
-        SavedDynamicColliderSystem {
-            colliders: HashMap::with_capacity(capacity),
-        }
-    }
-}
-
 pub struct DynamicColliderSystem {
     /// Computed values of all the dynamic colliders that currently exist.
     /// This is done partly, for efficiency, but also because it's hard
     /// for our physics system to do nested loops over all entities,
     /// given Rust's borrow checker.
     colliders: HashMap<u64, Collider>,
-
-    /// This solely exists as an instance variable so we can amortize
-    /// allocations across frames.
-    colliders_to_remove: Vec<u64>,
 }
 
 impl DynamicColliderSystem {
-    pub fn from_saved(saved: SavedDynamicColliderSystem) -> Self {
-        let capacity = saved.colliders.capacity();
+    pub fn with_capacity(capacity: usize) -> Self {
         DynamicColliderSystem {
-            colliders: saved.colliders,
-            colliders_to_remove: Vec::with_capacity(capacity),
-        }
-    }
-
-    pub fn save(&self) -> SavedDynamicColliderSystem {
-        SavedDynamicColliderSystem {
-            colliders: self.colliders.clone(),
+            colliders: HashMap::with_capacity(capacity),
         }
     }
 
@@ -78,11 +54,15 @@ impl DynamicColliderSystem {
         }
 
         // Now remove any stale colliders that no longer exist.
-        self.colliders_to_remove.clear();
-        self.colliders_to_remove
-            .extend(self.colliders.keys().filter(|&id| !entities.contains(*id)));
-        for id in self.colliders_to_remove.iter() {
-            self.colliders.remove(id);
+        let mut colliders_to_remove: HeaplessEntityVec = heapless::Vec::new();
+        colliders_to_remove.extend(
+            self.colliders
+                .keys()
+                .filter(|&id| !entities.contains(*id))
+                .cloned(),
+        );
+        for id in colliders_to_remove {
+            self.colliders.remove(&id);
         }
     }
 

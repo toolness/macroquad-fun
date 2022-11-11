@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crate::attachment::attachment_system;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
-use crate::dynamic_collider::{DynamicColliderSystem, SavedDynamicColliderSystem};
+use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
@@ -47,7 +47,7 @@ pub struct SavedLevelRuntime {
     entities: EntityMap,
     camera: Camera,
     next_id: u64,
-    dynamic_collider_system: SavedDynamicColliderSystem,
+    dynamic_collider_system: DynamicColliderSystem,
 }
 
 pub struct LevelRuntime {
@@ -68,7 +68,7 @@ impl LevelRuntime {
             entities: EntityMap::new_ex(player, ENTITY_CAPACITY),
             camera: Camera::new(),
             next_id: 1,
-            dynamic_collider_system: SavedDynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
+            dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
         });
         instance.change_level(level);
         instance
@@ -81,9 +81,7 @@ impl LevelRuntime {
             entities: saved.entities,
             next_id: saved.next_id,
             camera: saved.camera,
-            dynamic_collider_system: DynamicColliderSystem::from_saved(
-                saved.dynamic_collider_system,
-            ),
+            dynamic_collider_system: saved.dynamic_collider_system,
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
         }
     }
@@ -95,7 +93,7 @@ impl LevelRuntime {
             entities: self.entities.clone(),
             camera: self.camera,
             next_id: self.next_id,
-            dynamic_collider_system: self.dynamic_collider_system.save(),
+            dynamic_collider_system: self.dynamic_collider_system.clone(),
         }
     }
 
