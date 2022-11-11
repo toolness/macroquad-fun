@@ -17,7 +17,7 @@ use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
     teleport_entity,
 };
-use crate::push::PushSystem;
+use crate::push::push_system;
 use crate::route::{draw_route_debug_targets, route_system};
 use crate::spear::create_spear;
 use crate::switch::SwitchSystem;
@@ -58,7 +58,6 @@ pub struct LevelRuntime {
     next_id: u64,
     physics_system: PhysicsSystem,
     switch_system: SwitchSystem,
-    push_system: PushSystem,
     dynamic_collider_system: DynamicColliderSystem,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
     entity_processor: EntityProcessor,
@@ -86,9 +85,6 @@ impl LevelRuntime {
             next_id: saved.next_id,
             camera: saved.camera,
             physics_system: PhysicsSystem::with_capacity(ENTITY_CAPACITY),
-            push_system: PushSystem {
-                processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
-            },
             switch_system: SwitchSystem {
                 processor: EntityProcessor::with_capacity(ENTITY_CAPACITY),
             },
@@ -188,7 +184,7 @@ impl LevelRuntime {
         self.physics_system
             .update_positions(&mut self.entities, time);
         self.dynamic_collider_system.run(&mut self.entities);
-        self.push_system.run(&mut self.entities);
+        push_system(&mut self.entity_processor, &mut self.entities);
         self.switch_system.run(&mut self.entities);
         self.physics_system.resolve_collisions(
             &mut self.entities,

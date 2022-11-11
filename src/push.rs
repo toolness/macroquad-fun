@@ -11,44 +11,38 @@ pub struct PushComponent {
     pub pushable_coefficient: f32,
 }
 
-pub struct PushSystem {
-    pub processor: EntityProcessor,
-}
-
-impl PushSystem {
-    pub fn run(&mut self, entities: &mut EntityMap) {
-        self.processor.filter_and_process_entities(
-            entities,
-            |entity| {
-                entity
-                    .push
-                    .as_ref()
-                    .map(|push| push.can_push)
-                    .unwrap_or(false)
-            },
-            |pusher, entities| {
-                for (_id, pushed) in entities.iter_mut() {
-                    if let Some(push) = &pushed.push {
-                        if push.pushable_coefficient > 0. {
-                            let pusher_bbox = pusher.sprite.bbox();
-                            let pushed_bbox = pushed.sprite.bbox();
-                            if let Some(intersection) = pusher_bbox.intersect(pushed_bbox) {
-                                // Only push if the pusher is overlapping most of the
-                                // pushed entity.
-                                if intersection.h >= pushed_bbox.h * 0.5 {
-                                    let sign = if pusher_bbox.x > pushed_bbox.x {
-                                        -1.
-                                    } else {
-                                        1.
-                                    };
-                                    let x_delta = intersection.w * push.pushable_coefficient * sign;
-                                    pushed.sprite.pos.x += x_delta;
-                                }
+pub fn push_system(processor: &mut EntityProcessor, entities: &mut EntityMap) {
+    processor.filter_and_process_entities(
+        entities,
+        |entity| {
+            entity
+                .push
+                .as_ref()
+                .map(|push| push.can_push)
+                .unwrap_or(false)
+        },
+        |pusher, entities| {
+            for (_id, pushed) in entities.iter_mut() {
+                if let Some(push) = &pushed.push {
+                    if push.pushable_coefficient > 0. {
+                        let pusher_bbox = pusher.sprite.bbox();
+                        let pushed_bbox = pushed.sprite.bbox();
+                        if let Some(intersection) = pusher_bbox.intersect(pushed_bbox) {
+                            // Only push if the pusher is overlapping most of the
+                            // pushed entity.
+                            if intersection.h >= pushed_bbox.h * 0.5 {
+                                let sign = if pusher_bbox.x > pushed_bbox.x {
+                                    -1.
+                                } else {
+                                    1.
+                                };
+                                let x_delta = intersection.w * push.pushable_coefficient * sign;
+                                pushed.sprite.pos.x += x_delta;
                             }
                         }
                     }
                 }
-            },
-        )
-    }
+            }
+        },
+    )
 }
