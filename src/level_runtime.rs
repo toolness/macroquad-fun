@@ -19,6 +19,7 @@ use crate::player::{
 };
 use crate::push::PushSystem;
 use crate::route::{draw_route_debug_targets, RouteSystem};
+use crate::spear::create_spear;
 use crate::switch::SwitchSystem;
 use crate::text::draw_level_text;
 use crate::time::GameTime;
@@ -139,6 +140,7 @@ impl LevelRuntime {
         for entity in level.entities.iter() {
             let opt_instance = match &entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
+                EntityKind::Spear => Some(create_spear(entity.rect)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
                 EntityKind::MovingPlatform(args) => Some(create_moving_platform(entity.rect, args)),
                 EntityKind::Crate => Some(create_crate(entity.rect)),

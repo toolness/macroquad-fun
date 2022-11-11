@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 29,
+	"nextUid": 30,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -635,6 +635,34 @@
 					"tilesetUid": null
 				}
 			]
+		},
+		{
+			"identifier": "Spear",
+			"uid": 29,
+			"tags": [],
+			"width": 16,
+			"height": 16,
+			"resizableX": false,
+			"resizableY": false,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#848484",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
 		}
 	], "tilesets": [
 		{
@@ -848,7 +876,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "bf265b20-5110-11ed-83a8-4f2daf050271"
+								"worldIid": "7138c680-5110-11ed-b01d-3b6ed695f0fe"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -884,6 +912,20 @@
 									"params": ["EntityTiles"]
 								}] }
 							]
+						},
+						{
+							"__identifier": "Spear",
+							"__grid": [8,13],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#848484",
+							"iid": "95167250-5110-11ed-b01d-a1191d52de25",
+							"width": 16,
+							"height": 16,
+							"defUid": 29,
+							"px": [128,208],
+							"fieldInstances": []
 						}
 					]
 				},

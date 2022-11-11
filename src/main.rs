@@ -51,6 +51,7 @@ mod push;
 mod recorder;
 mod route;
 mod running;
+mod spear;
 mod sprite_component;
 mod sprite_renderer;
 mod switch;
