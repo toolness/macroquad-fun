@@ -11,16 +11,11 @@ use crate::{
     time::GameTime,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub enum Rotation {
+    #[default]
     None,
     Clockwise270,
-}
-
-impl Default for Rotation {
-    fn default() -> Self {
-        Rotation::None
-    }
 }
 
 #[derive(Default, Clone, Copy)]
