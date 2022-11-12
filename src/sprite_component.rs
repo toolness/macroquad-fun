@@ -92,7 +92,11 @@ impl SpriteComponent {
 
                 LeftFacingRendering::FlipBoundingBox => {
                     if let Renderer::Sprite(sprite) = self.renderer {
-                        let center_offset = sprite.frame_width() / 2. - bbox.w / 2.;
+                        let frame_width = match self.rotation {
+                            Rotation::None => sprite.frame_width(),
+                            Rotation::Clockwise270 => sprite.frame_height(),
+                        };
+                        let center_offset = frame_width / 2. - bbox.w / 2.;
                         let flipped_x = (bbox.x - center_offset) * -1. + center_offset;
                         bbox.x = flipped_x;
                     }
