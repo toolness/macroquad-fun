@@ -157,8 +157,19 @@ impl SpriteComponent {
         match self.renderer {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
-                let x = self.get_sprite_x();
-                let y = self.pos.y;
+                let (x, y) = match self.rotation {
+                    Rotation::None => (self.get_sprite_x(), self.pos.y),
+                    Rotation::Clockwise90 => {
+                        let x = self.get_sprite_x();
+                        let y = self.pos.y;
+                        let half_unrotated_frame_width = sprite.frame_width() / 2.;
+                        let half_unrotated_frame_height = sprite.frame_height() / 2.;
+                        (
+                            x - half_unrotated_frame_width + half_unrotated_frame_height,
+                            y + half_unrotated_frame_width - half_unrotated_frame_height,
+                        )
+                    }
+                };
                 sprite.draw_ex(
                     x,
                     y,
@@ -172,7 +183,7 @@ impl SpriteComponent {
                         color: self.color.unwrap_or(WHITE),
                         pivot: match self.rotation {
                             Rotation::None => None,
-                            Rotation::Clockwise90 => Some(Vec2::new(x + sprite.frame_height(), y)),
+                            Rotation::Clockwise90 => None,
                         },
                         ..Default::default()
                     },
