@@ -14,7 +14,7 @@ use crate::{
 #[derive(Clone, Copy)]
 pub enum Rotation {
     None,
-    Clockwise90,
+    Clockwise270,
 }
 
 impl Default for Rotation {
@@ -77,7 +77,7 @@ impl SpriteComponent {
     fn get_sprite_dimensions(&self, sprite: &SpriteRenderer) -> Vec2 {
         match self.rotation {
             Rotation::None => Vec2::new(sprite.frame_width(), sprite.frame_height()),
-            Rotation::Clockwise90 => Vec2::new(sprite.frame_height(), sprite.frame_width()),
+            Rotation::Clockwise270 => Vec2::new(sprite.frame_height(), sprite.frame_width()),
         }
     }
 
@@ -85,8 +85,15 @@ impl SpriteComponent {
         let mut bbox = *relative_bbox;
         match self.rotation {
             Rotation::None => {}
-            Rotation::Clockwise90 => {
+            Rotation::Clockwise270 => {
                 bbox = Rect::new(bbox.y, bbox.x, bbox.h, bbox.w);
+
+                if let Renderer::Sprite(sprite) = self.renderer {
+                    let frame_height = self.get_sprite_dimensions(&sprite).y;
+                    let center_offset = frame_height / 2. - bbox.h / 2.;
+                    let flipped_y = (bbox.y - center_offset) * -1. + center_offset;
+                    bbox.y = flipped_y;
+                }
             }
         }
         if self.is_facing_left {
@@ -159,7 +166,7 @@ impl SpriteComponent {
             // Macroquad *does* support specifying an alternative pivot point, it's
             // specified in absolute coordinates and extremely confusing, so we're
             // just doing things this way.
-            Rotation::Clockwise90 => {
+            Rotation::Clockwise270 => {
                 let half_unrotated_frame_width = sprite.frame_width() / 2.;
                 let half_unrotated_frame_height = sprite.frame_height() / 2.;
                 Vec2::new(
@@ -184,7 +191,7 @@ impl SpriteComponent {
                         flip_x: self.is_facing_left,
                         rotation: match self.rotation {
                             Rotation::None => 0.,
-                            Rotation::Clockwise90 => std::f64::consts::FRAC_PI_2 as f32,
+                            Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
                         },
                         color: self.color.unwrap_or(WHITE),
                         ..Default::default()
