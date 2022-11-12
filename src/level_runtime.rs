@@ -6,7 +6,7 @@ use crate::attachment::attachment_system;
 use crate::crate_entity::create_crate;
 use crate::drawing::draw_rect_lines;
 use crate::dynamic_collider::DynamicColliderSystem;
-use crate::entity::{Entity, EntityMap};
+use crate::entity::{filter_and_process_entities, Entity, EntityMap};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::input::InputState;
@@ -62,6 +62,7 @@ pub struct LevelRuntime {
 
 impl LevelRuntime {
     pub fn new(player: Entity, level: Rc<Level>, world: Rc<World>) -> Self {
+        let mut player_clone = player.clone();
         let mut instance = Self::from_saved(SavedLevelRuntime {
             level: level.clone(),
             world,
@@ -71,6 +72,10 @@ impl LevelRuntime {
             dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
         });
         instance.change_level(level);
+
+        player_clone.sprite.pos.x += 60.;
+        instance.entities.insert(500, player_clone);
+
         instance
     }
 
@@ -163,7 +168,14 @@ impl LevelRuntime {
             return FrameResult::MainPlayerDied;
         }
 
-        process_player_input(self.entities.main_player_mut(), time, input);
+        filter_and_process_entities(
+            &mut self.entities,
+            |entity| entity.player.is_some(),
+            |player_entity, _entities| {
+                process_player_input(player_entity, time, input);
+            },
+        );
+
         attachment_system(&mut self.entities, &self.level, time);
         route_system(&mut self.entities);
         physics_system_update_positions(&mut self.entities, time);
