@@ -142,14 +142,32 @@ impl SpriteComponent {
         }
     }
 
-    fn get_sprite_x(&self) -> f32 {
+    fn get_sprite_draw_coords(&self, sprite: &SpriteRenderer) -> Vec2 {
         let mut x = self.pos.x;
+        let y = self.pos.y;
+
         if self.is_facing_left {
             if let LeftFacingRendering::XOffset(offset) = self.left_facing_rendering {
                 x += offset;
             }
         }
-        x
+
+        match self.rotation {
+            Rotation::None => Vec2::new(x, y),
+            // Macroquad rotates sprites around their center, so we're going to
+            // "undo" that by translating by the opposite amount. Note that while
+            // Macroquad *does* support specifying an alternative pivot point, it's
+            // specified in absolute coordinates and extremely confusing, so we're
+            // just doing things this way.
+            Rotation::Clockwise90 => {
+                let half_unrotated_frame_width = sprite.frame_width() / 2.;
+                let half_unrotated_frame_height = sprite.frame_height() / 2.;
+                Vec2::new(
+                    x - half_unrotated_frame_width + half_unrotated_frame_height,
+                    y + half_unrotated_frame_width - half_unrotated_frame_height,
+                )
+            }
+        }
     }
 
     pub fn draw_current_frame(&self, level: &Level) {
@@ -157,22 +175,10 @@ impl SpriteComponent {
         match self.renderer {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
-                let (x, y) = match self.rotation {
-                    Rotation::None => (self.get_sprite_x(), self.pos.y),
-                    Rotation::Clockwise90 => {
-                        let x = self.get_sprite_x();
-                        let y = self.pos.y;
-                        let half_unrotated_frame_width = sprite.frame_width() / 2.;
-                        let half_unrotated_frame_height = sprite.frame_height() / 2.;
-                        (
-                            x - half_unrotated_frame_width + half_unrotated_frame_height,
-                            y + half_unrotated_frame_width - half_unrotated_frame_height,
-                        )
-                    }
-                };
+                let pos = self.get_sprite_draw_coords(sprite);
                 sprite.draw_ex(
-                    x,
-                    y,
+                    pos.x,
+                    pos.y,
                     self.current_frame_number,
                     SpriteDrawParams {
                         flip_x: self.is_facing_left,
