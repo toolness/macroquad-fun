@@ -20,7 +20,7 @@ pub fn create_floor_switch(start_rect: Rect, trigger_entity: Option<u64>) -> Ent
     return Entity {
         sprite: SpriteComponent {
             pos: start_point,
-            relative_bbox,
+            base_relative_bbox: relative_bbox,
             renderer: Renderer::SolidRectangle(drawn_rect),
             color: Some(BLACK),
             ..Default::default()

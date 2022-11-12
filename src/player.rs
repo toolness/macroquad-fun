@@ -31,7 +31,7 @@ pub struct PlayerComponent {
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: game_assets().huntress.idle_bbox,
+            base_relative_bbox: game_assets().huntress.idle_bbox,
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
@@ -204,7 +204,7 @@ pub fn should_switch_levels(
 ) -> Option<(Rc<Level>, Vec2)> {
     if !level.contains_majority_of(&sprite.bbox()) {
         let world_pos = level.to_world_coords(&sprite.pos);
-        let result = world.find_level_containing_majority_of(&world_pos, &sprite.relative_bbox);
+        let result = world.find_level_containing_majority_of(&world_pos, &sprite.relative_bbox());
         if result.is_some() {
             return result;
         }

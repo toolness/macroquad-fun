@@ -18,7 +18,7 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
     let assets = &game_assets().flying_eye;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: assets.flight_bbox,
+            base_relative_bbox: assets.flight_bbox,
             renderer: Renderer::Sprite(&assets.flight),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             material: MaterialRenderer::ReplaceColors(&assets.color_replacements),

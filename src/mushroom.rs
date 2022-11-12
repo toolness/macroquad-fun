@@ -33,7 +33,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
     let death_sprite = &assets.death;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: assets.idle_bbox,
+            base_relative_bbox: assets.idle_bbox,
             renderer: Renderer::Sprite(&death_sprite),
             material: MaterialRenderer::ReplaceColors(&assets.color_replacements),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,

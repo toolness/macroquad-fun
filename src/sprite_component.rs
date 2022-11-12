@@ -35,7 +35,15 @@ pub enum Renderer {
 #[derive(Default, Clone, Copy)]
 pub struct SpriteComponent {
     pub pos: Vec2,
-    pub relative_bbox: Rect,
+
+    /// The bounding box of the sprite relative to the top-left of a
+    /// single frame of its renderer, without any flipping or rotation
+    /// applied.
+    ///
+    /// This is only public for ease of construction. Prefer
+    /// `relative_bbox()` to this.
+    pub base_relative_bbox: Rect,
+
     pub rotation: Rotation,
     pub renderer: Renderer,
     pub material: MaterialRenderer,
@@ -66,8 +74,8 @@ pub enum LeftFacingRendering {
 }
 
 impl SpriteComponent {
-    pub fn calculate_absolute_bounding_box(&self, relative_bbox: &Rect) -> Rect {
-        let final_relative_bbox = if self.is_facing_left {
+    fn calculate_relative_bbox(&self, relative_bbox: &Rect) -> Rect {
+        if self.is_facing_left {
             match self.left_facing_rendering {
                 LeftFacingRendering::Default => *relative_bbox,
 
@@ -79,7 +87,7 @@ impl SpriteComponent {
                     if let Renderer::Sprite(sprite) = self.renderer {
                         let center_offset = sprite.frame_width() / 2. - relative_bbox.w / 2.;
                         let flipped_x =
-                            (self.relative_bbox.x - center_offset) * -1. + center_offset;
+                            (self.base_relative_bbox.x - center_offset) * -1. + center_offset;
                         let mut flipped_relative_bbox = *relative_bbox;
                         flipped_relative_bbox.x = flipped_x;
                         flipped_relative_bbox
@@ -90,23 +98,32 @@ impl SpriteComponent {
             }
         } else {
             *relative_bbox
-        };
-        final_relative_bbox.offset(self.pos)
+        }
+    }
+
+    pub fn relative_bbox(&self) -> Rect {
+        self.calculate_relative_bbox(&self.base_relative_bbox)
+    }
+
+    pub fn calculate_absolute_bounding_box(&self, relative_bbox: &Rect) -> Rect {
+        self.calculate_relative_bbox(relative_bbox).offset(self.pos)
     }
 
     pub fn bbox(&self) -> Rect {
-        self.calculate_absolute_bounding_box(&self.relative_bbox)
+        self.calculate_absolute_bounding_box(&self.base_relative_bbox)
     }
 
     pub fn at_bottom_left(mut self, rect: &Rect) -> Self {
-        self.pos.x = rect.left() - self.relative_bbox.left();
-        self.pos.y = rect.bottom() - self.relative_bbox.bottom();
+        let relative_bbox = self.relative_bbox();
+        self.pos.x = rect.left() - relative_bbox.left();
+        self.pos.y = rect.bottom() - relative_bbox.bottom();
         self
     }
 
     pub fn at_top_left(mut self, rect: &Rect) -> Self {
-        self.pos.x = rect.left() - self.relative_bbox.left();
-        self.pos.y = rect.top() - self.relative_bbox.top();
+        let relative_bbox = self.relative_bbox();
+        self.pos.x = rect.left() - relative_bbox.left();
+        self.pos.y = rect.top() - relative_bbox.top();
         self
     }
 

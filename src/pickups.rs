@@ -19,7 +19,7 @@ pub fn create_spear(start_rect: Rect) -> Entity {
     let assets = &game_assets().spear;
     Entity {
         sprite: SpriteComponent {
-            relative_bbox: assets.spear_move_bbox,
+            base_relative_bbox: assets.spear_move_bbox,
             renderer: Renderer::Sprite(&assets.spear_move),
             rotation: Rotation::Clockwise270,
             ..Default::default()
