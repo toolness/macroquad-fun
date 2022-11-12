@@ -11,6 +11,18 @@ use crate::{
     time::GameTime,
 };
 
+#[derive(Clone, Copy)]
+pub enum Rotation {
+    None,
+    Clockwise270,
+}
+
+impl Default for Rotation {
+    fn default() -> Self {
+        Rotation::None
+    }
+}
+
 #[derive(Default, Clone, Copy)]
 pub enum Renderer {
     #[default]
@@ -24,6 +36,7 @@ pub enum Renderer {
 pub struct SpriteComponent {
     pub pos: Vec2,
     pub relative_bbox: Rect,
+    pub rotation: Rotation,
     pub renderer: Renderer,
     pub material: MaterialRenderer,
     pub color: Option<Color>,
@@ -124,6 +137,10 @@ impl SpriteComponent {
                     self.current_frame_number,
                     SpriteDrawParams {
                         flip_x: self.is_facing_left,
+                        rotation: match self.rotation {
+                            Rotation::None => 0.,
+                            Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
+                        },
                         color: self.color.unwrap_or(WHITE),
                         ..Default::default()
                     },

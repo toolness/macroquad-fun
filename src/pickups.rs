@@ -4,7 +4,7 @@ use crate::{
     entity::{filter_and_process_entities, Entity, EntityMap, HeaplessEntityVec},
     game_assets::game_assets,
     physics::PhysicsComponent,
-    sprite_component::{Renderer, SpriteComponent},
+    sprite_component::{Renderer, Rotation, SpriteComponent},
     time::GameTime,
 };
 
@@ -21,6 +21,7 @@ pub fn create_spear(start_rect: Rect) -> Entity {
         sprite: SpriteComponent {
             relative_bbox: assets.spear_move_bbox,
             renderer: Renderer::Sprite(&assets.spear_move),
+            rotation: Rotation::Clockwise270,
             ..Default::default()
         }
         .at_bottom_left(&start_rect),

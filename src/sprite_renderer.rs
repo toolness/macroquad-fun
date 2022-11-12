@@ -16,6 +16,8 @@ pub struct SpriteDrawParams {
     /// Mirror on the Y axis
     pub flip_y: bool,
 
+    pub rotation: f32,
+
     pub color: Color,
 }
 
@@ -24,6 +26,7 @@ impl Default for SpriteDrawParams {
         Self {
             flip_x: false,
             flip_y: false,
+            rotation: 0.,
             color: WHITE,
         }
     }
@@ -65,6 +68,7 @@ impl SpriteRenderer {
             DrawTextureParams {
                 flip_x: params.flip_x,
                 flip_y: params.flip_y,
+                rotation: params.rotation,
                 dest_size: Some(self.frame_size * self.scale),
                 source: Some(Rect {
                     x: self.frame_size.x * frame_number as f32,
