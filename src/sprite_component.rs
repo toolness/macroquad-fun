@@ -1,6 +1,6 @@
 use macroquad::{
     prelude::{Color, Rect, Vec2, GREEN, PURPLE, WHITE},
-    shapes::draw_rectangle,
+    shapes::{draw_rectangle, draw_rectangle_lines},
 };
 
 use crate::{
@@ -74,6 +74,13 @@ pub enum LeftFacingRendering {
 }
 
 impl SpriteComponent {
+    fn get_sprite_dimensions(&self, sprite: &SpriteRenderer) -> Vec2 {
+        match self.rotation {
+            Rotation::None => Vec2::new(sprite.frame_width(), sprite.frame_height()),
+            Rotation::Clockwise270 => Vec2::new(sprite.frame_height(), sprite.frame_width()),
+        }
+    }
+
     fn calculate_relative_bbox(&self, relative_bbox: &Rect) -> Rect {
         let mut bbox = *relative_bbox;
         match self.rotation {
@@ -92,10 +99,7 @@ impl SpriteComponent {
 
                 LeftFacingRendering::FlipBoundingBox => {
                     if let Renderer::Sprite(sprite) = self.renderer {
-                        let frame_width = match self.rotation {
-                            Rotation::None => sprite.frame_width(),
-                            Rotation::Clockwise270 => sprite.frame_height(),
-                        };
+                        let frame_width = self.get_sprite_dimensions(&sprite).x;
                         let center_offset = frame_width / 2. - bbox.w / 2.;
                         let flipped_x = (bbox.x - center_offset) * -1. + center_offset;
                         bbox.x = flipped_x;
@@ -192,7 +196,8 @@ impl SpriteComponent {
 
     pub fn draw_debug_rects(&self) {
         if let Renderer::Sprite(sprite) = self.renderer {
-            sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
+            let frame = self.get_sprite_dimensions(&sprite);
+            draw_rectangle_lines(self.pos.x, self.pos.y, frame.x, frame.y, 1.0, GREEN);
         }
         draw_rect_lines(&self.bbox(), 2., PURPLE);
     }

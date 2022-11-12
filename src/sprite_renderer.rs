@@ -93,8 +93,4 @@ impl SpriteRenderer {
     pub fn draw(&self, x: f32, y: f32, frame_number: u32) {
         self.draw_ex(x, y, frame_number, Default::default())
     }
-
-    pub fn draw_debug_rect(&self, x: f32, y: f32, color: Color) {
-        draw_rectangle_lines(x, y, self.frame_width(), self.frame_height(), 1.0, color)
-    }
 }
