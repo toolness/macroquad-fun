@@ -153,9 +153,11 @@ impl SpriteComponent {
         match self.renderer {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
+                let x = self.get_sprite_x();
+                let y = self.pos.y;
                 sprite.draw_ex(
-                    self.get_sprite_x(),
-                    self.pos.y,
+                    x,
+                    y,
                     self.current_frame_number,
                     SpriteDrawParams {
                         flip_x: self.is_facing_left,
@@ -164,6 +166,10 @@ impl SpriteComponent {
                             Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
                         },
                         color: self.color.unwrap_or(WHITE),
+                        pivot: match self.rotation {
+                            Rotation::None => None,
+                            Rotation::Clockwise270 => Some(Vec2::new(x, y)),
+                        },
                         ..Default::default()
                     },
                 );
