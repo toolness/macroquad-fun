@@ -21,7 +21,7 @@ pub fn create_spear(start_rect: Rect) -> Entity {
         sprite: SpriteComponent {
             base_relative_bbox: assets.spear_move_bbox,
             renderer: Renderer::Sprite(&assets.spear_move),
-            rotation: Rotation::Clockwise270,
+            rotation: Rotation::Clockwise90,
             ..Default::default()
         }
         .at_bottom_left(&start_rect),

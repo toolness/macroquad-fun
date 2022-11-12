@@ -14,7 +14,7 @@ use crate::{
 #[derive(Clone, Copy)]
 pub enum Rotation {
     None,
-    Clockwise270,
+    Clockwise90,
 }
 
 impl Default for Rotation {
@@ -77,7 +77,7 @@ impl SpriteComponent {
     fn get_sprite_dimensions(&self, sprite: &SpriteRenderer) -> Vec2 {
         match self.rotation {
             Rotation::None => Vec2::new(sprite.frame_width(), sprite.frame_height()),
-            Rotation::Clockwise270 => Vec2::new(sprite.frame_height(), sprite.frame_width()),
+            Rotation::Clockwise90 => Vec2::new(sprite.frame_height(), sprite.frame_width()),
         }
     }
 
@@ -85,7 +85,7 @@ impl SpriteComponent {
         let mut bbox = *relative_bbox;
         match self.rotation {
             Rotation::None => {}
-            Rotation::Clockwise270 => {
+            Rotation::Clockwise90 => {
                 bbox = Rect::new(bbox.y, bbox.x, bbox.h, bbox.w);
             }
         }
@@ -167,12 +167,12 @@ impl SpriteComponent {
                         flip_x: self.is_facing_left,
                         rotation: match self.rotation {
                             Rotation::None => 0.,
-                            Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
+                            Rotation::Clockwise90 => std::f64::consts::FRAC_PI_2 as f32,
                         },
                         color: self.color.unwrap_or(WHITE),
                         pivot: match self.rotation {
                             Rotation::None => None,
-                            Rotation::Clockwise270 => Some(Vec2::new(x, y)),
+                            Rotation::Clockwise90 => Some(Vec2::new(x + sprite.frame_height(), y)),
                         },
                         ..Default::default()
                     },
