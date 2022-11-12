@@ -16,6 +16,8 @@ pub struct SpriteDrawParams {
     /// Mirror on the Y axis
     pub flip_y: bool,
 
+    pub rotation: f32,
+
     pub color: Color,
 }
 
@@ -24,6 +26,7 @@ impl Default for SpriteDrawParams {
         Self {
             flip_x: false,
             flip_y: false,
+            rotation: 0.,
             color: WHITE,
         }
     }
@@ -65,6 +68,7 @@ impl SpriteRenderer {
             DrawTextureParams {
                 flip_x: params.flip_x,
                 flip_y: params.flip_y,
+                rotation: params.rotation,
                 dest_size: Some(self.frame_size * self.scale),
                 source: Some(Rect {
                     x: self.frame_size.x * frame_number as f32,
@@ -72,7 +76,7 @@ impl SpriteRenderer {
                     w: self.frame_size.x,
                     h: self.frame_size.y,
                 }),
-                ..Default::default()
+                pivot: None,
             },
         )
     }
@@ -80,9 +84,5 @@ impl SpriteRenderer {
     #[allow(dead_code)]
     pub fn draw(&self, x: f32, y: f32, frame_number: u32) {
         self.draw_ex(x, y, frame_number, Default::default())
-    }
-
-    pub fn draw_debug_rect(&self, x: f32, y: f32, color: Color) {
-        draw_rectangle_lines(x, y, self.frame_width(), self.frame_height(), 1.0, color)
     }
 }

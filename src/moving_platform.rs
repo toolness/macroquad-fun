@@ -17,7 +17,7 @@ pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> En
     return Entity {
         sprite: SpriteComponent {
             pos: start_rect.point(),
-            relative_bbox,
+            base_relative_bbox: relative_bbox,
             renderer: match args.renderer_type {
                 RendererType::EntityTiles => Renderer::EntityTiles(start_rect),
                 RendererType::SolidRectangle => Renderer::SolidRectangle(relative_bbox),

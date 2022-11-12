@@ -316,7 +316,7 @@ mod tests {
     fn make_simple_10x10_entity() -> Entity {
         let sprite = SpriteComponent {
             pos: Vec2::new(10., 10.),
-            relative_bbox: Rect::new(0., 0., 10., 10.),
+            base_relative_bbox: Rect::new(0., 0., 10., 10.),
             ..Default::default()
         };
         Entity {

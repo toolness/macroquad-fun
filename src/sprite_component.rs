@@ -1,6 +1,6 @@
 use macroquad::{
     prelude::{Color, Rect, Vec2, GREEN, PURPLE, WHITE},
-    shapes::draw_rectangle,
+    shapes::{draw_rectangle, draw_rectangle_lines},
 };
 
 use crate::{
@@ -10,6 +10,13 @@ use crate::{
     sprite_renderer::{SpriteDrawParams, SpriteRenderer},
     time::GameTime,
 };
+
+#[derive(Clone, Copy, Default)]
+pub enum Rotation {
+    #[default]
+    None,
+    Clockwise270,
+}
 
 #[derive(Default, Clone, Copy)]
 pub enum Renderer {
@@ -23,7 +30,16 @@ pub enum Renderer {
 #[derive(Default, Clone, Copy)]
 pub struct SpriteComponent {
     pub pos: Vec2,
-    pub relative_bbox: Rect,
+
+    /// The bounding box of the sprite relative to the top-left of a
+    /// single frame of its renderer, without any flipping or rotation
+    /// applied.
+    ///
+    /// This is only public for ease of construction. Prefer
+    /// `relative_bbox()` to this.
+    pub base_relative_bbox: Rect,
+
+    pub rotation: Rotation,
     pub renderer: Renderer,
     pub material: MaterialRenderer,
     pub color: Option<Color>,
@@ -53,47 +69,72 @@ pub enum LeftFacingRendering {
 }
 
 impl SpriteComponent {
-    pub fn calculate_absolute_bounding_box(&self, relative_bbox: &Rect) -> Rect {
-        let final_relative_bbox = if self.is_facing_left {
+    fn get_sprite_dimensions(&self, sprite: &SpriteRenderer) -> Vec2 {
+        match self.rotation {
+            Rotation::None => Vec2::new(sprite.frame_width(), sprite.frame_height()),
+            Rotation::Clockwise270 => Vec2::new(sprite.frame_height(), sprite.frame_width()),
+        }
+    }
+
+    fn calculate_relative_bbox(&self, relative_bbox: &Rect) -> Rect {
+        let mut bbox = *relative_bbox;
+        match self.rotation {
+            Rotation::None => {}
+            Rotation::Clockwise270 => {
+                bbox = Rect::new(bbox.y, bbox.x, bbox.h, bbox.w);
+
+                if let Renderer::Sprite(sprite) = self.renderer {
+                    let frame_height = self.get_sprite_dimensions(&sprite).y;
+                    let center_offset = frame_height / 2. - bbox.h / 2.;
+                    let flipped_y = (bbox.y - center_offset) * -1. + center_offset;
+                    bbox.y = flipped_y;
+                }
+            }
+        }
+        if self.is_facing_left {
             match self.left_facing_rendering {
-                LeftFacingRendering::Default => *relative_bbox,
+                LeftFacingRendering::Default => {}
 
                 // Note that we're going to keep the bounding box the same here--the x-offset
                 // is used at *render* time, not to calculate the bounding box.
-                LeftFacingRendering::XOffset(..) => *relative_bbox,
+                LeftFacingRendering::XOffset(..) => {}
 
                 LeftFacingRendering::FlipBoundingBox => {
                     if let Renderer::Sprite(sprite) = self.renderer {
-                        let center_offset = sprite.frame_width() / 2. - relative_bbox.w / 2.;
-                        let flipped_x =
-                            (self.relative_bbox.x - center_offset) * -1. + center_offset;
-                        let mut flipped_relative_bbox = *relative_bbox;
-                        flipped_relative_bbox.x = flipped_x;
-                        flipped_relative_bbox
-                    } else {
-                        *relative_bbox
+                        let frame_width = self.get_sprite_dimensions(&sprite).x;
+                        let center_offset = frame_width / 2. - bbox.w / 2.;
+                        let flipped_x = (bbox.x - center_offset) * -1. + center_offset;
+                        bbox.x = flipped_x;
                     }
                 }
             }
-        } else {
-            *relative_bbox
-        };
-        final_relative_bbox.offset(self.pos)
+        }
+        bbox
+    }
+
+    pub fn relative_bbox(&self) -> Rect {
+        self.calculate_relative_bbox(&self.base_relative_bbox)
+    }
+
+    pub fn calculate_absolute_bounding_box(&self, relative_bbox: &Rect) -> Rect {
+        self.calculate_relative_bbox(relative_bbox).offset(self.pos)
     }
 
     pub fn bbox(&self) -> Rect {
-        self.calculate_absolute_bounding_box(&self.relative_bbox)
+        self.calculate_absolute_bounding_box(&self.base_relative_bbox)
     }
 
     pub fn at_bottom_left(mut self, rect: &Rect) -> Self {
-        self.pos.x = rect.left() - self.relative_bbox.left();
-        self.pos.y = rect.bottom() - self.relative_bbox.bottom();
+        let relative_bbox = self.relative_bbox();
+        self.pos.x = rect.left() - relative_bbox.left();
+        self.pos.y = rect.bottom() - relative_bbox.bottom();
         self
     }
 
     pub fn at_top_left(mut self, rect: &Rect) -> Self {
-        self.pos.x = rect.left() - self.relative_bbox.left();
-        self.pos.y = rect.top() - self.relative_bbox.top();
+        let relative_bbox = self.relative_bbox();
+        self.pos.x = rect.left() - relative_bbox.left();
+        self.pos.y = rect.top() - relative_bbox.top();
         self
     }
 
@@ -103,14 +144,32 @@ impl SpriteComponent {
         }
     }
 
-    fn get_sprite_x(&self) -> f32 {
+    fn get_sprite_draw_coords(&self, sprite: &SpriteRenderer) -> Vec2 {
         let mut x = self.pos.x;
+        let y = self.pos.y;
+
         if self.is_facing_left {
             if let LeftFacingRendering::XOffset(offset) = self.left_facing_rendering {
                 x += offset;
             }
         }
-        x
+
+        match self.rotation {
+            Rotation::None => Vec2::new(x, y),
+            // Macroquad rotates sprites around their center, so we're going to
+            // "undo" that by translating by the opposite amount. Note that while
+            // Macroquad *does* support specifying an alternative pivot point, it's
+            // specified in absolute coordinates and extremely confusing, so we're
+            // just doing things this way.
+            Rotation::Clockwise270 => {
+                let half_unrotated_frame_width = sprite.frame_width() / 2.;
+                let half_unrotated_frame_height = sprite.frame_height() / 2.;
+                Vec2::new(
+                    x - half_unrotated_frame_width + half_unrotated_frame_height,
+                    y + half_unrotated_frame_width - half_unrotated_frame_height,
+                )
+            }
+        }
     }
 
     pub fn draw_current_frame(&self, level: &Level) {
@@ -118,12 +177,17 @@ impl SpriteComponent {
         match self.renderer {
             Renderer::None => {}
             Renderer::Sprite(sprite) => {
+                let pos = self.get_sprite_draw_coords(sprite);
                 sprite.draw_ex(
-                    self.get_sprite_x(),
-                    self.pos.y,
+                    pos.x,
+                    pos.y,
                     self.current_frame_number,
                     SpriteDrawParams {
                         flip_x: self.is_facing_left,
+                        rotation: match self.rotation {
+                            Rotation::None => 0.,
+                            Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
+                        },
                         color: self.color.unwrap_or(WHITE),
                         ..Default::default()
                     },
@@ -147,7 +211,8 @@ impl SpriteComponent {
 
     pub fn draw_debug_rects(&self) {
         if let Renderer::Sprite(sprite) = self.renderer {
-            sprite.draw_debug_rect(self.pos.x, self.pos.y, GREEN);
+            let frame = self.get_sprite_dimensions(&sprite);
+            draw_rectangle_lines(self.pos.x, self.pos.y, frame.x, frame.y, 1.0, GREEN);
         }
         draw_rect_lines(&self.bbox(), 2., PURPLE);
     }
