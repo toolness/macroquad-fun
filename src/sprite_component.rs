@@ -75,30 +75,31 @@ pub enum LeftFacingRendering {
 
 impl SpriteComponent {
     fn calculate_relative_bbox(&self, relative_bbox: &Rect) -> Rect {
+        let mut bbox = *relative_bbox;
+        match self.rotation {
+            Rotation::None => {}
+            Rotation::Clockwise270 => {
+                bbox = Rect::new(bbox.y, bbox.x, bbox.h, bbox.w);
+            }
+        }
         if self.is_facing_left {
             match self.left_facing_rendering {
-                LeftFacingRendering::Default => *relative_bbox,
+                LeftFacingRendering::Default => {}
 
                 // Note that we're going to keep the bounding box the same here--the x-offset
                 // is used at *render* time, not to calculate the bounding box.
-                LeftFacingRendering::XOffset(..) => *relative_bbox,
+                LeftFacingRendering::XOffset(..) => {}
 
                 LeftFacingRendering::FlipBoundingBox => {
                     if let Renderer::Sprite(sprite) = self.renderer {
-                        let center_offset = sprite.frame_width() / 2. - relative_bbox.w / 2.;
-                        let flipped_x =
-                            (self.base_relative_bbox.x - center_offset) * -1. + center_offset;
-                        let mut flipped_relative_bbox = *relative_bbox;
-                        flipped_relative_bbox.x = flipped_x;
-                        flipped_relative_bbox
-                    } else {
-                        *relative_bbox
+                        let center_offset = sprite.frame_width() / 2. - bbox.w / 2.;
+                        let flipped_x = (bbox.x - center_offset) * -1. + center_offset;
+                        bbox.x = flipped_x;
                     }
                 }
             }
-        } else {
-            *relative_bbox
         }
+        bbox
     }
 
     pub fn relative_bbox(&self) -> Rect {
