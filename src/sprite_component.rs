@@ -181,10 +181,6 @@ impl SpriteComponent {
                             Rotation::Clockwise90 => std::f64::consts::FRAC_PI_2 as f32,
                         },
                         color: self.color.unwrap_or(WHITE),
-                        pivot: match self.rotation {
-                            Rotation::None => None,
-                            Rotation::Clockwise90 => None,
-                        },
                         ..Default::default()
                     },
                 );

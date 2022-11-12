@@ -19,13 +19,6 @@ pub struct SpriteDrawParams {
     pub rotation: f32,
 
     pub color: Color,
-
-    /// Rotate around this point.
-    /// When `None`, rotate around the texture's center.
-    /// When `Some`, the coordinates are in screen-space.
-    /// E.g. pivot (0,0) rotates around the top left corner of the screen, not of the
-    /// texture.
-    pub pivot: Option<Vec2>,
 }
 
 impl Default for SpriteDrawParams {
@@ -35,7 +28,6 @@ impl Default for SpriteDrawParams {
             flip_y: false,
             rotation: 0.,
             color: WHITE,
-            pivot: None,
         }
     }
 }
@@ -84,7 +76,7 @@ impl SpriteRenderer {
                     w: self.frame_size.x,
                     h: self.frame_size.y,
                 }),
-                pivot: params.pivot,
+                pivot: None,
             },
         )
     }
