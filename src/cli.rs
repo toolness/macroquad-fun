@@ -16,6 +16,10 @@ pub struct Cli {
     #[argh(option)]
     /// filename to play back recording from
     pub playback: Option<String>,
+
+    #[argh(option)]
+    /// base filename to export frame images to
+    pub export_frames: Option<String>,
 }
 
 impl Cli {

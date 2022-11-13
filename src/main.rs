@@ -16,7 +16,7 @@ use macroquad::prelude::*;
 use player::create_player;
 use recorder::InputRecorder;
 use time::FixedGameTime;
-use time_stream::create_real_time_stream;
+use time_stream::{create_fixed_fps_time_stream, create_real_time_stream, TimeStream};
 use world::World;
 
 use crate::recorder::InputPlayer;
@@ -65,6 +65,8 @@ mod z_index;
 
 const CONFIG_PATH: &str = "media/config.json";
 
+const EXPORT_FRAMES_FPS: u64 = 30;
+
 fn window_conf() -> Conf {
     #[cfg(target_arch = "wasm32")]
     return Default::default();
@@ -110,6 +112,14 @@ fn create_input_stream(args: &Cli) -> InputStream {
         )
     } else {
         create_macroquad_input_stream()
+    }
+}
+
+fn create_time_stream(args: &Cli) -> TimeStream {
+    if args.export_frames.is_some() {
+        create_fixed_fps_time_stream(EXPORT_FRAMES_FPS)
+    } else {
+        create_real_time_stream()
     }
 }
 
@@ -168,7 +178,7 @@ async fn main() {
     let mut input_state = InputState::default();
     let mut input_stream = create_input_stream(&args);
     let mut saved_state: Option<(SavedLevelRuntime, FixedGameTime)> = None;
-    let mut time_stream = create_real_time_stream();
+    let mut time_stream = create_time_stream(&args);
     let is_browser = cfg!(target_arch = "wasm32");
 
     loop {
