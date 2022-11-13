@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use macroquad::prelude::{Rect, Vec2};
+use macroquad::prelude::{Rect, Vec2, WHITE};
 
 use crate::{
     collision::CollisionFlags,
@@ -9,7 +9,7 @@ use crate::{
     game_assets::game_assets,
     input::{Buttons, InputState},
     level::Level,
-    materials::{replace_colors_with_image, MaterialRenderer},
+    materials::{replace_colors_with_image, LerpType, MaterialRenderer, ReplaceColorOptions},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
     running::RunComponent,
@@ -127,7 +127,10 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
             };
             sprite.update_looping_frame_number(time);
             sprite.material = if player.has_spear {
-                MaterialRenderer::None
+                MaterialRenderer::ReplaceColors(ReplaceColorOptions {
+                    image: Some(&game_assets().huntress.spear_glow_color_replacements),
+                    lerp: Some((LerpType::ReplacedColor, WHITE, 0.0)),
+                })
             } else {
                 replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements)
             };
