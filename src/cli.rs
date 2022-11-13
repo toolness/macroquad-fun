@@ -17,6 +17,10 @@ pub struct Cli {
     /// filename to play back recording from
     pub playback: Option<String>,
 
+    #[argh(switch)]
+    /// exit at end of playback (only used with --playback).
+    pub stop_at_end: bool,
+
     #[argh(option)]
     /// base filename to export frame images to
     pub export_frames: Option<String>,

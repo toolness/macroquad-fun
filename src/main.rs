@@ -108,7 +108,11 @@ fn create_input_stream(args: &Cli) -> InputStream {
             InputPlayer::new(
                 std::fs::read(filename).expect("Unable to open recording file for reading"),
             )
-            .chain(create_macroquad_input_stream()),
+            .chain(if args.stop_at_end {
+                Box::new(std::iter::empty())
+            } else {
+                create_macroquad_input_stream()
+            }),
         )
     } else {
         create_macroquad_input_stream()
@@ -182,7 +186,7 @@ async fn main() {
     let mut frame_number: u64 = 0;
     let is_browser = cfg!(target_arch = "wasm32");
 
-    loop {
+    'outer: loop {
         let Some(now) = time_stream.next() else {
             break;
         };
@@ -190,7 +194,10 @@ async fn main() {
             fixed_time.update(now);
 
             for time in fixed_time.iter_fixed_frames() {
-                input_state.update(input_stream.next().unwrap());
+                let Some(new_buttons) = input_stream.next() else {
+                    break 'outer;
+                };
+                input_state.update(new_buttons);
                 fixed_fps.update(time.now);
                 match level_runtime.advance_one_frame(&time, &input_state) {
                     FrameResult::Ok => {}
