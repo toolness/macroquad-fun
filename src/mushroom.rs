@@ -73,12 +73,13 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
             let player = player_entity.player.as_mut().unwrap();
             let mut closest_distance = f32::INFINITY;
             if player.has_spear {
+                let player_center = player_entity.sprite.bbox().center();
                 for (_id, entity) in entities.iter() {
                     let Some(mushroom) = entity.mushroom else {
                         continue;
                     };
                     if matches!(mushroom.state, MushroomState::Dead) {
-                        let distance = entity.sprite.pos.distance(player_entity.sprite.pos);
+                        let distance = entity.sprite.bbox().center().distance(player_center);
                         if distance < closest_distance {
                             closest_distance = distance;
                         }
