@@ -9,7 +9,7 @@ use crate::{
     game_assets::game_assets,
     input::{Buttons, InputState},
     level::Level,
-    materials::MaterialRenderer,
+    materials::{replace_colors_with_image, MaterialRenderer},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
     running::RunComponent,
@@ -129,7 +129,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
             sprite.material = if player.has_spear {
                 MaterialRenderer::None
             } else {
-                MaterialRenderer::ReplaceColors(&game_assets().huntress.no_spear_color_replacements)
+                replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements)
             };
         },
     );

@@ -6,7 +6,7 @@ use crate::{
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
-    materials::MaterialRenderer,
+    materials::replace_colors_with_image,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
     time::GameTime,
@@ -35,7 +35,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         sprite: SpriteComponent {
             base_relative_bbox: assets.idle_bbox,
             renderer: Renderer::Sprite(&death_sprite),
-            material: MaterialRenderer::ReplaceColors(&assets.color_replacements),
+            material: replace_colors_with_image(&assets.color_replacements),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
         }

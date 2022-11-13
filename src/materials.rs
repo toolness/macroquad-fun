@@ -1,8 +1,8 @@
 use anyhow::Result;
 use macroquad::{
     prelude::{
-        gl_use_default_material, gl_use_material, load_material, load_string, Material,
-        MaterialParams, UniformType,
+        gl_use_default_material, gl_use_material, load_material, load_string, Color, Material,
+        MaterialParams, UniformType, PINK, WHITE,
     },
     texture::Image,
 };
@@ -21,23 +21,39 @@ async fn load_shader(stem: &str, params: MaterialParams) -> Result<Material> {
     Ok(material)
 }
 
+const LERP_TYPE_NONE: i32 = 0;
+const LERP_TYPE_REPLACED_COLOR: i32 = 1;
+const LERP_TYPE_ALL_COLORS: i32 = 2;
+
+#[derive(Clone, Copy)]
+pub enum LerpType {
+    ReplacedColor,
+    AllColors,
+}
+
 pub struct GameMaterials {
     pub replace_color_material: Material,
+}
+
+#[derive(Default, Clone, Copy)]
+pub struct ReplaceColorOptions {
+    image: Option<&'static Image>,
+    lerp: Option<(LerpType, Color, f32)>,
 }
 
 #[derive(Default, Clone, Copy)]
 pub enum MaterialRenderer {
     #[default]
     None,
-    ReplaceColors(&'static Image),
+    ReplaceColors(ReplaceColorOptions),
 }
 
 impl MaterialRenderer {
     pub fn start_using(&self) {
         match self {
             MaterialRenderer::None => {}
-            MaterialRenderer::ReplaceColors(image) => {
-                use_replace_color_material(image);
+            MaterialRenderer::ReplaceColors(options) => {
+                use_replace_color_material(options);
             }
         }
     }
@@ -52,6 +68,13 @@ impl MaterialRenderer {
     }
 }
 
+pub fn replace_colors_with_image(image: &'static Image) -> MaterialRenderer {
+    MaterialRenderer::ReplaceColors(ReplaceColorOptions {
+        image: Some(image),
+        ..Default::default()
+    })
+}
+
 /// Use an image to specify what colors to replace at render time.
 ///
 /// The image should be structured in such a way that each pixel on the x-axis
@@ -61,10 +84,32 @@ impl MaterialRenderer {
 /// pixel, a red pixel, a green pixel, and a yellow pixel, this means that
 /// whenever this material is used, all blue pixels will be replaced by red
 /// ones, and all green pixels will be replaced by yellow ones.
-fn use_replace_color_material(image: &Image) {
+fn use_replace_color_material(options: &ReplaceColorOptions) {
     let materials = &game_assets().materials;
     let material = materials.replace_color_material;
     gl_use_material(material);
+
+    match options.lerp {
+        None => {
+            material.set_uniform("lerp_type", LERP_TYPE_NONE);
+        }
+        Some((lerp_type, color, amount)) => {
+            match lerp_type {
+                LerpType::ReplacedColor => {
+                    material.set_uniform("lerp_type", LERP_TYPE_REPLACED_COLOR)
+                }
+                LerpType::AllColors => material.set_uniform("lerp_type", LERP_TYPE_ALL_COLORS),
+            }
+            material.set_uniform("lerp_color", color.to_vec());
+            material.set_uniform("lerp_amount", amount);
+        }
+    }
+
+    let Some(image) = options.image else {
+        material.set_uniform("num_replacements", 0);
+        return;
+    };
+
     let num_replacements = (image.width / 2) as i32;
 
     material.set_uniform("num_replacements", num_replacements);
@@ -142,6 +187,9 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
                     ("replace_color_6".to_string(), UniformType::Float4),
                     ("replace_color_7".to_string(), UniformType::Float4),
                     ("replace_color_8".to_string(), UniformType::Float4),
+                    ("lerp_type".to_string(), UniformType::Int1),
+                    ("lerp_color".to_string(), UniformType::Float4),
+                    ("lerp_amount".to_string(), UniformType::Float1),
                 ],
                 ..Default::default()
             },
