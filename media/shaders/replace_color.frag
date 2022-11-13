@@ -33,6 +33,8 @@ uniform vec4 replace_color_7;
 uniform vec4 find_color_8;
 uniform vec4 replace_color_8;
 
+uniform float find_replace_lerp_amount;
+
 uniform int lerp_type;
 uniform vec4 lerp_color;
 uniform float lerp_amount;
@@ -47,7 +49,7 @@ bool replace_color(inout vec4 base_color, in vec4 find_color, in vec4 replace_co
             // Replace with a transparent pixel.
             discard;
         }
-        base_color.rgb = replace_color.rgb;
+        base_color.rgb = mix(base_color.rgb, replace_color.rgb, find_replace_lerp_amount);
         return true;
     }
     return false;

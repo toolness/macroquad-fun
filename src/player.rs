@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use macroquad::prelude::{Rect, Vec2, WHITE};
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
     collision::CollisionFlags,
@@ -9,7 +9,7 @@ use crate::{
     game_assets::game_assets,
     input::{Buttons, InputState},
     level::Level,
-    materials::{replace_colors_with_image, LerpType, MaterialRenderer, ReplaceColorOptions},
+    materials::{replace_colors_with_image, MaterialRenderer, ReplaceColorOptions},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
     running::RunComponent,
@@ -26,6 +26,7 @@ pub struct PlayerComponent {
     coyote_time_start: Option<f64>,
     run_direction: f32,
     pub has_spear: bool,
+    spear_glow_amount: f32,
 }
 
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
@@ -128,8 +129,11 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
             sprite.update_looping_frame_number(time);
             sprite.material = if player.has_spear {
                 MaterialRenderer::ReplaceColors(ReplaceColorOptions {
-                    image: Some(&game_assets().huntress.spear_glow_color_replacements),
-                    lerp: Some((LerpType::ReplacedColor, WHITE, 0.0)),
+                    image: Some((
+                        &game_assets().huntress.spear_glow_color_replacements,
+                        player.spear_glow_amount,
+                    )),
+                    ..Default::default()
                 })
             } else {
                 replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements)
