@@ -16,6 +16,7 @@ use macroquad::prelude::*;
 use player::create_player;
 use recorder::InputRecorder;
 use time::FixedGameTime;
+use time_stream::create_real_time_stream;
 use world::World;
 
 use crate::recorder::InputPlayer;
@@ -57,6 +58,7 @@ mod sprite_renderer;
 mod switch;
 mod text;
 mod time;
+mod time_stream;
 mod world;
 mod xy_range_iterator;
 mod z_index;
@@ -166,10 +168,13 @@ async fn main() {
     let mut input_state = InputState::default();
     let mut input_stream = create_input_stream(&args);
     let mut saved_state: Option<(SavedLevelRuntime, FixedGameTime)> = None;
+    let mut time_stream = create_real_time_stream();
     let is_browser = cfg!(target_arch = "wasm32");
 
     loop {
-        let now = get_time();
+        let Some(now) = time_stream.next() else {
+            break;
+        };
         if !fixed_time.is_paused() {
             fixed_time.update(now);
 
