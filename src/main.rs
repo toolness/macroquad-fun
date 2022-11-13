@@ -179,6 +179,7 @@ async fn main() {
     let mut input_stream = create_input_stream(&args);
     let mut saved_state: Option<(SavedLevelRuntime, FixedGameTime)> = None;
     let mut time_stream = create_time_stream(&args);
+    let mut frame_number: u64 = 0;
     let is_browser = cfg!(target_arch = "wasm32");
 
     loop {
@@ -202,6 +203,13 @@ async fn main() {
 
         render_fps.update(now);
         level_runtime.draw();
+
+        if let Some(basename) = &args.export_frames {
+            let screen_data = get_screen_data();
+            let filename = format!("{}_{:05}.png", basename, frame_number);
+            println!("Writing {}.", filename);
+            screen_data.export_png(&filename);
+        }
 
         if is_key_released(KeyCode::Escape) {
             fixed_time.toggle_pause(now);
@@ -245,6 +253,7 @@ async fn main() {
         }
 
         next_frame().await;
+        frame_number += 1;
     }
 }
 
