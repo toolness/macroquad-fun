@@ -25,6 +25,7 @@ const LERP_TYPE_NONE: i32 = 0;
 const LERP_TYPE_REPLACED_COLOR: i32 = 1;
 const LERP_TYPE_ALL_COLORS: i32 = 2;
 
+#[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub enum LerpType {
     ReplacedColor,
@@ -37,7 +38,7 @@ pub struct GameMaterials {
 
 #[derive(Default, Clone, Copy)]
 pub struct ReplaceColorOptions {
-    pub image: Option<&'static Image>,
+    pub image: Option<(&'static Image, f32)>,
     pub lerp: Option<(LerpType, Color, f32)>,
 }
 
@@ -70,7 +71,7 @@ impl MaterialRenderer {
 
 pub fn replace_colors_with_image(image: &'static Image) -> MaterialRenderer {
     MaterialRenderer::ReplaceColors(ReplaceColorOptions {
-        image: Some(image),
+        image: Some((image, 1.0)),
         ..Default::default()
     })
 }
@@ -105,7 +106,7 @@ fn use_replace_color_material(options: &ReplaceColorOptions) {
         }
     }
 
-    let Some(image) = options.image else {
+    let Some((image, find_replace_lerp_amount)) = options.image else {
         material.set_uniform("num_replacements", 0);
         return;
     };
@@ -113,6 +114,7 @@ fn use_replace_color_material(options: &ReplaceColorOptions) {
     let num_replacements = (image.width / 2) as i32;
 
     material.set_uniform("num_replacements", num_replacements);
+    material.set_uniform("find_replace_lerp_amount", find_replace_lerp_amount);
 
     // Ideally we'd just use a Texture2D for this, allowing the GPU to do all this work
     // itself, and easily supporting an arbitrary number of replacements. However, there
@@ -171,6 +173,7 @@ pub async fn load_game_materials() -> Result<GameMaterials> {
             MaterialParams {
                 uniforms: vec![
                     ("num_replacements".to_string(), UniformType::Int1),
+                    ("find_replace_lerp_amount".to_string(), UniformType::Float1),
                     ("find_color_1".to_string(), UniformType::Float4),
                     ("find_color_2".to_string(), UniformType::Float4),
                     ("find_color_3".to_string(), UniformType::Float4),
