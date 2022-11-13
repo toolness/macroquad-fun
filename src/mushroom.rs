@@ -1,4 +1,4 @@
-use macroquad::prelude::{Rect, Vec2};
+use macroquad::prelude::{clamp, Rect, Vec2};
 
 use crate::{
     animator::Animator,
@@ -62,6 +62,39 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
             let sprite = &mut entity.sprite;
             let dynamic_collider = &mut entity.dynamic_collider;
             update_mushroom(mushroom, velocity, sprite, dynamic_collider, entities, time);
+        },
+    );
+
+    filter_and_process_entities(
+        entities,
+        |entity| entity.player.is_some(),
+        |player_entity, entities| {
+            let sprite_scale = config().sprite_scale;
+            let player = player_entity.player.as_mut().unwrap();
+            let mut closest_distance = f32::INFINITY;
+            if player.has_spear {
+                for (_id, entity) in entities.iter() {
+                    let Some(mushroom) = entity.mushroom else {
+                        continue;
+                    };
+                    if matches!(mushroom.state, MushroomState::Dead) {
+                        let distance =
+                            entity.sprite.pos.distance(player_entity.sprite.pos) / sprite_scale;
+                        if distance < closest_distance {
+                            closest_distance = distance;
+                        }
+                    }
+                }
+                const DISTANCE_OFFSET: f32 = 32.0;
+                const MAX_DISTANCE: f32 = 64.0;
+                const MIN_DISTANCE: f32 = 0.001;
+                closest_distance = clamp(
+                    closest_distance - DISTANCE_OFFSET,
+                    MIN_DISTANCE,
+                    MAX_DISTANCE,
+                );
+                player.spear_glow_amount = 1. - closest_distance / MAX_DISTANCE;
+            }
         },
     );
 }
