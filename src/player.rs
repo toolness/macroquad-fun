@@ -26,7 +26,7 @@ pub struct PlayerComponent {
     coyote_time_start: Option<f64>,
     run_direction: f32,
     pub has_spear: bool,
-    spear_glow_amount: f32,
+    pub spear_glow_amount: f32,
 }
 
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
