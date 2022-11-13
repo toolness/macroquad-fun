@@ -20,6 +20,7 @@ pub struct HuntressAssets {
     pub fall: SpriteRenderer,
     pub idle_bbox: Rect,
     pub no_spear_color_replacements: Image,
+    pub spear_glow_color_replacements: Image,
 }
 
 pub struct FlyingEyeAssets {
@@ -79,6 +80,10 @@ pub async fn load_game_assets() -> Result<()> {
             )?,
             no_spear_color_replacements: load_image(
                 "media/Huntress/no_spear_color_replacements.png",
+            )
+            .await?,
+            spear_glow_color_replacements: load_image(
+                "media/Huntress/spear_glow_color_replacements.png",
             )
             .await?,
         },

@@ -2,7 +2,7 @@ use anyhow::Result;
 use macroquad::{
     prelude::{
         gl_use_default_material, gl_use_material, load_material, load_string, Color, Material,
-        MaterialParams, UniformType, PINK, WHITE,
+        MaterialParams, UniformType,
     },
     texture::Image,
 };
@@ -37,8 +37,8 @@ pub struct GameMaterials {
 
 #[derive(Default, Clone, Copy)]
 pub struct ReplaceColorOptions {
-    image: Option<&'static Image>,
-    lerp: Option<(LerpType, Color, f32)>,
+    pub image: Option<&'static Image>,
+    pub lerp: Option<(LerpType, Color, f32)>,
 }
 
 #[derive(Default, Clone, Copy)]
