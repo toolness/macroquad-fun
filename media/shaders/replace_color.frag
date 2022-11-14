@@ -49,7 +49,11 @@ bool replace_color(inout vec4 base_color, in vec4 find_color, in vec4 replace_co
             // Replace with a transparent pixel.
             discard;
         }
-        base_color.rgb = mix(base_color.rgb, replace_color.rgb, find_replace_lerp_amount);
+        // This is SUPER weird, macOS doesn't seem to like passing in an amount of
+        // 0.0, nor does it seem to like it if we leave base_color unmodified, so
+        // I guess we'll just specify a really small amount?
+        float amount = find_replace_lerp_amount == 0.0 ? 0.00001 : find_replace_lerp_amount;
+        base_color.rgb = mix(base_color.rgb, replace_color.rgb, amount);
         return true;
     }
     return false;
