@@ -21,6 +21,6 @@
     "coyote_time_ms": 60.0,
     "spear_glow_min_radius": 32.0,
     "spear_glow_max_radius": 64.0,
-    "spear_glow_revive_threshold": 0.9,
+    "spear_glow_revive_threshold": 0.99,
     "debug_text_size": 32.0
 }
