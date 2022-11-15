@@ -22,5 +22,6 @@
     "spear_glow_min_radius": 32.0,
     "spear_glow_max_radius": 64.0,
     "spear_glow_revive_threshold": 0.99,
+    "spear_glow_speed_coefficient": 3.0,
     "debug_text_size": 32.0
 }

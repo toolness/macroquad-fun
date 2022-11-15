@@ -85,7 +85,11 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
                             0.001,
                             config.spear_glow_max_radius,
                         );
-                        let glow_amount = 1. - distance / config.spear_glow_max_radius;
+                        let oscillator = (1.
+                            + (time.now as f32 * config.spear_glow_speed_coefficient).sin())
+                            / 2.;
+                        let glow_amount =
+                            oscillator * (1. - distance / config.spear_glow_max_radius);
                         if glow_amount > max_glow_amount {
                             max_glow_amount = glow_amount;
                         }
