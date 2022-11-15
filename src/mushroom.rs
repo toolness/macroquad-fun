@@ -1,4 +1,4 @@
-use macroquad::prelude::{clamp, Rect, Vec2, WHITE};
+use macroquad::prelude::{clamp, Rect, Vec2};
 
 use crate::{
     animator::Animator,
@@ -137,9 +137,11 @@ impl MushroomComponent {
         match &self.state {
             MushroomState::Dead(amount) => {
                 sprite.current_frame_number = dead_frame();
+                let glow_image = &game_assets().huntress.spear_glow_color_replacements;
+                let glow_color = glow_image.get_pixel((glow_image.width as u32) - 1, 0);
                 sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
                     image: None,
-                    lerp: Some((LerpType::AllColors, WHITE, *amount)),
+                    lerp: Some((LerpType::AllColors, glow_color, *amount)),
                 })
             }
             MushroomState::Rezzing(animator) => {
