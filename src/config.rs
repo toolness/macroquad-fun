@@ -19,6 +19,7 @@ pub struct Config {
     pub flying_eye_speed: f32,
     pub moving_platform_speed: f32,
     pub mushroom_speed: f32,
+    pub mushroom_rez_ms_per_animation_frame: f64,
     pub screen_width: f32,
     pub screen_height: f32,
     pub crate_pushable_coefficient: f32,
