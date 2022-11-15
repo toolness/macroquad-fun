@@ -35,6 +35,7 @@ pub struct MushroomAssets {
     pub platform_bbox: Rect,
     pub run: SpriteRenderer,
     pub color_replacements: Image,
+    pub dead_color_replacements: Image,
 }
 
 pub struct SpearAssets {
@@ -101,6 +102,8 @@ pub async fn load_game_assets() -> Result<()> {
             platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
             color_replacements: load_image("media/Mushroom/color_replacements.png").await?,
+            dead_color_replacements: load_image("media/Mushroom/dead_color_replacements.png")
+                .await?,
         },
         spear: SpearAssets {
             spear_move: SpriteRenderer::new(
