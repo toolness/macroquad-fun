@@ -100,7 +100,6 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
                                         config.mushroom_rez_ms_per_animation_frame,
                                     ),
                             );
-                            entity.sprite.material = MaterialRenderer::None;
                         } else {
                             mushroom.state = MushroomState::Dead(glow_amount);
                         }
@@ -125,6 +124,7 @@ fn update_mushroom(
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
                 sprite.renderer = Renderer::Sprite(&game_assets().mushroom.run);
+                sprite.material = MaterialRenderer::None;
                 velocity.x = config().mushroom_speed;
                 let _ = dynamic_collider.insert(DynamicColliderComponent::new(RelativeCollider {
                     rect: game_assets().mushroom.platform_bbox,
@@ -153,7 +153,14 @@ impl MushroomComponent {
                 })
             }
             MushroomState::Rezzing(animator) => {
-                sprite.current_frame_number = animator.get_frame(&time);
+                let curr_frame = animator.get_frame(&time);
+                let amount = curr_frame as f32 / animator.last_frame() as f32;
+                sprite.current_frame_number = curr_frame;
+                if let MaterialRenderer::ReplaceColors(options) = &mut sprite.material {
+                    if let Some(lerp_options) = &mut options.lerp {
+                        lerp_options.2 = amount;
+                    }
+                }
             }
             MushroomState::Alive => {
                 sprite.update_looping_frame_number(&time);
