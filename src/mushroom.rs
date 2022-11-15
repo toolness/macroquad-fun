@@ -94,8 +94,12 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
                             max_glow_amount = glow_amount;
                         }
                         if glow_amount >= config.spear_glow_revive_threshold {
-                            mushroom.state =
-                                MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
+                            mushroom.state = MushroomState::Rezzing(
+                                Animator::new(dead_frame(), true, &time)
+                                    .with_ms_per_animation_frame(
+                                        config.mushroom_rez_ms_per_animation_frame,
+                                    ),
+                            );
                             entity.sprite.material = MaterialRenderer::None;
                         } else {
                             mushroom.state = MushroomState::Dead(glow_amount);

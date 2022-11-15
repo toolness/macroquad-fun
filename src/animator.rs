@@ -20,6 +20,11 @@ impl Animator {
         }
     }
 
+    pub fn with_ms_per_animation_frame(mut self, ms: f64) -> Self {
+        self.ms_per_animation_frame = ms;
+        self
+    }
+
     fn get_unclamped_frame(&self, time: &GameTime) -> u32 {
         let time_since_start = time.now - self.start_time;
         (time_since_start * 1000.0 / self.ms_per_animation_frame) as u32
