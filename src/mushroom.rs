@@ -1,4 +1,4 @@
-use macroquad::prelude::{clamp, Rect, Vec2};
+use macroquad::prelude::{clamp, Rect, Vec2, WHITE};
 
 use crate::{
     animator::Animator,
@@ -6,7 +6,7 @@ use crate::{
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
-    materials::replace_colors_with_image,
+    materials::{replace_colors_with_image, LerpType, MaterialRenderer, ReplaceColorOptions},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
     time::GameTime,
@@ -19,7 +19,7 @@ pub struct MushroomComponent {
 
 #[derive(Clone, Copy)]
 pub enum MushroomState {
-    Dead,
+    Dead(f32),
     Rezzing(Animator),
     Alive,
 }
@@ -41,7 +41,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         }
         .at_bottom_left(&start_rect),
         mushroom: Some(MushroomComponent {
-            state: MushroomState::Dead,
+            state: MushroomState::Dead(0.0),
         }),
         physics: PhysicsComponent {
             collision_behavior: PhysicsCollisionBehavior::ReverseDirectionX,
@@ -56,12 +56,12 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
     filter_and_process_entities(
         entities,
         |entity| entity.mushroom.is_some(),
-        |entity, entities| {
+        |entity, _entities| {
             let mushroom = entity.mushroom.as_mut().unwrap();
             let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;
             let dynamic_collider = &mut entity.dynamic_collider;
-            update_mushroom(mushroom, velocity, sprite, dynamic_collider, entities, time);
+            update_mushroom(mushroom, velocity, sprite, dynamic_collider, time);
         },
     );
 
@@ -71,26 +71,34 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
         |player_entity, entities| {
             let config = config();
             let player = player_entity.player.as_mut().unwrap();
-            let mut closest_distance = f32::INFINITY;
+            let mut max_glow_amount = 0.;
             if player.has_spear {
                 let player_center = player_entity.sprite.bbox().center();
-                for (_id, entity) in entities.iter() {
-                    let Some(mushroom) = entity.mushroom else {
+                for (_id, entity) in entities.iter_mut() {
+                    let Some(mushroom) = entity.mushroom.as_mut() else {
                         continue;
                     };
-                    if matches!(mushroom.state, MushroomState::Dead) {
-                        let distance = entity.sprite.bbox().center().distance(player_center);
-                        if distance < closest_distance {
-                            closest_distance = distance;
+                    if let MushroomState::Dead(_) = mushroom.state {
+                        let distance = clamp(
+                            entity.sprite.bbox().center().distance(player_center)
+                                - config.spear_glow_min_radius,
+                            0.001,
+                            config.spear_glow_max_radius,
+                        );
+                        let glow_amount = 1. - distance / config.spear_glow_max_radius;
+                        if glow_amount > max_glow_amount {
+                            max_glow_amount = glow_amount;
+                        }
+                        if glow_amount >= config.spear_glow_revive_threshold {
+                            mushroom.state =
+                                MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
+                            entity.sprite.material = MaterialRenderer::None;
+                        } else {
+                            mushroom.state = MushroomState::Dead(glow_amount);
                         }
                     }
                 }
-                closest_distance = clamp(
-                    closest_distance - config.spear_glow_min_radius,
-                    0.001,
-                    config.spear_glow_max_radius,
-                );
-                player.spear_glow_amount = 1. - closest_distance / config.spear_glow_max_radius;
+                player.spear_glow_amount = max_glow_amount;
             }
         },
     );
@@ -101,20 +109,10 @@ fn update_mushroom(
     velocity: &mut Vec2,
     sprite: &mut SpriteComponent,
     dynamic_collider: &mut Option<DynamicColliderComponent>,
-    entities: &mut EntityMap,
     time: &GameTime,
 ) {
     match &mushroom.state {
-        MushroomState::Dead => {
-            for (_id, player_entity) in entities.iter() {
-                if let Some(player) = player_entity.player {
-                    if player.has_spear && player_entity.sprite.bbox().overlaps(&sprite.bbox()) {
-                        mushroom.state =
-                            MushroomState::Rezzing(Animator::new(dead_frame(), true, &time));
-                    }
-                }
-            }
-        }
+        MushroomState::Dead(_) => {}
         MushroomState::Rezzing(animator) => {
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
@@ -131,14 +129,18 @@ fn update_mushroom(
             sprite.is_facing_left = velocity.x < 0.;
         }
     }
-    mushroom.set_current_frame_number(time, sprite);
+    mushroom.set_sprite(time, sprite);
 }
 
 impl MushroomComponent {
-    fn set_current_frame_number(&self, time: &GameTime, sprite: &mut SpriteComponent) {
+    fn set_sprite(&self, time: &GameTime, sprite: &mut SpriteComponent) {
         match &self.state {
-            MushroomState::Dead => {
+            MushroomState::Dead(amount) => {
                 sprite.current_frame_number = dead_frame();
+                sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
+                    image: None,
+                    lerp: Some((LerpType::AllColors, WHITE, *amount)),
+                })
             }
             MushroomState::Rezzing(animator) => {
                 sprite.current_frame_number = animator.get_frame(&time);
