@@ -26,6 +26,7 @@ pub struct Config {
     pub vertical_collision_leeway: f32,
     pub spear_glow_min_radius: f32,
     pub spear_glow_max_radius: f32,
+    pub spear_glow_revive_threshold: f32,
     pub coyote_time_ms: f64,
     pub debug_text_size: f32,
 }
