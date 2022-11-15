@@ -34,6 +34,10 @@ impl Animator {
         self.get_unclamped_frame(&time) > self.last_frame
     }
 
+    pub fn last_frame(&self) -> u32 {
+        self.last_frame
+    }
+
     pub fn get_frame(&self, time: &GameTime) -> u32 {
         let frame = clamp(self.get_unclamped_frame(&time), 0, self.last_frame);
         if self.is_reversed {
