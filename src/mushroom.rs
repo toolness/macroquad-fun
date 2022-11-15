@@ -35,7 +35,6 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         sprite: SpriteComponent {
             base_relative_bbox: assets.idle_bbox,
             renderer: Renderer::Sprite(&death_sprite),
-            material: replace_colors_with_image(&assets.color_replacements),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
         }
@@ -126,7 +125,8 @@ fn update_mushroom(
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
                 sprite.renderer = Renderer::Sprite(&game_assets().mushroom.run);
-                sprite.material = MaterialRenderer::None;
+                sprite.material =
+                    replace_colors_with_image(&game_assets().mushroom.color_replacements);
                 velocity.x = config().mushroom_speed;
                 let _ = dynamic_collider.insert(DynamicColliderComponent::new(RelativeCollider {
                     rect: game_assets().mushroom.platform_bbox,
@@ -150,8 +150,8 @@ impl MushroomComponent {
                 let glow_image = &game_assets().huntress.spear_glow_color_replacements;
                 let glow_color = glow_image.get_pixel((glow_image.width as u32) - 1, 0);
                 sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
-                    image: None,
-                    lerp: Some((LerpType::AllColors, glow_color, *amount)),
+                    image: Some((&game_assets().mushroom.dead_color_replacements, 1.)),
+                    lerp: Some((LerpType::ReplacedColor, glow_color, *amount)),
                 })
             }
             MushroomState::Rezzing(animator) => {
