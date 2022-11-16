@@ -28,7 +28,12 @@ const LERP_TYPE_ALL_COLORS: i32 = 2;
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub enum LerpType {
+    /// Linearly interpolate only pixels containing the replaced colors from
+    /// their replaced values to a specified color (unless the replaced colors
+    /// are transparent).
     ReplacedColor,
+    /// Linearly interpolate all non-transparent pixels from
+    /// their normal values to a specified color.
     AllColors,
 }
 
@@ -38,7 +43,19 @@ pub struct GameMaterials {
 
 #[derive(Default, Clone, Copy)]
 pub struct ReplaceColorOptions {
+    /// Find/replace colors using the given image, linearly interpolating
+    /// between the find color and replace color by the given amount.
+    ///
+    /// The image should be structured in such a way that each pixel on the x-axis
+    /// is immediately followed by the color that should replace it.
+    ///
+    /// So for instance, if you have a 4x1 image that consists of a blue
+    /// pixel, a red pixel, a green pixel, and a yellow pixel, this means that
+    /// whenever this material is used, all blue pixels will be replaced by red
+    /// ones, and all green pixels will be replaced by yellow ones.
     pub image: Option<(&'static Image, f32)>,
+    /// Linearly interpolate to the given color by the given amount, using
+    /// the specified scheme.
     pub lerp: Option<(LerpType, Color, f32)>,
 }
 
@@ -69,6 +86,8 @@ impl MaterialRenderer {
     }
 }
 
+/// Use an image to specify what colors to replace at render time.
+/// For details on the format of the image, see [`ReplaceColorOptions`].
 pub fn replace_colors_with_image(image: &'static Image) -> MaterialRenderer {
     MaterialRenderer::ReplaceColors(ReplaceColorOptions {
         image: Some((image, 1.0)),
@@ -76,15 +95,6 @@ pub fn replace_colors_with_image(image: &'static Image) -> MaterialRenderer {
     })
 }
 
-/// Use an image to specify what colors to replace at render time.
-///
-/// The image should be structured in such a way that each pixel on the x-axis
-/// is immediately followed by the color that should replace it.
-///
-/// So for instance, if you have a 4x1 image that consists of a blue
-/// pixel, a red pixel, a green pixel, and a yellow pixel, this means that
-/// whenever this material is used, all blue pixels will be replaced by red
-/// ones, and all green pixels will be replaced by yellow ones.
 fn use_replace_color_material(options: &ReplaceColorOptions) {
     let materials = &game_assets().materials;
     let material = materials.replace_color_material;
