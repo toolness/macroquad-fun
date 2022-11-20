@@ -1,0 +1,21 @@
+{ "frames": {
+   "Death.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 600, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 600, "h": 150 },
+    "sourceSize": { "w": 600, "h": 150 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.2.40-arm64",
+  "format": "RGBA8888",
+  "size": { "w": 600, "h": 150 },
+  "scale": "1",
+  "slices": [
+   { "name": "dead_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 524, "y": 74, "w": 14, "h": 27 } }] }
+  ]
+ }
+}
