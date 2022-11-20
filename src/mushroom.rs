@@ -69,20 +69,30 @@ pub fn mushroom_rez_system(entities: &mut EntityMap, time: &GameTime) {
                         let distance = clamp(
                             entity.sprite.bbox().center().distance(player_center)
                                 - config.spear_glow_min_radius,
+                            // We never want this to be zero because we're using it
+                            // as a denominator later, and we never want to divide by zero.
                             0.001,
                             config.spear_glow_max_radius,
                         );
-                        let oscillator = (1.
-                            + (time.now as f32 * config.spear_glow_speed_coefficient).sin())
-                            / 2.
+
+                        // Make a base oscillator from -1 to 1.
+                        let base_oscillator =
+                            (time.now as f32 * config.spear_glow_speed_coefficient).sin();
+
+                        // Shift the oscillator to go from 0 to 1.
+                        let zero_to_one_oscillator = (1. + base_oscillator) / 2.;
+
+                        // Now shift it to go from 1-config.spear_glow_oscillate_amount to 1.
+                        let oscillator = zero_to_one_oscillator
                             * config.spear_glow_oscillate_amount
                             + (1. - config.spear_glow_oscillate_amount);
-                        let glow_amount =
-                            oscillator * (1. - distance / config.spear_glow_max_radius);
-                        if glow_amount > max_glow_amount {
-                            max_glow_amount = glow_amount;
+
+                        let base_glow_amount = 1. - distance / config.spear_glow_max_radius;
+                        let oscillating_glow_amount = oscillator * base_glow_amount;
+                        if oscillating_glow_amount > max_glow_amount {
+                            max_glow_amount = oscillating_glow_amount;
                         }
-                        if glow_amount >= config.spear_glow_revive_threshold {
+                        if oscillating_glow_amount >= config.spear_glow_revive_threshold {
                             mushroom.state = MushroomState::Rezzing(
                                 Animator::new(dead_frame(), true, &time)
                                     .with_ms_per_animation_frame(
@@ -90,7 +100,7 @@ pub fn mushroom_rez_system(entities: &mut EntityMap, time: &GameTime) {
                                     ),
                             );
                         } else {
-                            mushroom.state = MushroomState::Dead(glow_amount);
+                            mushroom.state = MushroomState::Dead(oscillating_glow_amount);
                         }
                     }
                 }
