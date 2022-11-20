@@ -9,18 +9,14 @@
    }
  },
  "meta": {
-  "app": "http://www.aseprite.org/",
-  "version": "1.2.25-x64",
+  "app": "https://www.aseprite.org/",
+  "version": "1.2.40-arm64",
   "format": "RGBA8888",
   "size": { "w": 1200, "h": 150 },
   "scale": "1",
-  "frameTags": [
-  ],
-  "layers": [
-   { "name": "Layer", "opacity": 255, "blendMode": "normal" }
-  ],
   "slices": [
-   { "name": "idle_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 67, "y": 58, "w": 13, "h": 39 } }] }
+   { "name": "idle_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 67, "y": 58, "w": 13, "h": 39 } }] },
+   { "name": "spear_point_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 87, "y": 84, "w": 6, "h": 7 } }] }
   ]
  }
 }
