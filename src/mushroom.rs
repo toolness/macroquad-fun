@@ -51,19 +51,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
     }
 }
 
-pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
-    filter_and_process_entities(
-        entities,
-        |entity| entity.mushroom.is_some(),
-        |entity, _entities| {
-            let mushroom = entity.mushroom.as_mut().unwrap();
-            let velocity = &mut entity.physics.velocity;
-            let sprite = &mut entity.sprite;
-            let dynamic_collider = &mut entity.dynamic_collider;
-            update_mushroom(mushroom, velocity, sprite, dynamic_collider, time);
-        },
-    );
-
+pub fn mushroom_rez_system(entities: &mut EntityMap, time: &GameTime) {
     filter_and_process_entities(
         entities,
         |entity| entity.player.is_some(),
@@ -108,6 +96,20 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
                 }
                 player.spear_glow_amount = max_glow_amount;
             }
+        },
+    );
+}
+
+pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
+    filter_and_process_entities(
+        entities,
+        |entity| entity.mushroom.is_some(),
+        |entity, _entities| {
+            let mushroom = entity.mushroom.as_mut().unwrap();
+            let velocity = &mut entity.physics.velocity;
+            let sprite = &mut entity.sprite;
+            let dynamic_collider = &mut entity.dynamic_collider;
+            update_mushroom(mushroom, velocity, sprite, dynamic_collider, time);
         },
     );
 }
