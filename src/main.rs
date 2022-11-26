@@ -38,6 +38,7 @@ mod flying_eye;
 mod font;
 mod fps;
 mod game_assets;
+mod hierarchy;
 mod input;
 mod ldtk;
 mod level;

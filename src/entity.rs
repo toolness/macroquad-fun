@@ -7,6 +7,7 @@ use crate::{
     dynamic_collider::DynamicColliderComponent,
     floor_switch::FloorSwitchComponent,
     flying_eye::FlyingEyeComponent,
+    hierarchy::ChildComponent,
     mushroom::MushroomComponent,
     physics::PhysicsComponent,
     pickups::PickupComponent,
@@ -36,6 +37,7 @@ pub struct Entity {
     pub switch: Option<SwitchComponent>,
     pub floor_switch: Option<FloorSwitchComponent>,
     pub pickup: Option<PickupComponent>,
+    pub child: Option<ChildComponent>,
     pub iid: Option<Uuid>,
     pub name_for_debugging: Option<&'static str>,
 }

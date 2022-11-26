@@ -9,6 +9,7 @@ use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
+use crate::hierarchy::child_component_system;
 use crate::input::InputState;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system, mushroom_rez_system};
@@ -175,6 +176,7 @@ impl LevelRuntime {
             &self.level,
             &mut self.dynamic_collider_system,
         );
+        child_component_system(&mut self.entities);
         floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, time);
         mushroom_movement_system(&mut self.entities, time);
