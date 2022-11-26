@@ -19,6 +19,7 @@ pub struct HuntressAssets {
     pub jump: SpriteRenderer,
     pub fall: SpriteRenderer,
     pub idle_bbox: Rect,
+    pub spear_point_bbox: Rect,
     pub no_spear_color_replacements: Image,
     pub spear_glow_color_replacements: Image,
 }
@@ -33,6 +34,7 @@ pub struct MushroomAssets {
     pub death: SpriteRenderer,
     pub idle_bbox: Rect,
     pub platform_bbox: Rect,
+    pub dead_bbox: Rect,
     pub run: SpriteRenderer,
     pub color_replacements: Image,
     pub dead_color_replacements: Image,
@@ -69,16 +71,16 @@ async fn load_pixel_perfect_texture(path: &str) -> Result<Texture2D> {
 
 pub async fn load_game_assets() -> Result<()> {
     let mushroom_idle_slices = load_aseprite_slices("media/Mushroom/Idle.json").await?;
+    let mushroom_death_slices = load_aseprite_slices("media/Mushroom/Death.json").await?;
+    let huntress_idle_slices = load_aseprite_slices("media/Huntress/Idle.json").await?;
     let assets = GameAssets {
         huntress: HuntressAssets {
             idle: SpriteRenderer::new(load_texture("media/Huntress/Idle.png").await?, 8),
             run: SpriteRenderer::new(load_texture("media/Huntress/Run.png").await?, 8),
             jump: SpriteRenderer::new(load_texture("media/Huntress/Jump.png").await?, 2),
             fall: SpriteRenderer::new(load_texture("media/Huntress/Fall.png").await?, 2),
-            idle_bbox: get_slice(
-                &load_aseprite_slices("media/Huntress/Idle.json").await?,
-                "idle_bounding_box",
-            )?,
+            idle_bbox: get_slice(&huntress_idle_slices, "idle_bounding_box")?,
+            spear_point_bbox: get_slice(&huntress_idle_slices, "spear_point_bounding_box")?,
             no_spear_color_replacements: load_image(
                 "media/Huntress/no_spear_color_replacements.png",
             )
@@ -100,6 +102,7 @@ pub async fn load_game_assets() -> Result<()> {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
             platform_bbox: get_slice(&mushroom_idle_slices, "platform_bounding_box")?,
+            dead_bbox: get_slice(&mushroom_death_slices, "dead_bounding_box")?,
             run: SpriteRenderer::new(load_texture("media/Mushroom/Run.png").await?, 8),
             color_replacements: load_image("media/Mushroom/color_replacements.png").await?,
             dead_color_replacements: load_image("media/Mushroom/dead_color_replacements.png")
