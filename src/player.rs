@@ -161,6 +161,7 @@ fn update_spear(
     let spear_glow_amount = if let Some(spear_point_entity) = entities.get(spear_point_entity_id) {
         get_life_giving_amount_or_zero(spear_point_entity.life_transfer)
     } else {
+        println!("Warning: invalid spear point entity id!");
         0.
     };
     sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
