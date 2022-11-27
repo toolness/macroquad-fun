@@ -1,4 +1,4 @@
-use macroquad::prelude::{clamp, Rect, Vec2};
+use macroquad::prelude::Rect;
 
 use crate::{
     animator::Animator,
@@ -6,6 +6,7 @@ use crate::{
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
+    life_transfer::{get_life_receiving_amount_or_zero, LifeTransfer},
     materials::{replace_colors_with_image, LerpType, MaterialRenderer, ReplaceColorOptions},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{LeftFacingRendering, SpriteComponent},
@@ -19,7 +20,7 @@ pub struct MushroomComponent {
 
 #[derive(Clone, Copy)]
 pub enum MushroomState {
-    Dead(f32),
+    Dead,
     Rezzing(Animator),
     Alive,
 }
@@ -40,74 +41,16 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
         }
         .at_bottom_left(&start_rect),
         mushroom: Some(MushroomComponent {
-            state: MushroomState::Dead(0.0),
+            state: MushroomState::Dead,
         }),
         physics: PhysicsComponent {
             collision_behavior: PhysicsCollisionBehavior::ReverseDirectionX,
             gravity_coefficient: Some(0.5),
             ..Default::default()
         },
+        life_transfer: Some(LifeTransfer::Receiving(0.)),
         ..Default::default()
     }
-}
-
-pub fn mushroom_rez_system(entities: &mut EntityMap, time: &GameTime) {
-    filter_and_process_entities(
-        entities,
-        |entity| entity.player.is_some(),
-        |player_entity, entities, _| {
-            let config = config();
-            let player = player_entity.player.as_mut().unwrap();
-            let mut max_glow_amount = 0.;
-            if player.has_spear {
-                let player_center = player_entity.sprite.bbox().center();
-                for (_id, entity) in entities.iter_mut() {
-                    let Some(mushroom) = entity.mushroom.as_mut() else {
-                        continue;
-                    };
-                    if let MushroomState::Dead(_) = mushroom.state {
-                        let distance = clamp(
-                            entity.sprite.bbox().center().distance(player_center)
-                                - config.spear_glow_min_radius,
-                            // We never want this to be zero because we're using it
-                            // as a denominator later, and we never want to divide by zero.
-                            0.001,
-                            config.spear_glow_max_radius,
-                        );
-
-                        // Make a base oscillator from -1 to 1.
-                        let base_oscillator =
-                            (time.now as f32 * config.spear_glow_speed_coefficient).sin();
-
-                        // Shift the oscillator to go from 0 to 1.
-                        let zero_to_one_oscillator = (1. + base_oscillator) / 2.;
-
-                        // Now shift it to go from 1-config.spear_glow_oscillate_amount to 1.
-                        let oscillator = zero_to_one_oscillator
-                            * config.spear_glow_oscillate_amount
-                            + (1. - config.spear_glow_oscillate_amount);
-
-                        let base_glow_amount = 1. - distance / config.spear_glow_max_radius;
-                        let oscillating_glow_amount = oscillator * base_glow_amount;
-                        if oscillating_glow_amount > max_glow_amount {
-                            max_glow_amount = oscillating_glow_amount;
-                        }
-                        if oscillating_glow_amount >= config.spear_glow_revive_threshold {
-                            mushroom.state = MushroomState::Rezzing(
-                                Animator::new(dead_frame(), true, &time)
-                                    .with_ms_per_animation_frame(
-                                        config.mushroom_rez_ms_per_animation_frame,
-                                    ),
-                            );
-                        } else {
-                            mushroom.state = MushroomState::Dead(oscillating_glow_amount);
-                        }
-                    }
-                }
-                player.spear_glow_amount = max_glow_amount;
-            }
-        },
-    );
 }
 
 pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
@@ -115,31 +58,36 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
         entities,
         |entity| entity.mushroom.is_some(),
         |entity, _entities, _id| {
-            let mushroom = entity.mushroom.as_mut().unwrap();
-            let velocity = &mut entity.physics.velocity;
-            let sprite = &mut entity.sprite;
-            let dynamic_collider = &mut entity.dynamic_collider;
-            update_mushroom(mushroom, velocity, sprite, dynamic_collider, time);
+            update_mushroom(entity, time);
         },
     );
 }
 
-fn update_mushroom(
-    mushroom: &mut MushroomComponent,
-    velocity: &mut Vec2,
-    sprite: &mut SpriteComponent,
-    dynamic_collider: &mut Option<DynamicColliderComponent>,
-    time: &GameTime,
-) {
+fn update_mushroom(entity: &mut Entity, time: &GameTime) {
+    let mushroom = entity.mushroom.as_mut().unwrap();
+    let velocity = &mut entity.physics.velocity;
+    let sprite = &mut entity.sprite;
+    let dynamic_collider = &mut entity.dynamic_collider;
+    let config = config();
+
     match &mushroom.state {
-        MushroomState::Dead(_) => {}
+        MushroomState::Dead => {
+            let life_receiving = get_life_receiving_amount_or_zero(entity.life_transfer);
+            if life_receiving >= config.life_transfer_revive_threshold {
+                mushroom.state = MushroomState::Rezzing(
+                    Animator::new(dead_frame(), true, &time)
+                        .with_ms_per_animation_frame(config.mushroom_rez_ms_per_animation_frame),
+                );
+                entity.life_transfer = None;
+            }
+        }
         MushroomState::Rezzing(animator) => {
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
                 sprite.sprite = Some(&game_assets().mushroom.run);
                 sprite.material =
                     replace_colors_with_image(&game_assets().mushroom.color_replacements);
-                velocity.x = config().mushroom_speed;
+                velocity.x = config.mushroom_speed;
                 let _ = dynamic_collider.insert(DynamicColliderComponent::new(RelativeCollider {
                     rect: game_assets().mushroom.platform_bbox,
                     enable_top: true,
@@ -151,19 +99,25 @@ fn update_mushroom(
             sprite.is_facing_left = velocity.x < 0.;
         }
     }
-    mushroom.set_sprite(time, sprite);
+    mushroom.set_sprite(time, sprite, entity.life_transfer);
 }
 
 impl MushroomComponent {
-    fn set_sprite(&self, time: &GameTime, sprite: &mut SpriteComponent) {
+    fn set_sprite(
+        &self,
+        time: &GameTime,
+        sprite: &mut SpriteComponent,
+        life_transfer: Option<LifeTransfer>,
+    ) {
         match &self.state {
-            MushroomState::Dead(amount) => {
+            MushroomState::Dead => {
                 sprite.current_frame_number = dead_frame();
                 let glow_image = &game_assets().huntress.spear_glow_color_replacements;
                 let glow_color = glow_image.get_pixel((glow_image.width as u32) - 1, 0);
+                let amount = get_life_receiving_amount_or_zero(life_transfer);
                 sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
                     image: Some((&game_assets().mushroom.dead_color_replacements, 1.)),
-                    lerp: Some((LerpType::ReplacedColor, glow_color, *amount)),
+                    lerp: Some((LerpType::ReplacedColor, glow_color, amount)),
                 })
             }
             MushroomState::Rezzing(animator) => {
