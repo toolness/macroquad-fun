@@ -47,7 +47,7 @@ pub fn pickup_system(entities: &mut EntityMap, time: &GameTime) {
     filter_and_process_entities(
         entities,
         |entity| entity.player.is_some(),
-        |player_entity, entities| {
+        |player_entity, entities, _| {
             let mut entities_to_remove: HeaplessEntityVec = heapless::Vec::new();
             for (id, entity) in entities.iter() {
                 if let Some(pickup) = entity.pickup {

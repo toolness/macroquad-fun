@@ -13,7 +13,7 @@ pub fn switch_system(entities: &mut EntityMap) {
     filter_and_process_entities(
         entities,
         |entity| entity.switch.is_some(),
-        |switch_entity, entities| {
+        |switch_entity, entities, _| {
             let switch_bbox = &switch_entity.sprite.bbox();
             let mut switch = switch_entity.switch.as_mut().unwrap();
             let mut overlaps_anything = false;

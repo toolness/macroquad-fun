@@ -7,6 +7,7 @@ use crate::{
     config::config,
     entity::{filter_and_process_entities, Entity, EntityMap},
     game_assets::game_assets,
+    hierarchy::ChildComponent,
     input::{Buttons, InputState},
     level::Level,
     materials::{replace_colors_with_image, MaterialRenderer, ReplaceColorOptions},
@@ -27,6 +28,7 @@ pub struct PlayerComponent {
     run_direction: f32,
     pub has_spear: bool,
     pub spear_glow_amount: f32,
+    spear_point_entity: Option<u64>,
 }
 
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
@@ -38,6 +40,7 @@ pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Enti
         .at_bottom_left(&start_rect),
         z_index: ZIndexComponent::new(500),
         player: Some(PlayerComponent {
+            has_spear: true,
             ..Default::default()
         }),
         name_for_debugging: Some(name_for_debugging),
@@ -80,7 +83,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
     filter_and_process_entities(
         entities,
         |entity| entity.player.is_some(),
-        |player_entity, _entities| {
+        |player_entity, entities, player_id| {
             let physics = &mut player_entity.physics;
             let sprite = &mut player_entity.sprite;
             let player = player_entity.player.as_mut().unwrap();
@@ -119,12 +122,12 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
                 &physics.velocity,
                 player.run_direction,
             ));
-            sprite.left_facing_rendering = if attachment.is_attached() {
+            sprite.left_facing_x_offset = if attachment.is_attached() {
                 // The player juts out awkwardly from their carrier if offset,
                 // so don't offset.
-                LeftFacingRendering::Default
+                0.
             } else {
-                LeftFacingRendering::XOffset(config.player_left_facing_x_offset)
+                config.player_left_facing_x_offset
             };
             sprite.update_looping_frame_number(time);
             sprite.material = if player.has_spear {
@@ -138,6 +141,28 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
             } else {
                 replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements)
             };
+            if player.has_spear && player.spear_point_entity.is_none() {
+                let spear_point_id = entities.new_id();
+                let assets = &game_assets().huntress;
+                entities.insert(
+                    spear_point_id,
+                    Entity {
+                        sprite: SpriteComponent {
+                            base_relative_bbox: assets.spear_point_bbox,
+                            left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
+                            left_facing_bbox_x_offset: player_entity.sprite.left_facing_x_offset,
+                            renderer: Renderer::Sprite(&assets.empty),
+                            ..Default::default()
+                        },
+                        child: Some(ChildComponent {
+                            parent: player_id,
+                            pos: Default::default(),
+                        }),
+                        ..Default::default()
+                    },
+                );
+                player.spear_point_entity = Some(spear_point_id);
+            }
         },
     );
 }

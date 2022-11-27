@@ -45,6 +45,15 @@ pub struct SpriteComponent {
     pub color: Option<Color>,
     pub is_facing_left: bool,
     pub left_facing_rendering: LeftFacingRendering,
+
+    /// We sometimes don't want to change the sprite's bounding box when it
+    /// is facing left, as this could result in weird physics bugs; instead,
+    /// this can be used to shift the x-coordinate of where we render
+    /// the sprite.
+    pub left_facing_x_offset: f32,
+
+    pub left_facing_bbox_x_offset: f32,
+
     pub current_frame_number: u32,
 }
 
@@ -58,11 +67,6 @@ pub enum LeftFacingRendering {
     #[default]
     /// Just horizontally flip the sprite, don't change its bounding box.
     Default,
-
-    /// Don't change the sprite's bounding box (as this could result in weird
-    /// physics bugs); instead, shift the x-coordinate of where we render the
-    /// sprite by this amount.
-    XOffset(f32),
 
     /// Horizontally flip the sprite's bounding box too.
     FlipBoundingBox,
@@ -95,16 +99,12 @@ impl SpriteComponent {
             match self.left_facing_rendering {
                 LeftFacingRendering::Default => {}
 
-                // Note that we're going to keep the bounding box the same here--the x-offset
-                // is used at *render* time, not to calculate the bounding box.
-                LeftFacingRendering::XOffset(..) => {}
-
                 LeftFacingRendering::FlipBoundingBox => {
                     if let Renderer::Sprite(sprite) = self.renderer {
                         let frame_width = self.get_sprite_dimensions(&sprite).x;
                         let center_offset = frame_width / 2. - bbox.w / 2.;
                         let flipped_x = (bbox.x - center_offset) * -1. + center_offset;
-                        bbox.x = flipped_x;
+                        bbox.x = flipped_x + self.left_facing_bbox_x_offset;
                     }
                 }
             }
@@ -149,9 +149,7 @@ impl SpriteComponent {
         let y = self.pos.y;
 
         if self.is_facing_left {
-            if let LeftFacingRendering::XOffset(offset) = self.left_facing_rendering {
-                x += offset;
-            }
+            x += self.left_facing_x_offset;
         }
 
         match self.rotation {

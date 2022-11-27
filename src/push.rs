@@ -21,7 +21,7 @@ pub fn push_system(entities: &mut EntityMap) {
                 .map(|push| push.can_push)
                 .unwrap_or(false)
         },
-        |pusher, entities| {
+        |pusher, entities, _| {
             for (_id, pushed) in entities.iter_mut() {
                 if let Some(push) = &pushed.push {
                     if push.pushable_coefficient > 0. {
