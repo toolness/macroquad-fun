@@ -34,7 +34,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
     let death_sprite = &assets.death;
     Entity {
         sprite: SpriteComponent {
-            base_relative_bbox: assets.idle_bbox,
+            base_relative_bbox: assets.dead_bbox,
             sprite: Some(&death_sprite),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
@@ -69,6 +69,7 @@ fn update_mushroom(entity: &mut Entity, time: &GameTime) {
     let sprite = &mut entity.sprite;
     let dynamic_collider = &mut entity.dynamic_collider;
     let config = config();
+    let assets = &game_assets().mushroom;
 
     match &mushroom.state {
         MushroomState::Dead => {
@@ -79,17 +80,17 @@ fn update_mushroom(entity: &mut Entity, time: &GameTime) {
                         .with_ms_per_animation_frame(config.mushroom_rez_ms_per_animation_frame),
                 );
                 entity.life_transfer = None;
+                sprite.base_relative_bbox = assets.idle_bbox;
             }
         }
         MushroomState::Rezzing(animator) => {
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
-                sprite.sprite = Some(&game_assets().mushroom.run);
-                sprite.material =
-                    replace_colors_with_image(&game_assets().mushroom.color_replacements);
+                sprite.sprite = Some(&assets.run);
+                sprite.material = replace_colors_with_image(&assets.color_replacements);
                 velocity.x = config.mushroom_speed;
                 let _ = dynamic_collider.insert(DynamicColliderComponent::new(RelativeCollider {
-                    rect: game_assets().mushroom.platform_bbox,
+                    rect: assets.platform_bbox,
                     enable_top: true,
                     ..Default::default()
                 }));
