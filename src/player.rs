@@ -131,37 +131,45 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
             };
             sprite.update_looping_frame_number(time);
             if player.has_spear {
-                let spear_point_entity_id = match player.spear_point_entity {
-                    None => {
-                        let spear_point_id = entities.new_id();
-                        entities.insert(
-                            spear_point_id,
-                            create_spear_point_entity(player_id, &sprite),
-                        );
-                        player.spear_point_entity = Some(spear_point_id);
-                        spear_point_id
-                    }
-                    Some(id) => id,
-                };
-                let spear_glow_amount =
-                    if let Some(spear_point_entity) = entities.get(spear_point_entity_id) {
-                        get_life_giving_amount_or_zero(spear_point_entity.life_transfer)
-                    } else {
-                        0.
-                    };
-                sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
-                    image: Some((
-                        &game_assets().huntress.spear_glow_color_replacements,
-                        spear_glow_amount,
-                    )),
-                    ..Default::default()
-                });
+                update_spear(player, player_id, sprite, entities);
             } else {
                 sprite.material =
                     replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements);
             }
         },
     );
+}
+
+fn update_spear(
+    player: &mut PlayerComponent,
+    player_id: u64,
+    sprite: &mut SpriteComponent,
+    entities: &mut EntityMap,
+) {
+    let spear_point_entity_id = match player.spear_point_entity {
+        None => {
+            let spear_point_id = entities.new_id();
+            entities.insert(
+                spear_point_id,
+                create_spear_point_entity(player_id, &sprite),
+            );
+            player.spear_point_entity = Some(spear_point_id);
+            spear_point_id
+        }
+        Some(id) => id,
+    };
+    let spear_glow_amount = if let Some(spear_point_entity) = entities.get(spear_point_entity_id) {
+        get_life_giving_amount_or_zero(spear_point_entity.life_transfer)
+    } else {
+        0.
+    };
+    sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
+        image: Some((
+            &game_assets().huntress.spear_glow_color_replacements,
+            spear_glow_amount,
+        )),
+        ..Default::default()
+    });
 }
 
 fn create_spear_point_entity(player_id: u64, player_sprite: &SpriteComponent) -> Entity {
