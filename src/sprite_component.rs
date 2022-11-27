@@ -192,6 +192,8 @@ impl SpriteComponent {
                             ..Default::default()
                         },
                     );
+                } else {
+                    println!("Warning: Renderer::Sprite is used but no sprite is defined!");
                 }
             }
             Renderer::SolidRectangle(rect) => {
