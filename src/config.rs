@@ -25,11 +25,7 @@ pub struct Config {
     pub crate_pushable_coefficient: f32,
     pub fall_off_level_threshold: f32,
     pub vertical_collision_leeway: f32,
-    pub life_transfer_min_radius: f32,
-    pub life_transfer_max_radius: f32,
-    pub life_transfer_revive_threshold: f32,
-    pub life_transfer_speed_coefficient: f32,
-    pub life_transfer_oscillate_amount: f32,
+    pub life_transfer_rate: f32,
     pub coyote_time_ms: f64,
     pub debug_text_size: f32,
 }
@@ -50,8 +46,6 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.vertical_collision_leeway *= config.sprite_scale;
     config.blocked_route_edge_thickness *= config.sprite_scale;
     config.player_left_facing_x_offset *= config.sprite_scale;
-    config.life_transfer_min_radius *= config.sprite_scale;
-    config.life_transfer_max_radius *= config.sprite_scale;
 
     Ok(config)
 }

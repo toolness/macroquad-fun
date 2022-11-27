@@ -74,7 +74,7 @@ fn update_mushroom(entity: &mut Entity, time: &GameTime) {
     match &mushroom.state {
         MushroomState::Dead => {
             let life_receiving = get_life_receiving_amount_or_zero(entity.life_transfer);
-            if life_receiving >= config.life_transfer_revive_threshold {
+            if life_receiving == 1.0 {
                 mushroom.state = MushroomState::Rezzing(
                     Animator::new(dead_frame(), true, &time)
                         .with_ms_per_animation_frame(config.mushroom_rez_ms_per_animation_frame),
