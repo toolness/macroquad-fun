@@ -41,9 +41,19 @@ pub struct SpriteComponent {
 
     pub rotation: Rotation,
     pub renderer: Renderer,
+
+    /// This is used to render the sprite, if the renderer is set to
+    /// [Renderer::Sprite]. If it's not, the dimensions of this sprite
+    /// can still be used in the computation of bounding boxes and such
+    /// (this can be useful for entities that are children of parents).
     pub sprite: Option<&'static SpriteRenderer>,
+
     pub material: MaterialRenderer,
+
+    /// The tint of the sprite, or the fill color of the shape, depending
+    /// on which renderer is active.
     pub color: Option<Color>,
+
     pub is_facing_left: bool,
     pub left_facing_rendering: LeftFacingRendering,
 
