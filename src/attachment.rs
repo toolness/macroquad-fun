@@ -21,7 +21,7 @@ pub fn attachment_system(entities: &mut EntityMap, level: &Level, time: &GameTim
                 false
             }
         },
-        |entity, entities| {
+        |entity, entities, _| {
             let sprite = &mut entity.sprite;
             let attachment = entity.attachment.as_mut().unwrap();
             if let Some(carrier_entity) = attachment.attached_entity(entities) {

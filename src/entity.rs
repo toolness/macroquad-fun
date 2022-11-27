@@ -119,7 +119,17 @@ impl EntityMap {
     }
 
     pub fn clear_all_except_main_player(&mut self) {
-        self.map.retain(|&key, _value| key == MAIN_PLAYER_ENTITY_ID);
+        self.map.retain(|&key, entity| {
+            if key == MAIN_PLAYER_ENTITY_ID {
+                return true;
+            }
+            // Note that this only preserves direct children
+            // of the player, not all descendants!
+            if let Some(child) = entity.child {
+                return child.parent == MAIN_PLAYER_ENTITY_ID;
+            }
+            return false;
+        });
     }
 
     pub fn new_ex(main_player: Entity, capacity: usize) -> Self {
@@ -136,9 +146,9 @@ impl EntityMap {
     ///
     /// This is useful for situations where we need to be able to mutate an Entity,
     /// but also look at other Entities while mutating it.
-    pub fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap)>(&mut self, id: u64, f: F) {
+    fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap, u64)>(&mut self, id: u64, f: F) {
         let mut entity = self.map.remove(&id).unwrap();
-        f(&mut entity, self);
+        f(&mut entity, self, id);
         self.map.insert(id, entity);
     }
 }
@@ -149,7 +159,7 @@ pub type HeaplessEntityVec = heapless::Vec<u64, ENTITY_MAX>;
 
 pub fn filter_and_process_entities<
     Filter: Fn(&Entity) -> bool,
-    Processor: FnMut(&mut Entity, &mut EntityMap),
+    Processor: FnMut(&mut Entity, &mut EntityMap, u64),
 >(
     entities: &mut EntityMap,
     filter: Filter,

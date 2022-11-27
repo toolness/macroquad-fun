@@ -35,7 +35,7 @@ pub fn route_system(entities: &mut EntityMap) {
     filter_and_process_entities(
         entities,
         |entity| entity.route.is_some(),
-        |entity, entities| {
+        |entity, entities, _| {
             let route = entity.route.as_mut().unwrap();
             if !route.is_moving {
                 return;

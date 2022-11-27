@@ -55,7 +55,7 @@ pub fn mushroom_rez_system(entities: &mut EntityMap, time: &GameTime) {
     filter_and_process_entities(
         entities,
         |entity| entity.player.is_some(),
-        |player_entity, entities| {
+        |player_entity, entities, _| {
             let config = config();
             let player = player_entity.player.as_mut().unwrap();
             let mut max_glow_amount = 0.;
@@ -114,7 +114,7 @@ pub fn mushroom_movement_system(entities: &mut EntityMap, time: &GameTime) {
     filter_and_process_entities(
         entities,
         |entity| entity.mushroom.is_some(),
-        |entity, _entities| {
+        |entity, _entities, _id| {
             let mushroom = entity.mushroom.as_mut().unwrap();
             let velocity = &mut entity.physics.velocity;
             let sprite = &mut entity.sprite;
