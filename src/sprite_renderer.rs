@@ -60,9 +60,6 @@ impl SpriteRenderer {
     }
 
     pub fn draw_ex(&self, x: f32, y: f32, frame_number: u32, params: SpriteDrawParams) {
-        if self.texture.width() == 0. && self.texture.height() == 0. {
-            return;
-        }
         draw_texture_ex(
             self.texture,
             x,
