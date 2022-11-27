@@ -143,26 +143,31 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
             };
             if player.has_spear && player.spear_point_entity.is_none() {
                 let spear_point_id = entities.new_id();
-                let assets = &game_assets().huntress;
                 entities.insert(
                     spear_point_id,
-                    Entity {
-                        sprite: SpriteComponent {
-                            base_relative_bbox: assets.spear_point_bbox,
-                            left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
-                            left_facing_bbox_x_offset: player_entity.sprite.left_facing_x_offset,
-                            sprite: Some(&assets.idle),
-                            renderer: Renderer::Invisible,
-                            ..Default::default()
-                        },
-                        child: Some(ChildComponent { parent: player_id }),
-                        ..Default::default()
-                    },
+                    create_spear_point_entity(player_id, &player_entity.sprite),
                 );
                 player.spear_point_entity = Some(spear_point_id);
             }
         },
     );
+}
+
+fn create_spear_point_entity(player_id: u64, player_sprite: &SpriteComponent) -> Entity {
+    let assets = &game_assets().huntress;
+
+    Entity {
+        sprite: SpriteComponent {
+            base_relative_bbox: assets.spear_point_bbox,
+            left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
+            left_facing_bbox_x_offset: player_sprite.left_facing_x_offset,
+            sprite: Some(&assets.idle),
+            renderer: Renderer::Invisible,
+            ..Default::default()
+        },
+        child: Some(ChildComponent { parent: player_id }),
+        ..Default::default()
+    }
 }
 
 fn unattached_player_process_input(
