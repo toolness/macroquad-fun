@@ -51,8 +51,14 @@ pub struct SpriteComponent {
     /// is facing left, as this could result in weird physics bugs; instead,
     /// this can be used to shift the x-coordinate of where we render
     /// the sprite.
+    ///
+    /// In other words, this doesn't actually affect the sprite's bounding
+    /// box at all--it just shifts where the sprite is rendered.
     pub left_facing_x_offset: f32,
 
+    /// When the sprite is facing left, this shifts the sprite's bounding
+    /// box by the given amount. It does *not* affect where the sprite is
+    /// rendered.
     pub left_facing_bbox_x_offset: f32,
 
     pub current_frame_number: u32,
