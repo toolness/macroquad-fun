@@ -117,7 +117,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
 
             attachment.should_attach = player.is_in_air;
             push.can_push = !player.is_in_air;
-            sprite.renderer = Renderer::Sprite(sprite_renderer(
+            sprite.sprite = Some(sprite_renderer(
                 player.is_in_air,
                 &physics.velocity,
                 player.run_direction,
@@ -151,7 +151,8 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
                             base_relative_bbox: assets.spear_point_bbox,
                             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
                             left_facing_bbox_x_offset: player_entity.sprite.left_facing_x_offset,
-                            renderer: Renderer::Sprite(&assets.empty),
+                            sprite: Some(&assets.idle),
+                            renderer: Renderer::Invisible,
                             ..Default::default()
                         },
                         child: Some(ChildComponent { parent: player_id }),

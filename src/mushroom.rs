@@ -8,7 +8,7 @@ use crate::{
     game_assets::game_assets,
     materials::{replace_colors_with_image, LerpType, MaterialRenderer, ReplaceColorOptions},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
-    sprite_component::{LeftFacingRendering, Renderer, SpriteComponent},
+    sprite_component::{LeftFacingRendering, SpriteComponent},
     time::GameTime,
 };
 
@@ -34,7 +34,7 @@ pub fn create_mushrom(start_rect: Rect) -> Entity {
     Entity {
         sprite: SpriteComponent {
             base_relative_bbox: assets.idle_bbox,
-            renderer: Renderer::Sprite(&death_sprite),
+            sprite: Some(&death_sprite),
             left_facing_rendering: LeftFacingRendering::FlipBoundingBox,
             ..Default::default()
         }
@@ -136,7 +136,7 @@ fn update_mushroom(
         MushroomState::Rezzing(animator) => {
             if animator.is_done(&time) {
                 mushroom.state = MushroomState::Alive;
-                sprite.renderer = Renderer::Sprite(&game_assets().mushroom.run);
+                sprite.sprite = Some(&game_assets().mushroom.run);
                 sprite.material =
                     replace_colors_with_image(&game_assets().mushroom.color_replacements);
                 velocity.x = config().mushroom_speed;

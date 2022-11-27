@@ -21,9 +21,9 @@ pub enum Rotation {
 #[derive(Default, Clone, Copy)]
 pub enum Renderer {
     #[default]
-    None,
+    Sprite,
+    Invisible,
     SolidRectangle(Rect),
-    Sprite(&'static SpriteRenderer),
     EntityTiles(Rect),
 }
 
@@ -41,6 +41,7 @@ pub struct SpriteComponent {
 
     pub rotation: Rotation,
     pub renderer: Renderer,
+    pub sprite: Option<&'static SpriteRenderer>,
     pub material: MaterialRenderer,
     pub color: Option<Color>,
     pub is_facing_left: bool,
@@ -87,7 +88,7 @@ impl SpriteComponent {
             Rotation::Clockwise270 => {
                 bbox = Rect::new(bbox.y, bbox.x, bbox.h, bbox.w);
 
-                if let Renderer::Sprite(sprite) = self.renderer {
+                if let Some(sprite) = self.sprite {
                     let frame_height = self.get_sprite_dimensions(&sprite).y;
                     let center_offset = frame_height / 2. - bbox.h / 2.;
                     let flipped_y = (bbox.y - center_offset) * -1. + center_offset;
@@ -100,7 +101,7 @@ impl SpriteComponent {
                 LeftFacingRendering::Default => {}
 
                 LeftFacingRendering::FlipBoundingBox => {
-                    if let Renderer::Sprite(sprite) = self.renderer {
+                    if let Some(sprite) = self.sprite {
                         let frame_width = self.get_sprite_dimensions(&sprite).x;
                         let center_offset = frame_width / 2. - bbox.w / 2.;
                         let flipped_x = (bbox.x - center_offset) * -1. + center_offset;
@@ -139,7 +140,7 @@ impl SpriteComponent {
     }
 
     pub fn update_looping_frame_number(&mut self, time: &GameTime) {
-        if let Renderer::Sprite(sprite) = self.renderer {
+        if let Some(sprite) = self.sprite {
             self.current_frame_number = time.looping_frame_number(&sprite);
         }
     }
@@ -173,23 +174,25 @@ impl SpriteComponent {
     pub fn draw_current_frame(&self, level: &Level) {
         self.material.start_using();
         match self.renderer {
-            Renderer::None => {}
-            Renderer::Sprite(sprite) => {
-                let pos = self.get_sprite_draw_coords(sprite);
-                sprite.draw_ex(
-                    pos.x,
-                    pos.y,
-                    self.current_frame_number,
-                    SpriteDrawParams {
-                        flip_x: self.is_facing_left,
-                        rotation: match self.rotation {
-                            Rotation::None => 0.,
-                            Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
+            Renderer::Invisible => {}
+            Renderer::Sprite => {
+                if let Some(sprite) = self.sprite {
+                    let pos = self.get_sprite_draw_coords(sprite);
+                    sprite.draw_ex(
+                        pos.x,
+                        pos.y,
+                        self.current_frame_number,
+                        SpriteDrawParams {
+                            flip_x: self.is_facing_left,
+                            rotation: match self.rotation {
+                                Rotation::None => 0.,
+                                Rotation::Clockwise270 => -std::f64::consts::FRAC_PI_2 as f32,
+                            },
+                            color: self.color.unwrap_or(WHITE),
+                            ..Default::default()
                         },
-                        color: self.color.unwrap_or(WHITE),
-                        ..Default::default()
-                    },
-                );
+                    );
+                }
             }
             Renderer::SolidRectangle(rect) => {
                 if let Some(color) = self.color {
@@ -208,7 +211,7 @@ impl SpriteComponent {
     }
 
     pub fn draw_debug_rects(&self) {
-        if let Renderer::Sprite(sprite) = self.renderer {
+        if let Some(sprite) = self.sprite {
             let frame = self.get_sprite_dimensions(&sprite);
             draw_rectangle_lines(self.pos.x, self.pos.y, frame.x, frame.y, 1.0, GREEN);
         }
