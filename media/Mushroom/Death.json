@@ -1,10 +1,34 @@
 { "frames": {
-   "Death.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 600, "h": 150 },
+   "Death 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 150, "h": 150 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 600, "h": 150 },
-    "sourceSize": { "w": 600, "h": 150 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+    "sourceSize": { "w": 150, "h": 150 },
+    "duration": 100
+   },
+   "Death 1.aseprite": {
+    "frame": { "x": 150, "y": 0, "w": 150, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+    "sourceSize": { "w": 150, "h": 150 },
+    "duration": 100
+   },
+   "Death 2.aseprite": {
+    "frame": { "x": 300, "y": 0, "w": 150, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+    "sourceSize": { "w": 150, "h": 150 },
+    "duration": 100
+   },
+   "Death 3.aseprite": {
+    "frame": { "x": 450, "y": 0, "w": 150, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+    "sourceSize": { "w": 150, "h": 150 },
     "duration": 100
    }
  },
@@ -15,7 +39,7 @@
   "size": { "w": 600, "h": 150 },
   "scale": "1",
   "slices": [
-   { "name": "dead_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 524, "y": 74, "w": 14, "h": 27 } }] }
+   { "name": "dead_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 3, "bounds": {"x": 71, "y": 74, "w": 16, "h": 27 } }] }
   ]
  }
 }
