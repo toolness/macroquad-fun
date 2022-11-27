@@ -59,9 +59,16 @@ pub const MAIN_PLAYER_ENTITY_ID: u64 = 0;
 #[derive(Clone)]
 pub struct EntityMap {
     map: HashMap<u64, Entity>,
+    next_id: u64,
 }
 
 impl EntityMap {
+    pub fn new_id(&mut self) -> u64 {
+        let id = self.next_id;
+        self.next_id += 1;
+        id
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (u64, &Entity)> {
         self.map.iter().map(|(&id, entity)| (id, entity))
     }
@@ -118,6 +125,7 @@ impl EntityMap {
     pub fn new_ex(main_player: Entity, capacity: usize) -> Self {
         let mut map = EntityMap {
             map: HashMap::with_capacity(capacity),
+            next_id: 1,
         };
         map.map.insert(MAIN_PLAYER_ENTITY_ID, main_player);
         map

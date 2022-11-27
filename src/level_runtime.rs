@@ -47,7 +47,6 @@ pub struct SavedLevelRuntime {
     world: Rc<World>,
     entities: EntityMap,
     camera: Camera,
-    next_id: u64,
     dynamic_collider_system: DynamicColliderSystem,
 }
 
@@ -56,7 +55,6 @@ pub struct LevelRuntime {
     world: Rc<World>,
     entities: EntityMap,
     camera: Camera,
-    next_id: u64,
     dynamic_collider_system: DynamicColliderSystem,
     z_indexed_drawing_system: ZIndexedDrawingSystem,
 }
@@ -68,7 +66,6 @@ impl LevelRuntime {
             world,
             entities: EntityMap::new_ex(player, ENTITY_CAPACITY),
             camera: Camera::new(),
-            next_id: 1,
             dynamic_collider_system: DynamicColliderSystem::with_capacity(ENTITY_CAPACITY),
         });
         instance.change_level(level);
@@ -80,7 +77,6 @@ impl LevelRuntime {
             level: saved.level,
             world: saved.world,
             entities: saved.entities,
-            next_id: saved.next_id,
             camera: saved.camera,
             dynamic_collider_system: saved.dynamic_collider_system,
             z_indexed_drawing_system: ZIndexedDrawingSystem::with_capacity(ENTITY_CAPACITY),
@@ -93,7 +89,6 @@ impl LevelRuntime {
             world: self.world.clone(),
             entities: self.entities.clone(),
             camera: self.camera,
-            next_id: self.next_id,
             dynamic_collider_system: self.dynamic_collider_system.clone(),
         }
     }
@@ -111,7 +106,7 @@ impl LevelRuntime {
         let mut iid_id_map: HashMap<Uuid, u64> = HashMap::with_capacity(self.level.entities.len());
         let level = self.level.clone();
         for entity in level.entities.iter() {
-            let result = iid_id_map.insert(entity.iid, self.new_id());
+            let result = iid_id_map.insert(entity.iid, self.entities.new_id());
             assert!(
                 result.is_none(),
                 "All level entities should have unique IIDs"
@@ -136,12 +131,6 @@ impl LevelRuntime {
                 self.entities.insert(iid_id_map[&entity.iid], instance);
             }
         }
-    }
-
-    fn new_id(&mut self) -> u64 {
-        let id = self.next_id;
-        self.next_id += 1;
-        id
     }
 
     fn maybe_switch_level(&mut self) -> bool {
