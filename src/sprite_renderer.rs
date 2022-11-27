@@ -43,13 +43,6 @@ impl SpriteRenderer {
         }
     }
 
-    pub fn empty(&self) -> Self {
-        SpriteRenderer {
-            texture: Texture2D::empty(),
-            ..*self
-        }
-    }
-
     pub fn frame_width(&self) -> f32 {
         self.frame_size.x * self.scale
     }

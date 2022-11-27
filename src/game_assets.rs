@@ -18,7 +18,6 @@ pub struct HuntressAssets {
     pub run: SpriteRenderer,
     pub jump: SpriteRenderer,
     pub fall: SpriteRenderer,
-    pub empty: SpriteRenderer,
     pub idle_bbox: Rect,
     pub spear_point_bbox: Rect,
     pub no_spear_color_replacements: Image,
@@ -74,11 +73,9 @@ pub async fn load_game_assets() -> Result<()> {
     let mushroom_idle_slices = load_aseprite_slices("media/Mushroom/Idle.json").await?;
     let mushroom_death_slices = load_aseprite_slices("media/Mushroom/Death.json").await?;
     let huntress_idle_slices = load_aseprite_slices("media/Huntress/Idle.json").await?;
-    let huntress_idle = SpriteRenderer::new(load_texture("media/Huntress/Idle.png").await?, 8);
     let assets = GameAssets {
         huntress: HuntressAssets {
-            empty: huntress_idle.empty(),
-            idle: huntress_idle,
+            idle: SpriteRenderer::new(load_texture("media/Huntress/Idle.png").await?, 8),
             run: SpriteRenderer::new(load_texture("media/Huntress/Run.png").await?, 8),
             jump: SpriteRenderer::new(load_texture("media/Huntress/Jump.png").await?, 2),
             fall: SpriteRenderer::new(load_texture("media/Huntress/Fall.png").await?, 2),
