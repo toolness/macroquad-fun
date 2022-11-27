@@ -20,10 +20,10 @@
     "moving_platform_speed": 20.0,
     "crate_pushable_coefficient": 0.5,
     "coyote_time_ms": 60.0,
-    "spear_glow_min_radius": 32.0,
-    "spear_glow_max_radius": 64.0,
-    "spear_glow_revive_threshold": 0.95,
-    "spear_glow_speed_coefficient": 6.0,
-    "spear_glow_oscillate_amount": 0.2,
+    "life_transfer_min_radius": 32.0,
+    "life_transfer_max_radius": 64.0,
+    "life_transfer_revive_threshold": 0.95,
+    "life_transfer_speed_coefficient": 6.0,
+    "life_transfer_oscillate_amount": 0.2,
     "debug_text_size": 32.0
 }

@@ -11,8 +11,9 @@ use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::hierarchy::child_component_system;
 use crate::input::InputState;
+use crate::life_transfer::life_transfer_system;
 use crate::moving_platform::create_moving_platform;
-use crate::mushroom::{create_mushrom, mushroom_movement_system, mushroom_rez_system};
+use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::{physics_system_resolve_collisions, physics_system_update_positions};
 use crate::pickups::{create_spear, pickup_system};
 use crate::player::{
@@ -169,7 +170,7 @@ impl LevelRuntime {
         floor_switch_system(&mut self.entities);
         flying_eye_movement_system(&mut self.entities, time);
         mushroom_movement_system(&mut self.entities, time);
-        mushroom_rez_system(&mut self.entities, time);
+        life_transfer_system(&mut self.entities, time);
         pickup_system(&mut self.entities, time);
         player_update_system(&mut self.entities, time);
 

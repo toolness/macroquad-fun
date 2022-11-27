@@ -10,6 +10,7 @@ use crate::{
     hierarchy::ChildComponent,
     input::{Buttons, InputState},
     level::Level,
+    life_transfer::{get_life_giving_amount_or_zero, LifeTransfer},
     materials::{replace_colors_with_image, MaterialRenderer, ReplaceColorOptions},
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     push::PushComponent,
@@ -27,7 +28,6 @@ pub struct PlayerComponent {
     coyote_time_start: Option<f64>,
     run_direction: f32,
     pub has_spear: bool,
-    pub spear_glow_amount: f32,
     spear_point_entity: Option<u64>,
 }
 
@@ -130,24 +130,35 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
                 config.player_left_facing_x_offset
             };
             sprite.update_looping_frame_number(time);
-            sprite.material = if player.has_spear {
-                MaterialRenderer::ReplaceColors(ReplaceColorOptions {
+            if player.has_spear {
+                let spear_point_entity_id = match player.spear_point_entity {
+                    None => {
+                        let spear_point_id = entities.new_id();
+                        entities.insert(
+                            spear_point_id,
+                            create_spear_point_entity(player_id, &sprite),
+                        );
+                        player.spear_point_entity = Some(spear_point_id);
+                        spear_point_id
+                    }
+                    Some(id) => id,
+                };
+                let spear_glow_amount =
+                    if let Some(spear_point_entity) = entities.get(spear_point_entity_id) {
+                        get_life_giving_amount_or_zero(spear_point_entity.life_transfer)
+                    } else {
+                        0.
+                    };
+                sprite.material = MaterialRenderer::ReplaceColors(ReplaceColorOptions {
                     image: Some((
                         &game_assets().huntress.spear_glow_color_replacements,
-                        player.spear_glow_amount,
+                        spear_glow_amount,
                     )),
                     ..Default::default()
-                })
+                });
             } else {
-                replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements)
-            };
-            if player.has_spear && player.spear_point_entity.is_none() {
-                let spear_point_id = entities.new_id();
-                entities.insert(
-                    spear_point_id,
-                    create_spear_point_entity(player_id, &player_entity.sprite),
-                );
-                player.spear_point_entity = Some(spear_point_id);
+                sprite.material =
+                    replace_colors_with_image(&game_assets().huntress.no_spear_color_replacements);
             }
         },
     );
@@ -165,6 +176,7 @@ fn create_spear_point_entity(player_id: u64, player_sprite: &SpriteComponent) ->
             renderer: Renderer::Invisible,
             ..Default::default()
         },
+        life_transfer: Some(LifeTransfer::Giving(0.)),
         child: Some(ChildComponent { parent: player_id }),
         ..Default::default()
     }

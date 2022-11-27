@@ -43,6 +43,7 @@ mod input;
 mod ldtk;
 mod level;
 mod level_runtime;
+mod life_transfer;
 mod materials;
 mod math_util;
 mod moving_platform;
