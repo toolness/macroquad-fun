@@ -154,10 +154,7 @@ pub fn player_update_system(entities: &mut EntityMap, time: &GameTime) {
                             renderer: Renderer::Sprite(&assets.empty),
                             ..Default::default()
                         },
-                        child: Some(ChildComponent {
-                            parent: player_id,
-                            pos: Default::default(),
-                        }),
+                        child: Some(ChildComponent { parent: player_id }),
                         ..Default::default()
                     },
                 );
