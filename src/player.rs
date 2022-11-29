@@ -32,9 +32,11 @@ pub struct PlayerComponent {
 }
 
 pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Entity {
+    let assets = &game_assets().huntress;
     Entity {
         sprite: SpriteComponent {
-            base_relative_bbox: game_assets().huntress.idle_bbox,
+            base_relative_bbox: assets.idle_bbox,
+            sprite: Some(&assets.idle),
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
