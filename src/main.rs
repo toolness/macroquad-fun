@@ -36,6 +36,7 @@ mod entity;
 mod floor_switch;
 mod flying_eye;
 mod font;
+mod foreground_tiles;
 mod fps;
 mod game_assets;
 mod hierarchy;

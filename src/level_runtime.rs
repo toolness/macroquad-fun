@@ -9,6 +9,7 @@ use crate::dynamic_collider::DynamicColliderSystem;
 use crate::entity::{Entity, EntityMap};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
+use crate::foreground_tiles::create_foreground_tiles;
 use crate::hierarchy::child_component_system;
 use crate::input::InputState;
 use crate::life_transfer::life_transfer_system;
@@ -120,6 +121,7 @@ impl LevelRuntime {
                 EntityKind::Spear => Some(create_spear(entity.rect)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
                 EntityKind::MovingPlatform(args) => Some(create_moving_platform(entity.rect, args)),
+                EntityKind::ForegroundTiles => Some(create_foreground_tiles(entity.rect)),
                 EntityKind::Crate => Some(create_crate(entity.rect)),
                 EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
                     entity.rect,

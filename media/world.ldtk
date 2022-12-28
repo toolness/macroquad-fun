@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 30,
+	"nextUid": 31,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -663,6 +663,34 @@
 			"pivotX": 0,
 			"pivotY": 0,
 			"fieldDefs": []
+		},
+		{
+			"identifier": "ForegroundTiles",
+			"uid": 30,
+			"tags": [],
+			"width": 16,
+			"height": 16,
+			"resizableX": true,
+			"resizableY": true,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#8B8E38",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
 		}
 	], "tilesets": [
 		{
@@ -876,7 +904,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "7138c680-5110-11ed-b01d-3b6ed695f0fe"
+								"worldIid": "37911ae0-7820-11ed-b296-a15e66f4c95d"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -925,6 +953,20 @@
 							"height": 16,
 							"defUid": 29,
 							"px": [128,208],
+							"fieldInstances": []
+						},
+						{
+							"__identifier": "ForegroundTiles",
+							"__grid": [6,6],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#8B8E38",
+							"iid": "707ca360-7820-11ed-b296-a559a96510e6",
+							"width": 16,
+							"height": 48,
+							"defUid": 30,
+							"px": [96,96],
 							"fieldInstances": []
 						}
 					]
@@ -1202,7 +1244,10 @@
 						{ "px": [384,48], "src": [0,0], "f": 0, "t": 0, "d": [162] },
 						{ "px": [384,64], "src": [0,0], "f": 0, "t": 0, "d": [208] },
 						{ "px": [384,80], "src": [0,0], "f": 0, "t": 0, "d": [254] },
-						{ "px": [384,96], "src": [0,0], "f": 0, "t": 0, "d": [300] }
+						{ "px": [96,96], "src": [0,0], "f": 0, "t": 0, "d": [282] },
+						{ "px": [384,96], "src": [0,0], "f": 0, "t": 0, "d": [300] },
+						{ "px": [96,112], "src": [0,0], "f": 0, "t": 0, "d": [328] },
+						{ "px": [96,128], "src": [0,0], "f": 0, "t": 0, "d": [374] }
 					],
 					"entityInstances": []
 				},

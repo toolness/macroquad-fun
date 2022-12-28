@@ -128,6 +128,7 @@ pub enum EntityKind {
     FlyingEye(Vec2),
     Mushroom,
     MovingPlatform(MovingPlatformArgs),
+    ForegroundTiles,
     Crate,
     FloorSwitch(Option<EntityRef>),
     Spear,
@@ -190,6 +191,7 @@ impl Level {
                             stop_when_blocked: field_into(&mut fields, "stop_when_blocked")?,
                             renderer_type: field_into(&mut fields, "renderer")?,
                         }),
+                        "ForegroundTiles" => EntityKind::ForegroundTiles,
                         "Crate" => EntityKind::Crate,
                         "FloorSwitch" => {
                             EntityKind::FloorSwitch(field_into(&mut fields, "trigger")?)
