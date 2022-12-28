@@ -9,6 +9,7 @@ use crate::{
     physics::PhysicsComponent,
     route::RouteComponent,
     sprite_component::{Renderer, SpriteComponent},
+    z_index::{ZIndexComponent, FOREGROUND_Z_INDEX},
 };
 
 pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> Entity {
@@ -30,14 +31,23 @@ pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> En
             defies_gravity: true,
             ..Default::default()
         },
-        dynamic_collider: Some(DynamicColliderComponent::new(RelativeCollider {
-            rect: relative_bbox,
-            collision_flags: CollisionFlags::ENVIRONMENT,
-            enable_top: true,
-            enable_bottom: true,
-            enable_left: true,
-            enable_right: true,
-        })),
+        z_index: if args.disable_collider {
+            ZIndexComponent::new(FOREGROUND_Z_INDEX)
+        } else {
+            Default::default()
+        },
+        dynamic_collider: if args.disable_collider {
+            None
+        } else {
+            Some(DynamicColliderComponent::new(RelativeCollider {
+                rect: relative_bbox,
+                collision_flags: CollisionFlags::ENVIRONMENT,
+                enable_top: true,
+                enable_bottom: true,
+                enable_left: true,
+                enable_right: true,
+            }))
+        },
         route: Some(RouteComponent {
             start_point,
             end_point: args.end_point,

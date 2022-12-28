@@ -2,6 +2,10 @@ use std::cell::RefCell;
 
 use crate::{entity::EntityMap, level::Level};
 
+pub const PLAYER_Z_INDEX: i32 = 500;
+
+pub const FOREGROUND_Z_INDEX: i32 = 550;
+
 #[derive(Default, Clone, Copy)]
 pub struct ZIndexComponent {
     value: i32,

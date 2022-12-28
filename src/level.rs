@@ -118,6 +118,7 @@ pub struct MovingPlatformArgs {
     pub end_point: Vec2,
     pub ping_pong: bool,
     pub stop_when_blocked: bool,
+    pub disable_collider: bool,
     pub renderer_type: RendererType,
 }
 
@@ -188,6 +189,7 @@ impl Level {
                             end_point: field_into::<Vec2>(&mut fields, "endpoint")? * grid_size,
                             ping_pong: field_into(&mut fields, "ping_pong")?,
                             stop_when_blocked: field_into(&mut fields, "stop_when_blocked")?,
+                            disable_collider: field_into(&mut fields, "disable_collider")?,
                             renderer_type: field_into(&mut fields, "renderer")?,
                         }),
                         "Crate" => EntityKind::Crate,

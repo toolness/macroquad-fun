@@ -19,7 +19,7 @@ use crate::{
     sprite_renderer::SpriteRenderer,
     time::GameTime,
     world::World,
-    z_index::ZIndexComponent,
+    z_index::{ZIndexComponent, PLAYER_Z_INDEX},
 };
 
 #[derive(Default, Copy, Clone)]
@@ -40,7 +40,7 @@ pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Enti
             ..Default::default()
         }
         .at_bottom_left(&start_rect),
-        z_index: ZIndexComponent::new(500),
+        z_index: ZIndexComponent::new(PLAYER_Z_INDEX),
         player: Some(PlayerComponent {
             has_spear: true,
             ..Default::default()
