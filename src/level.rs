@@ -132,6 +132,7 @@ pub enum EntityKind {
     Crate,
     FloorSwitch(Option<EntityRef>),
     Spear,
+    Gem,
 }
 
 impl Level {
@@ -184,6 +185,7 @@ impl Level {
                             field_into(&mut fields, "y_velocity")?,
                         )),
                         "Spear" => EntityKind::Spear,
+                        "Gem" => EntityKind::Gem,
                         "Mushroom" => EntityKind::Mushroom,
                         "MovingPlatform" => EntityKind::MovingPlatform(MovingPlatformArgs {
                             end_point: field_into::<Vec2>(&mut fields, "endpoint")? * grid_size,

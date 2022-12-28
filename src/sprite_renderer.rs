@@ -51,6 +51,10 @@ impl SpriteRenderer {
         self.frame_size.y * self.scale
     }
 
+    pub fn frame_rect(&self) -> Rect {
+        Rect::new(0., 0., self.frame_width(), self.frame_height())
+    }
+
     pub fn num_frames(&self) -> u32 {
         self.num_frames
     }

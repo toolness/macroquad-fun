@@ -45,11 +45,16 @@ pub struct SpearAssets {
     pub spear_move_bbox: Rect,
 }
 
+pub struct GemAssets {
+    pub gem: SpriteRenderer,
+}
+
 pub struct GameAssets {
     pub huntress: HuntressAssets,
     pub flying_eye: FlyingEyeAssets,
     pub mushroom: MushroomAssets,
     pub spear: SpearAssets,
+    pub gem: GemAssets,
     pub tileset: Texture2D,
     pub font: BitmapFont,
     pub materials: GameMaterials,
@@ -117,6 +122,9 @@ pub async fn load_game_assets() -> Result<()> {
                 &load_aseprite_slices("media/Huntress/Spear move.json").await?,
                 "spear_bounding_box",
             )?,
+        },
+        gem: GemAssets {
+            gem: SpriteRenderer::new(load_texture("media/gem.png").await?, 1),
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {

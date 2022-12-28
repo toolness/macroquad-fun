@@ -16,7 +16,7 @@ use crate::life_transfer::life_transfer_system;
 use crate::moving_platform::create_moving_platform;
 use crate::mushroom::{create_mushrom, mushroom_movement_system};
 use crate::physics::{physics_system_resolve_collisions, physics_system_update_positions};
-use crate::pickups::{create_spear, pickup_system};
+use crate::pickups::{create_gem, create_spear, pickup_system};
 use crate::player::{
     did_fall_off_level, player_update_system, process_player_input, should_switch_levels,
     teleport_entity,
@@ -119,6 +119,7 @@ impl LevelRuntime {
             let opt_instance = match &entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
                 EntityKind::Spear => Some(create_spear(entity.rect)),
+                EntityKind::Gem => Some(create_gem(entity.rect)),
                 EntityKind::Mushroom => Some(create_mushrom(entity.rect)),
                 EntityKind::MovingPlatform(args) => Some(create_moving_platform(entity.rect, args)),
                 EntityKind::ForegroundTiles => Some(create_foreground_tiles(entity.rect)),

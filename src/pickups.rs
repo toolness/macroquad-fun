@@ -11,9 +11,28 @@ use crate::{
 #[derive(Clone, Copy)]
 pub enum Pickup {
     Spear,
+    Gem,
 }
 
 pub type PickupComponent = Pickup;
+
+pub fn create_gem(start_rect: Rect) -> Entity {
+    let assets = &game_assets().gem;
+    Entity {
+        sprite: SpriteComponent {
+            base_relative_bbox: assets.gem.frame_rect(),
+            sprite: Some(&assets.gem),
+            ..Default::default()
+        }
+        .at_bottom_left(&start_rect),
+        physics: PhysicsComponent {
+            defies_gravity: true,
+            ..Default::default()
+        },
+        pickup: Some(Pickup::Gem),
+        ..Default::default()
+    }
+}
 
 pub fn create_spear(start_rect: Rect) -> Entity {
     let assets = &game_assets().spear;
@@ -39,6 +58,9 @@ fn grab_pickup(player_entity: &mut Entity, pickup: Pickup) {
     match pickup {
         Pickup::Spear => {
             player.has_spear = true;
+        }
+        Pickup::Gem => {
+            // TODO: Add a gem to the player's inventory.
         }
     }
 }
