@@ -42,7 +42,6 @@ pub fn create_player(start_rect: Rect, name_for_debugging: &'static str) -> Enti
         .at_bottom_left(&start_rect),
         z_index: ZIndexComponent::new(500),
         player: Some(PlayerComponent {
-            has_spear: true,
             ..Default::default()
         }),
         name_for_debugging: Some(name_for_debugging),
