@@ -3,10 +3,16 @@ use crate::{
     route::try_to_start_route,
 };
 
+#[derive(Clone, Copy)]
+pub enum TriggerType {
+    ToggleRoute,
+    Destroy,
+}
+
 #[derive(Default, Clone, Copy)]
 pub struct SwitchComponent {
     pub is_switched_on: bool,
-    pub trigger_entity: Option<u64>,
+    pub trigger: Option<(TriggerType, u64)>,
 }
 
 pub fn switch_system(entities: &mut EntityMap) {
@@ -27,8 +33,17 @@ pub fn switch_system(entities: &mut EntityMap) {
             switch.is_switched_on = overlaps_anything;
 
             if was_switched_on != switch.is_switched_on {
-                if let Some(id) = switch.trigger_entity {
-                    if let Some(triggered_entity) = entities.get_mut(id) {
+                let Some((trigger_type, id)) = switch.trigger else {
+                    return
+                };
+                let Some(triggered_entity) = entities.get_mut(id) else {
+                    return
+                };
+                match trigger_type {
+                    TriggerType::Destroy => {
+                        entities.remove(id);
+                    }
+                    TriggerType::ToggleRoute => {
                         try_to_start_route(triggered_entity, !switch.is_switched_on);
                     }
                 }

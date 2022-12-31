@@ -6,7 +6,7 @@ use crate::{
     math_util::contract_rect,
     physics::PhysicsComponent,
     sprite_component::{Renderer, SpriteComponent},
-    switch::SwitchComponent,
+    switch::{SwitchComponent, TriggerType},
 };
 
 #[derive(Clone, Copy)]
@@ -31,7 +31,7 @@ pub fn create_floor_switch(start_rect: Rect, trigger_entity: Option<u64>) -> Ent
         },
         floor_switch: Some(FloorSwitchComponent()),
         switch: Some(SwitchComponent {
-            trigger_entity,
+            trigger: trigger_entity.map(|id| (TriggerType::ToggleRoute, id)),
             ..Default::default()
         }),
         ..Default::default()
