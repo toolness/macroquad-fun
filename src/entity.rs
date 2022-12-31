@@ -18,6 +18,7 @@ use crate::{
     running::RunComponent,
     sprite_component::SpriteComponent,
     switch::SwitchComponent,
+    text::TextComponent,
     z_index::ZIndexComponent,
 };
 
@@ -39,6 +40,7 @@ pub struct Entity {
     pub floor_switch: Option<FloorSwitchComponent>,
     pub pickup: Option<PickupComponent>,
     pub life_transfer: Option<LifeTransferComponent>,
+    pub text: Option<TextComponent>,
     pub child: Option<ChildComponent>,
     pub iid: Option<Uuid>,
     pub name_for_debugging: Option<&'static str>,

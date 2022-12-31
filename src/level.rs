@@ -392,15 +392,14 @@ impl Level {
         true
     }
 
-    pub fn get_text(&self, rect: &Rect) -> Option<&Vec<String>> {
-        for entity in self.entities.values() {
+    pub fn get_text(&self, iid: &Uuid) -> Option<&Vec<String>> {
+        self.entities.get(iid).and_then(|entity| {
             if let EntityKind::Text(text) = &entity.kind {
-                if entity.rect.overlaps(rect) {
-                    return Some(text);
-                }
+                Some(text)
+            } else {
+                None
             }
-        }
-        None
+        })
     }
 }
 

@@ -24,7 +24,7 @@ use crate::player::{
 use crate::push::push_system;
 use crate::route::{draw_route_debug_targets, route_system};
 use crate::switch::switch_system;
-use crate::text::draw_level_text;
+use crate::text::{create_text_entity, draw_level_text};
 use crate::time::GameTime;
 use crate::world::World;
 use crate::z_index::ZIndexedDrawingSystem;
@@ -128,7 +128,8 @@ impl LevelRuntime {
                     entity.rect,
                     trigger_entity_iid.as_ref().map(|s| iid_id_map[&s.iid]),
                 )),
-                EntityKind::PlayerStart(..) | EntityKind::Text(..) => None,
+                EntityKind::PlayerStart(..) => None,
+                EntityKind::Text(..) => Some(create_text_entity(entity.rect)),
             };
             if let Some(mut instance) = opt_instance {
                 instance.iid = Some(entity.iid);
@@ -190,7 +191,7 @@ impl LevelRuntime {
                 .draw_entities(&self.entities, &self.level);
         });
 
-        draw_level_text(&self.entities.main_player().sprite, &self.level);
+        draw_level_text(&self.entities, &self.level);
     }
 
     pub fn generate_debug_text(&self, text: &mut String) -> Result<()> {
