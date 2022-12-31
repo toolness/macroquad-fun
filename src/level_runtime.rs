@@ -107,7 +107,7 @@ impl LevelRuntime {
         // rather than having to do it every frame.
         let mut iid_id_map: HashMap<Uuid, u64> = HashMap::with_capacity(self.level.entities.len());
         let level = self.level.clone();
-        for entity in level.entities.iter() {
+        for entity in level.entities.values() {
             let result = iid_id_map.insert(entity.iid, self.entities.new_id());
             assert!(
                 result.is_none(),
@@ -115,7 +115,7 @@ impl LevelRuntime {
             );
         }
 
-        for entity in level.entities.iter() {
+        for entity in level.entities.values() {
             let opt_instance = match &entity.kind {
                 EntityKind::FlyingEye(velocity) => Some(create_flying_eye(entity.rect, *velocity)),
                 EntityKind::Spear => Some(create_spear(entity.rect)),

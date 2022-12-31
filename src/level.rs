@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{anyhow, Error, Result};
 use macroquad::prelude::*;
 use uuid::Uuid;
@@ -93,7 +95,7 @@ pub struct Level {
     pub entity_tiles: Vec<Option<Tile>>,
 
     /// Various other entities in the level.
-    pub entities: Vec<Entity>,
+    pub entities: HashMap<Uuid, Entity>,
 }
 
 #[derive(Copy, Clone)]
@@ -146,7 +148,7 @@ impl Level {
             level.px_hei as f32 * scale,
         );
         let layers = level.layer_instances.unwrap();
-        let mut entities = vec![];
+        let mut entities = HashMap::new();
         let mut opt_tiles: Option<Vec<Option<Tile>>> = None;
         let mut opt_background_tiles: Option<Vec<Option<Tile>>> = None;
         let mut opt_entity_tiles: Option<Vec<Option<Tile>>> = None;
@@ -203,7 +205,11 @@ impl Level {
                             continue;
                         }
                     };
-                    entities.push(Entity { kind, rect, iid });
+                    let result = entities.insert(iid, Entity { kind, rect, iid });
+                    assert!(
+                        result.is_none(),
+                        "All level entities should have unique IIDs"
+                    );
                 }
             } else if layer.identifier == "BackgroundTiles" {
                 opt_background_tiles = Some(load_tile_layer(&layer, &layer.grid_tiles));
@@ -387,7 +393,7 @@ impl Level {
     }
 
     pub fn get_text(&self, rect: &Rect) -> Option<&Vec<String>> {
-        for entity in self.entities.iter() {
+        for entity in self.entities.values() {
             if let EntityKind::Text(text) = &entity.kind {
                 if entity.rect.overlaps(rect) {
                     return Some(text);

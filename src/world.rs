@@ -37,7 +37,7 @@ impl World {
 
     pub fn player_start(&self, name: &str) -> Option<(Rc<Level>, Rect)> {
         for level in self.levels.values() {
-            for entity in level.entities.iter() {
+            for entity in level.entities.values() {
                 match &entity.kind {
                     EntityKind::PlayerStart(entity_name) if entity_name == name => {
                         return Some((level.clone(), entity.rect));
