@@ -12,26 +12,26 @@ use crate::{
 };
 
 pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> Entity {
-    let start_point = start_rect.point();
-    let relative_bbox = start_rect.offset(-start_point);
+    let mut sprite = SpriteComponent::default().with_pos_and_size(&start_rect);
+    match args.renderer_type {
+        RendererType::EntityTiles => {
+            sprite.renderer = Renderer::EntityTiles(start_rect);
+        }
+        RendererType::SolidRectangle => {
+            // Used only for prototyping.
+            sprite.renderer = Renderer::SolidRectangle(sprite.relative_bbox());
+            sprite.color = Some(PINK);
+        }
+    };
+
     return Entity {
-        sprite: SpriteComponent {
-            pos: start_rect.point(),
-            base_relative_bbox: relative_bbox,
-            renderer: match args.renderer_type {
-                RendererType::EntityTiles => Renderer::EntityTiles(start_rect),
-                RendererType::SolidRectangle => Renderer::SolidRectangle(relative_bbox),
-            },
-            // Used only by RendererType::SolidRectangle, for prototyping
-            color: Some(PINK),
-            ..Default::default()
-        },
+        sprite,
         physics: PhysicsComponent {
             defies_gravity: true,
             ..Default::default()
         },
         dynamic_collider: Some(DynamicColliderComponent::new(RelativeCollider {
-            rect: relative_bbox,
+            rect: sprite.relative_bbox(),
             collision_flags: CollisionFlags::ENVIRONMENT,
             enable_top: true,
             enable_bottom: true,
@@ -39,7 +39,7 @@ pub fn create_moving_platform(start_rect: Rect, args: &MovingPlatformArgs) -> En
             enable_right: true,
         })),
         route: Some(RouteComponent {
-            start_point,
+            start_point: sprite.pos,
             end_point: args.end_point,
             stop_when_blocked: args.stop_when_blocked,
             is_moving: args.ping_pong,

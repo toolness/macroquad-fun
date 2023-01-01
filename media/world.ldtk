@@ -1068,6 +1068,34 @@
 							"defUid": 31,
 							"px": [176,96],
 							"fieldInstances": []
+						},
+						{
+							"__identifier": "MovingPlatform",
+							"__grid": [9,3],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#EFE606",
+							"iid": "d26ff9a0-7820-11ed-a211-d7c339dbb3f0",
+							"width": 16,
+							"height": 16,
+							"defUid": 15,
+							"px": [144,48],
+							"fieldInstances": [
+								{ "__identifier": "endpoint", "__value": { "cx": 12, "cy": 3 }, "__type": "Point", "__tile": null, "defUid": 16, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["12,3"]
+								}] },
+								{ "__identifier": "ping_pong", "__value": true, "__type": "Bool", "__tile": null, "defUid": 24, "realEditorValues": [{
+									"id": "V_Bool",
+									"params": [ true ]
+								}] },
+								{ "__identifier": "stop_when_blocked", "__value": false, "__type": "Bool", "__tile": null, "defUid": 26, "realEditorValues": [] },
+								{ "__identifier": "renderer", "__value": "SolidRectangle", "__type": "LocalEnum.Renderer", "__tile": null, "defUid": 28, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["SolidRectangle"]
+								}] }
+							]
 						}
 					]
 				},

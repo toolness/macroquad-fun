@@ -155,6 +155,14 @@ impl SpriteComponent {
         self
     }
 
+    pub fn with_pos_and_size(mut self, rect: &Rect) -> Self {
+        let start_point = rect.point();
+        let relative_bbox = rect.offset(-start_point);
+        self.pos = start_point;
+        self.base_relative_bbox = relative_bbox;
+        self
+    }
+
     pub fn update_looping_frame_number(&mut self, time: &GameTime) {
         if let Some(sprite) = self.sprite {
             self.current_frame_number = time.looping_frame_number(&sprite);

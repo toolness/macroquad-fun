@@ -8,15 +8,12 @@ use crate::{
 };
 
 pub fn create_foreground_tiles(start_rect: Rect) -> Entity {
-    let start_point = start_rect.point();
-    let relative_bbox = start_rect.offset(-start_point);
     return Entity {
         sprite: SpriteComponent {
-            pos: start_point,
-            base_relative_bbox: relative_bbox,
             renderer: Renderer::EntityTiles(start_rect),
             ..Default::default()
-        },
+        }
+        .with_pos_and_size(&start_rect),
         physics: PhysicsComponent {
             defies_gravity: true,
             ..Default::default()

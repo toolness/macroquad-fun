@@ -13,17 +13,14 @@ use crate::{
 pub struct TextComponent {}
 
 pub fn create_text_entity(rect: Rect) -> Entity {
-    let start_point = rect.point();
-    let relative_bbox = rect.offset(-start_point);
     Entity {
         sprite: SpriteComponent {
-            pos: start_point,
-            base_relative_bbox: relative_bbox,
             // Rendering is actually done via `draw_level_text()`, so we don't
             // use the sprite renderer.
             renderer: Renderer::Invisible,
             ..Default::default()
-        },
+        }
+        .with_pos_and_size(&rect),
         physics: PhysicsComponent {
             defies_gravity: true,
             ..Default::default()

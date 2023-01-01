@@ -9,15 +9,12 @@ use crate::{
 };
 
 pub fn create_trigger(rect: Rect, destroy_on_enter: Option<u64>) -> Entity {
-    let start_point = rect.point();
-    let relative_bbox = rect.offset(-start_point);
     Entity {
         sprite: SpriteComponent {
-            pos: start_point,
-            base_relative_bbox: relative_bbox,
             renderer: Renderer::Invisible,
             ..Default::default()
-        },
+        }
+        .with_pos_and_size(&rect),
         physics: PhysicsComponent {
             defies_gravity: true,
             // Currently we're only using this for cases where the player
