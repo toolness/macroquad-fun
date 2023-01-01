@@ -40,9 +40,9 @@ pub struct FixedGameTime {
     /// The maximum amount of time, in seconds, that we'll allow to elapse from one
     /// game frame to the next. If more than this amount of real-world time passes
     /// between frames, we'll "truncate" it to this maximum to avoid undesirable
-    /// effects.
+    /// effects, such as physics tunneling.
     ///
-    /// For example, this prevents us from spending too long "catching up" with the
+    /// This also prevents us from spending too long "catching up" with the
     /// time elapsed since the last frame. It also ensures resonable behavior in
     /// situations where e.g. the user puts their computer to sleep, or Macroquad's event
     /// loop takes a really long time to get back to us (see e.g.
