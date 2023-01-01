@@ -1,0 +1,22 @@
+{
+  "name": "macroquad-fun",
+  "version": "1.0.0",
+  "description": "```\r cargo run\r ```",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "gh-pages -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toolness/macroquad-fun.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toolness/macroquad-fun/issues"
+  },
+  "homepage": "https://github.com/toolness/macroquad-fun#readme",
+  "dependencies": {
+    "gh-pages": "^4.0.0"
+  }
+}
