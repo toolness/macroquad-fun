@@ -1,0 +1,21 @@
+{ "frames": {
+   "Spear move.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 240, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 240, "h": 20 },
+    "sourceSize": { "w": 240, "h": 20 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.2.40-arm64",
+  "format": "RGBA8888",
+  "size": { "w": 240, "h": 20 },
+  "scale": "1",
+  "slices": [
+   { "name": "spear_bounding_box", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 10, "y": 8, "w": 42, "h": 5 } }] }
+  ]
+ }
+}

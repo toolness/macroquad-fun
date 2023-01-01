@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!-- This file is based on https://github.com/not-fl3/macroquad#wasm -->
+    <title>Macroquad Fun</title>
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            outline-style: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="glcanvas" tabindex="1"></canvas>
+    <script src="media/js/vendor/miniquad/gl.js"></script>
+    <script type="module" src="media/js/main.js"></script>
+</body>
+</html>
