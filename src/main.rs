@@ -39,6 +39,7 @@ mod font;
 mod foreground_tiles;
 mod fps;
 mod game_assets;
+mod gem_counter;
 mod hierarchy;
 mod input;
 mod ldtk;

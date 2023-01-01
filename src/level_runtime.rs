@@ -10,6 +10,7 @@ use crate::entity::{Entity, EntityMap};
 use crate::floor_switch::{create_floor_switch, floor_switch_system};
 use crate::flying_eye::{create_flying_eye, flying_eye_movement_system};
 use crate::foreground_tiles::create_foreground_tiles;
+use crate::gem_counter::draw_gem_counter;
 use crate::hierarchy::child_component_system;
 use crate::input::InputState;
 use crate::life_transfer::life_transfer_system;
@@ -197,6 +198,7 @@ impl LevelRuntime {
         });
 
         draw_level_text(&self.entities, &self.level);
+        draw_gem_counter(&self.entities, &self.level);
     }
 
     pub fn generate_debug_text(&self, text: &mut String) -> Result<()> {

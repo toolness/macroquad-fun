@@ -63,6 +63,7 @@ pub const MAIN_PLAYER_ENTITY_ID: u64 = 0;
 #[derive(Clone)]
 pub struct EntityMap {
     map: HashMap<u64, Entity>,
+    iid_map: HashMap<Uuid, u64>,
     next_id: u64,
 }
 
@@ -88,10 +89,22 @@ impl EntityMap {
     pub fn insert(&mut self, id: u64, entity: Entity) {
         assert!(!self.map.contains_key(&id), "Entity with id already exists");
         self.map.insert(id, entity);
+        if let Some(iid) = entity.iid {
+            let result = self.iid_map.insert(iid, id);
+            if result.is_some() {
+                println!("WARNING: Entity with iid {} already exists!", iid);
+            }
+        }
     }
 
-    pub fn remove(&mut self, id: u64) {
-        self.map.remove(&id);
+    pub fn remove(&mut self, id: u64) -> Option<Entity> {
+        let result = self.map.remove(&id);
+        if let Some(entity) = result {
+            if let Some(iid) = entity.iid {
+                self.iid_map.remove(&iid);
+            }
+        }
+        result
     }
 
     pub fn capacity(&self) -> usize {
@@ -104,6 +117,10 @@ impl EntityMap {
 
     pub fn ids(&self) -> impl Iterator<Item = &u64> {
         self.map.keys()
+    }
+
+    pub fn get_id_for_iid(&self, iid: Uuid) -> Option<u64> {
+        self.iid_map.get(&iid).copied()
     }
 
     pub fn get(&self, id: u64) -> Option<&Entity> {
@@ -127,11 +144,17 @@ impl EntityMap {
             if key == MAIN_PLAYER_ENTITY_ID {
                 return true;
             }
+
             // Note that this only preserves direct children
             // of the player, not all descendants!
             if let Some(child) = entity.child {
                 return child.parent == MAIN_PLAYER_ENTITY_ID;
             }
+
+            if let Some(iid) = entity.iid {
+                self.iid_map.remove(&iid);
+            }
+
             return false;
         });
     }
@@ -139,9 +162,10 @@ impl EntityMap {
     pub fn new_ex(main_player: Entity, capacity: usize) -> Self {
         let mut map = EntityMap {
             map: HashMap::with_capacity(capacity),
+            iid_map: HashMap::with_capacity(capacity),
             next_id: 1,
         };
-        map.map.insert(MAIN_PLAYER_ENTITY_ID, main_player);
+        map.insert(MAIN_PLAYER_ENTITY_ID, main_player);
         map
     }
 
@@ -151,9 +175,9 @@ impl EntityMap {
     /// This is useful for situations where we need to be able to mutate an Entity,
     /// but also look at other Entities while mutating it.
     fn with_entity_removed<F: FnOnce(&mut Entity, &mut EntityMap, u64)>(&mut self, id: u64, f: F) {
-        let mut entity = self.map.remove(&id).unwrap();
+        let mut entity = self.remove(id).unwrap();
         f(&mut entity, self, id);
-        self.map.insert(id, entity);
+        self.insert(id, entity);
     }
 }
 
