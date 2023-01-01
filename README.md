@@ -30,6 +30,14 @@ sh ./dist-wasm.sh
 
 Then copy the `dist` directory to a static file server.
 
+### Deployment
+
+To deploy the `dist` directory to GitHub Pages, run:
+
+```
+npm run deploy
+```
+
 ## Credits
 
 - [Huntress](https://luizmelo.itch.io/huntress) by LuizMelo (CC0 license)
