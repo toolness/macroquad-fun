@@ -3090,9 +3090,9 @@
 							"height": 64,
 							"defUid": 6,
 							"px": [16,304],
-							"fieldInstances": [{ "__identifier": "text", "__value": "hold D to move right", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "Hold D to move right.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["hold D to move right"]
+								"params": ["Hold D to move right."]
 							}] }]
 						},
 						{
@@ -3107,9 +3107,9 @@
 							"height": 64,
 							"defUid": 6,
 							"px": [112,304],
-							"fieldInstances": [{ "__identifier": "text", "__value": "tap SPACE to jump", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "Tap SPACE to jump.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["tap SPACE to jump"]
+								"params": ["Tap SPACE to jump."]
 							}] }]
 						},
 						{
@@ -3124,9 +3124,9 @@
 							"height": 96,
 							"defUid": 6,
 							"px": [192,256],
-							"fieldInstances": [{ "__identifier": "text", "__value": "hold SPACE to jump higher", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "Hold SPACE to jump higher.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["hold SPACE to jump higher"]
+								"params": ["Hold SPACE to jump higher."]
 							}] }]
 						},
 						{
@@ -3155,9 +3155,9 @@
 							"height": 80,
 							"defUid": 6,
 							"px": [256,224],
-							"fieldInstances": [{ "__identifier": "text", "__value": "collect gems to save the world", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "Collect gems to save the world.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["collect gems to save the world"]
+								"params": ["Collect gems to save the world."]
 							}] }]
 						},
 						{
@@ -3186,9 +3186,9 @@
 							"height": 64,
 							"defUid": 6,
 							"px": [336,304],
-							"fieldInstances": [{ "__identifier": "text", "__value": "hold A to move left", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "Hold A to move left.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["hold A to move left"]
+								"params": ["Hold A to move left."]
 							}] }]
 						},
 						{
@@ -3220,9 +3220,9 @@
 							"height": 128,
 							"defUid": 6,
 							"px": [624,272],
-							"fieldInstances": [{ "__identifier": "text", "__value": "the eye is your friend", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "The eye is your friend.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["the eye is your friend"]
+								"params": ["The eye is your friend."]
 							}] }]
 						},
 						{
@@ -3237,9 +3237,9 @@
 							"height": 16,
 							"defUid": 6,
 							"px": [864,272],
-							"fieldInstances": [{ "__identifier": "text", "__value": "tap SPACE to disembark", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "Tap SPACE to disembark.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["tap SPACE to disembark"]
+								"params": ["Tap SPACE to disembark."]
 							}] }]
 						},
 						{
@@ -3353,7 +3353,7 @@
 								"entityIid": "8d173d70-7820-11ed-a8bc-6fcf9a79030f",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["8d173d70-7820-11ed-a8bc-6fcf9a79030f"]
@@ -3399,9 +3399,9 @@
 							"height": 80,
 							"defUid": 6,
 							"px": [720,48],
-							"fieldInstances": [{ "__identifier": "text", "__value": "the spear can bring the dead to life", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "text", "__value": "The spear can bring the dead to life.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["the spear can bring the dead to life"]
+								"params": ["The spear can bring the dead to life."]
 							}] }]
 						},
 						{
@@ -3465,7 +3465,7 @@
 								"entityIid": "2b82f5e0-7820-11ed-a8bc-c95c401b65ca",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["2b82f5e0-7820-11ed-a8bc-c95c401b65ca"]
@@ -3487,7 +3487,7 @@
 								"entityIid": "5d8fc400-7820-11ed-a8bc-dd7941e2198a",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["5d8fc400-7820-11ed-a8bc-dd7941e2198a"]
@@ -3509,7 +3509,7 @@
 								"entityIid": "2ff2b6a0-7820-11ed-a8bc-091034180399",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["2ff2b6a0-7820-11ed-a8bc-091034180399"]
@@ -3531,7 +3531,7 @@
 								"entityIid": "58d61710-7820-11ed-a8bc-d1b1260eb1f0",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["58d61710-7820-11ed-a8bc-d1b1260eb1f0"]
@@ -3553,7 +3553,7 @@
 								"entityIid": "6d848b20-7820-11ed-a8bc-0f7a29324733",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["6d848b20-7820-11ed-a8bc-0f7a29324733"]
@@ -3575,7 +3575,7 @@
 								"entityIid": "475159c0-7820-11ed-a8bc-9135740a5f95",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["475159c0-7820-11ed-a8bc-9135740a5f95"]
@@ -3597,7 +3597,7 @@
 								"entityIid": "abb7dd80-7820-11ed-a8bc-f3f12ed3807a",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["abb7dd80-7820-11ed-a8bc-f3f12ed3807a"]
@@ -3619,7 +3619,7 @@
 								"entityIid": "c217eba0-7820-11ed-a8bc-6dfaccce27a4",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "3351d890-7820-11ed-beef-d974a3d8f1dd"
+								"worldIid": "6ba1b720-7820-11ed-9e90-378a782d3e1a"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["c217eba0-7820-11ed-a8bc-6dfaccce27a4"]
