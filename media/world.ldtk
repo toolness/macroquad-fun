@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.3",
 	"appBuildId": 458364,
-	"nextUid": 33,
+	"nextUid": 35,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -719,6 +719,64 @@
 			"pivotX": 0,
 			"pivotY": 0,
 			"fieldDefs": []
+		},
+		{
+			"identifier": "Trigger",
+			"uid": 33,
+			"tags": [],
+			"width": 16,
+			"height": 16,
+			"resizableX": true,
+			"resizableY": true,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#FF0000",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": [
+				{
+					"identifier": "destroy_on_enter",
+					"__type": "EntityRef",
+					"uid": 34,
+					"type": "F_EntityRef",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "RefLinkBetweenCenters",
+					"editorDisplayPos": "Above",
+					"editorAlwaysShow": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "Any",
+					"allowedRefTags": [],
+					"tilesetUid": null
+				}
+			]
 		}
 	], "tilesets": [
 		{
@@ -932,7 +990,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "c558db10-7820-11ed-a8bc-9bd7419f1854"
+								"worldIid": "b1f5dc40-7820-11ed-a211-974dcd26ffb0"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -3267,7 +3325,7 @@
 								"entityIid": "8d173d70-7820-11ed-a8bc-6fcf9a79030f",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "c558db10-7820-11ed-a8bc-9bd7419f1854"
+								"worldIid": "b1f5dc40-7820-11ed-a211-974dcd26ffb0"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["8d173d70-7820-11ed-a8bc-6fcf9a79030f"]
@@ -3362,6 +3420,28 @@
 								{ "__identifier": "x_velocity", "__value": 1, "__type": "Float", "__tile": null, "defUid": 9, "realEditorValues": [{ "id": "V_Float", "params": [1] }] },
 								{ "__identifier": "y_velocity", "__value": 0, "__type": "Float", "__tile": null, "defUid": 10, "realEditorValues": [] }
 							]
+						},
+						{
+							"__identifier": "Trigger",
+							"__grid": [5,19],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#FF0000",
+							"iid": "08e82940-7820-11ed-a211-53c15938a8be",
+							"width": 16,
+							"height": 64,
+							"defUid": 33,
+							"px": [80,304],
+							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
+								"entityIid": "2b82f5e0-7820-11ed-a8bc-c95c401b65ca",
+								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+								"worldIid": "b1f5dc40-7820-11ed-a211-974dcd26ffb0"
+							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["2b82f5e0-7820-11ed-a8bc-c95c401b65ca"]
+							}] }]
 						}
 					]
 				},

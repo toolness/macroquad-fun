@@ -62,6 +62,7 @@ mod switch;
 mod text;
 mod time;
 mod time_stream;
+mod trigger;
 mod world;
 mod xy_range_iterator;
 mod z_index;

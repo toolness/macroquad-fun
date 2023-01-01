@@ -26,6 +26,7 @@ use crate::route::{draw_route_debug_targets, route_system};
 use crate::switch::switch_system;
 use crate::text::{create_text_entity, draw_level_text};
 use crate::time::GameTime;
+use crate::trigger::create_trigger;
 use crate::world::World;
 use crate::z_index::ZIndexedDrawingSystem;
 use crate::{camera::Camera, level::EntityKind};
@@ -127,6 +128,10 @@ impl LevelRuntime {
                 EntityKind::FloorSwitch(trigger_entity_iid) => Some(create_floor_switch(
                     entity.rect,
                     trigger_entity_iid.as_ref().map(|s| iid_id_map[&s.iid]),
+                )),
+                EntityKind::Trigger(args) => Some(create_trigger(
+                    entity.rect,
+                    args.destroy_on_enter.as_ref().map(|s| iid_id_map[&s.iid]),
                 )),
                 EntityKind::PlayerStart(..) => None,
                 EntityKind::Text(..) => Some(create_text_entity(entity.rect)),

@@ -124,6 +124,11 @@ pub struct MovingPlatformArgs {
 }
 
 #[derive(PartialEq)]
+pub struct TriggerArgs {
+    pub destroy_on_enter: Option<EntityRef>,
+}
+
+#[derive(PartialEq)]
 pub enum EntityKind {
     PlayerStart(String),
     Text(Vec<String>),
@@ -135,6 +140,7 @@ pub enum EntityKind {
     FloorSwitch(Option<EntityRef>),
     Spear,
     Gem,
+    Trigger(TriggerArgs),
 }
 
 impl Level {
@@ -200,6 +206,9 @@ impl Level {
                         "FloorSwitch" => {
                             EntityKind::FloorSwitch(field_into(&mut fields, "trigger")?)
                         }
+                        "Trigger" => EntityKind::Trigger(TriggerArgs {
+                            destroy_on_enter: field_into(&mut fields, "destroy_on_enter")?,
+                        }),
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
                             continue;

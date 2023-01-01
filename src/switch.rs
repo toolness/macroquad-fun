@@ -24,6 +24,12 @@ pub fn switch_system(entities: &mut EntityMap) {
             let mut switch = switch_entity.switch.as_mut().unwrap();
             let mut overlaps_anything = false;
             for (_id, entity) in entities.iter() {
+                if (switch_entity.physics.collision_flags & entity.physics.collision_flags)
+                    .is_empty()
+                {
+                    // The collider and the entity can't collide, skip this.
+                    continue;
+                }
                 if entity.sprite.bbox().overlaps(switch_bbox) {
                     overlaps_anything = true;
                     break;
