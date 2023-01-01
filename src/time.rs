@@ -77,7 +77,7 @@ impl FixedGameTime {
 
     pub fn pause(&mut self) {
         if !self.is_paused() {
-            self.time_when_paused = Some(self.now);
+            self.time_when_paused = Some(self.now + self.excess_time_offset);
         }
     }
 
