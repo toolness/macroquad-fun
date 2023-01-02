@@ -90,32 +90,35 @@ fn process_request(request: &Request) -> Response {
 
                 if !path.exists() {
                     let Ok(_) = fs::write(&path, vec![]) else {
-                        println!("Error creating file: {}", path.display());
+                        eprintln!("Error creating file: {}", path.display());
                         return Response::text("Internal Server Error").with_status_code(500);
                     };
+                    #[cfg(debug_assertions)]
                     println!("Created {}.", filename);
                 }
 
                 let Ok(metadata) = fs::metadata(&path) else {
-                    println!("Error getting metadata for file: {}", path.display());
+                    eprintln!("Error getting metadata for file: {}", path.display());
                     return Response::text("Internal Server Error").with_status_code(500);
                 };
 
                 if metadata.len() == prev_len as u64 {
                     let Ok(mut file) = fs::OpenOptions::new().append(true).open(&path) else {
-                        println!("Error opening file for appending: {}", path.display());
+                        eprintln!("Error opening file for appending: {}", path.display());
                         return Response::text("Internal Server Error").with_status_code(500);
                     };
                     let Ok(_) = file.write_all(&bytes) else {
-                        println!("Error writing to file: {}", path.display());
+                        eprintln!("Error writing to file: {}", path.display());
                         return Response::text("Internal Server Error").with_status_code(500);
                     };
+                    #[cfg(debug_assertions)]
                     println!("Wrote {} bytes to {}.", bytes.len(), filename);
                 } else {
                     // Note that if the length of the recording doesn't match the previous length,
                     // we don't error. This is because we support at-least-once delivery, so
                     // multiple requests of the same recording may be sent, and all after the
                     // first will be no-ops.
+                    #[cfg(debug_assertions)]
                     println!("Ignoring write of {} bytes to {} (prev_len mismatch).", bytes.len(), filename);
                 }
 
@@ -136,9 +139,7 @@ fn main() {
     println!("Starting HTTP server on {}.", addr);
 
     rouille::start_server(addr, move |request| {
-        rouille::log(request, std::io::stdout(), || {
-            let response = process_request(request);
-            response.with_additional_header("Access-Control-Allow-Origin", "*")
-        })
+        let response = process_request(request);
+        response.with_additional_header("Access-Control-Allow-Origin", "*")
     });
 }
