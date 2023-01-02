@@ -5,6 +5,8 @@ const canvas = document.getElementById("glcanvas");
 
 canvas.style = `width: ${width}px; height: ${height}px`;
 
+let trackingTag = getTrackingTag();
+
 let version = "0.0.0";
 
 let recordingBytes = {
@@ -12,6 +14,35 @@ let recordingBytes = {
     sent: 0,
     toSend: [],
     nextScheduledSend: null,
+}
+
+function isValidTrackingTag(tag) {
+    if (!tag) {
+        return false;
+    }
+    if (tag.length > 10 || !tag.match(/^[a-zA-Z0-9]+$/)) {
+        return false;
+    }
+    return true;
+}
+
+function getTrackingTag() {
+    let tag = new URLSearchParams(window.location.search).get("t");
+    if (tag && !isValidTrackingTag(tag)) {
+        tag = null;
+    }
+    if (tag) {
+        try {
+            window.localStorage.setItem("macroquad_fun_tracking_tag", tag);
+        } catch (e) {
+        }
+    } else {
+        try {
+            tag = window.localStorage.getItem("macroquad_fun_tracking_tag");
+        } catch (e) {
+        }
+    }
+    return tag;
 }
 
 function scheduleSendRecordingBytes(ms) {
@@ -33,7 +64,9 @@ async function sendRecordingBytes() {
         data.append("v", version);
         data.append("b", new Blob([new Uint8Array(recordingBytes.toSend)]));
         data.append("p", recordingBytes.sent);
-        // TODO: Add tracking tag.
+        if (trackingTag && isValidTrackingTag(trackingTag)) {
+            data.append("t", trackingTag);
+        }
         if (recordingBytes.id !== null) {
             data.append("id", recordingBytes.id);
         }
