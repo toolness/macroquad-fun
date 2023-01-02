@@ -11,7 +11,9 @@ const OFF = "off";
 
 const MIN_USEFUL_RECORDING_BYTES = 25;
 
-let trackingTag = getTrackingTag();
+const windowSearchParams = new URLSearchParams(window.location.search);
+
+const trackingTag = getAndCacheTrackingTag();
 
 let version = "0.0.0";
 
@@ -32,8 +34,8 @@ function isValidTrackingTag(tag) {
     return true;
 }
 
-function getTrackingTag() {
-    let tag = new URLSearchParams(window.location.search).get("t");
+function getAndCacheTrackingTag() {
+    let tag = windowSearchParams.get("t");
     if (tag && !isValidTrackingTag(tag)) {
         tag = null;
     }
@@ -72,6 +74,13 @@ function areUsefulRecordingBytesAvailable() {
     return recordingBytes.toSend.length > minimumBytesToSend;
 }
 
+function getServerOrigin() {
+    if (window.location.hostname === "localhost") {
+        return "http://localhost:4001";
+    }
+    return "https://macroquad-fun.toolness.org";
+}
+
 async function sendRecordingBytes() {
     if (!areUsefulRecordingBytesAvailable()) {
         recordingBytes.nextScheduledSend = null;
@@ -90,7 +99,7 @@ async function sendRecordingBytes() {
         data.append("id", recordingBytes.id);
     }
     try {
-        const response = await fetch("http://localhost:4001/record", {
+        const response = await fetch(`${getServerOrigin()}/record`, {
             method: "POST",
             body: data,
         });
