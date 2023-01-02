@@ -3,23 +3,20 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use std::{cell::RefCell, io::BufWriter, rc::Rc};
+use std::rc::Rc;
 
 use cli::Cli;
 use config::load_config;
 use debug_mode::DebugMode;
 use fps::FpsCounter;
 use game_assets::load_game_assets;
-use input::{create_macroquad_input_stream, InputState, InputStream};
+use input::{InputState, InputStream};
 use level_runtime::{FrameResult, LevelRuntime, SavedLevelRuntime};
 use macroquad::prelude::*;
 use player::create_player;
-use recorder::InputRecorder;
 use time::FixedGameTime;
 use time_stream::{create_fixed_fps_time_stream, create_real_time_stream, TimeStream};
 use world::World;
-
-use crate::recorder::InputPlayer;
 
 mod animator;
 mod aseprite;
@@ -42,6 +39,7 @@ mod game_assets;
 mod gem_counter;
 mod hierarchy;
 mod input;
+mod js_interop;
 mod ldtk;
 mod level;
 mod level_runtime;
@@ -68,14 +66,12 @@ mod world;
 mod xy_range_iterator;
 mod z_index;
 
+#[cfg(target_arch = "wasm32")]
+use js_interop::js_interop_wasm32 as js;
+
 const CONFIG_PATH: &str = "media/config.json";
 
 const EXPORT_FRAMES_FPS: u64 = 30;
-
-#[cfg(target_arch = "wasm32")]
-extern "C" {
-    fn hi_from_js();
-}
 
 fn window_conf() -> Conf {
     #[cfg(target_arch = "wasm32")]
@@ -101,7 +97,18 @@ fn window_conf() -> Conf {
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+fn create_input_stream(_args: &Cli) -> InputStream {
+    js::create_input_stream()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 fn create_input_stream(args: &Cli) -> InputStream {
+    use crate::recorder::InputPlayer;
+    use input::create_macroquad_input_stream;
+    use recorder::InputRecorder;
+    use std::{cell::RefCell, io::BufWriter};
+
     if let Some(filename) = &args.record {
         println!("Writing recording to '{}'.", filename);
         // Ideally we should be keeping a reference to the output and flushing it explicitly
@@ -182,10 +189,6 @@ async fn main() {
         // properly via our window_conf function.)
         request_new_screen_size(config.screen_width, config.screen_height);
         next_frame().await;
-
-        unsafe {
-            hi_from_js();
-        }
     }
 
     let mut fixed_time = FixedGameTime::new(config.fixed_fps, get_time());
