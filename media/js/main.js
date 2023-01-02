@@ -7,8 +7,9 @@ canvas.style = `width: ${width}px; height: ${height}px`;
 
 miniquad_add_plugin({
     register_plugin(importObject) {
-        importObject.env.hi_from_js = () => {
-            console.log("OHAI FROM JS");
+        importObject.env.record_input = (ptr, len) => {
+            const u8Array = new Uint8Array(wasm_memory.buffer, ptr, len);
+            console.log("TODO: RECORD INPUT", u8Array);
         };
     }
 })

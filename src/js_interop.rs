@@ -8,17 +8,14 @@ pub mod js_interop_wasm32 {
     };
 
     extern "C" {
-        fn hi_from_js();
+        fn record_input(data: *const u8, len: usize);
     }
 
     struct JsWriter();
 
     impl Write for JsWriter {
         fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-            // TODO: Give the buffer to JS.
-            unsafe {
-                hi_from_js();
-            }
+            unsafe { record_input(buf.as_ptr(), buf.len()) }
             Ok(buf.len())
         }
 
