@@ -2,3 +2,5 @@
 /media/world/backups
 /dist
 /node_modules
+/server/target
+/server/recordings
