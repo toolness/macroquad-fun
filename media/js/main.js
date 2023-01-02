@@ -5,6 +5,8 @@ const canvas = document.getElementById("glcanvas");
 
 canvas.style = `width: ${width}px; height: ${height}px`;
 
+let DEBUG = false;
+
 let trackingTag = getTrackingTag();
 
 let version = "0.0.0";
@@ -51,25 +53,35 @@ function scheduleSendRecordingBytes(ms) {
     }
 }
 
+function areUsefulRecordingBytesAvailable() {
+    let minimumBytesToSend = 0;
+    if (recordingBytes.sent === 0) {
+        // We don't want to spam our analytics with tons of
+        // useless sessions, so let's wait until we have at least
+        // enough data to be useful before we send anything.
+        minimumBytesToSend = 25;
+    }
+    return recordingBytes.toSend.length > minimumBytesToSend;
+}
+
 async function sendRecordingBytes() {
-    console.log("Sending recording bytes", recordingBytes);
-    if (recordingBytes.toSend.length === 0) {
+    if (!areUsefulRecordingBytesAvailable()) {
         recordingBytes.nextScheduledSend = null;
         return;
     }
     let success = false;
+    const data = new FormData();
+    const numBytesToSend = recordingBytes.toSend.length;
+    data.append("v", version);
+    data.append("b", new Blob([new Uint8Array(recordingBytes.toSend)]));
+    data.append("p", recordingBytes.sent);
+    if (trackingTag && isValidTrackingTag(trackingTag)) {
+        data.append("t", trackingTag);
+    }
+    if (recordingBytes.id !== null) {
+        data.append("id", recordingBytes.id);
+    }
     try {
-        const data = new FormData();
-        const numBytesToSend = recordingBytes.toSend.length;
-        data.append("v", version);
-        data.append("b", new Blob([new Uint8Array(recordingBytes.toSend)]));
-        data.append("p", recordingBytes.sent);
-        if (trackingTag && isValidTrackingTag(trackingTag)) {
-            data.append("t", trackingTag);
-        }
-        if (recordingBytes.id !== null) {
-            data.append("id", recordingBytes.id);
-        }
         const response = await fetch("http://localhost:4001/record", {
             method: "POST",
             body: data,
@@ -77,20 +89,26 @@ async function sendRecordingBytes() {
         if (response.ok) {
             const id = await response.text();
             recordingBytes.id = id;
-            recordingBytes.sent += numBytesToSend;
-            recordingBytes.toSend = recordingBytes.toSend.slice(numBytesToSend);
-            console.log(`Sent ${numBytesToSend} bytes for session ${id}, total sent: ${recordingBytes.sent}`);
             success = true;
         } else {
-            console.error("Error sending recording bytes", response);
+            if (DEBUG) {
+                console.error("Error response when sending recording bytes", response);
+            }
         }
     } catch (e) {
-        console.error("Error sending recording bytes", e);
+        if (DEBUG) {
+            console.error("Error thrown when sending recording bytes", e);
+        }
     }
 
     recordingBytes.nextScheduledSend = null;
 
     if (success) {
+        recordingBytes.sent += numBytesToSend;
+        recordingBytes.toSend = recordingBytes.toSend.slice(numBytesToSend);
+        if (DEBUG) {
+            console.log(`Sent ${numBytesToSend} bytes for session ${id}, total sent: ${recordingBytes.sent}`);
+        }
         if (recordingBytes.toSend.length > 0) {
             scheduleSendRecordingBytes(100);
         }
