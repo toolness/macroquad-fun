@@ -72,6 +72,11 @@ const CONFIG_PATH: &str = "media/config.json";
 
 const EXPORT_FRAMES_FPS: u64 = 30;
 
+#[cfg(target_arch = "wasm32")]
+extern "C" {
+    fn hi_from_js();
+}
+
 fn window_conf() -> Conf {
     #[cfg(target_arch = "wasm32")]
     return Default::default();
@@ -177,6 +182,10 @@ async fn main() {
         // properly via our window_conf function.)
         request_new_screen_size(config.screen_width, config.screen_height);
         next_frame().await;
+
+        unsafe {
+            hi_from_js();
+        }
     }
 
     let mut fixed_time = FixedGameTime::new(config.fixed_fps, get_time());
