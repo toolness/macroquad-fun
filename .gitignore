@@ -4,3 +4,4 @@
 /node_modules
 /server/target
 /server/recordings
+/server/dist
