@@ -11,6 +11,11 @@ miniquad_add_plugin({
             const u8Array = new Uint8Array(wasm_memory.buffer, ptr, len);
             console.log("TODO: RECORD INPUT", u8Array);
         };
+
+        importObject.env.init_version = (ptr) => {
+            const version = UTF8ToString(ptr);
+            console.log("TODO: STORE VERSION", version);
+        };
     }
 })
 

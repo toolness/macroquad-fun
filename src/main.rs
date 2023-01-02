@@ -189,6 +189,8 @@ async fn main() {
         // properly via our window_conf function.)
         request_new_screen_size(config.screen_width, config.screen_height);
         next_frame().await;
+
+        js::init();
     }
 
     let mut fixed_time = FixedGameTime::new(config.fixed_fps, get_time());

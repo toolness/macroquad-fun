@@ -8,6 +8,7 @@ pub mod js_interop_wasm32 {
     };
 
     extern "C" {
+        fn init_version(version_str: *const u8);
         fn record_input(data: *const u8, len: usize);
     }
 
@@ -22,6 +23,11 @@ pub mod js_interop_wasm32 {
         fn flush(&mut self) -> std::io::Result<()> {
             Ok(())
         }
+    }
+
+    pub fn init() {
+        let version = format!("{}\0", env!("CARGO_PKG_VERSION"));
+        unsafe { init_version(version.as_ptr()) }
     }
 
     pub fn create_input_stream() -> InputStream {
