@@ -12,6 +12,31 @@ pub mod js_interop_wasm32 {
         fn record_input(data: *const u8, len: usize);
     }
 
+    #[derive(Default)]
+    pub struct JsState {
+        pub is_blurred: bool,
+    }
+
+    static mut JS_STATE: Option<JsState> = None;
+
+    fn js_state_mut() -> &'static mut JsState {
+        unsafe {
+            if JS_STATE.is_none() {
+                JS_STATE = Some(JsState::default());
+            }
+            JS_STATE.as_mut().unwrap()
+        }
+    }
+
+    pub fn is_blurred() -> bool {
+        js_state_mut().is_blurred
+    }
+
+    #[no_mangle]
+    extern "C" fn set_blurred(is_blurred: i32) {
+        js_state_mut().is_blurred = is_blurred != 0;
+    }
+
     struct JsWriter();
 
     impl Write for JsWriter {

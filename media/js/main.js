@@ -81,4 +81,12 @@ miniquad_add_plugin({
     }
 })
 
+window.addEventListener("blur", () => {
+    wasm_exports.set_blurred(1);
+});
+
+window.addEventListener("focus", () => {
+    wasm_exports.set_blurred(0);
+});
+
 load("target/wasm32-unknown-unknown/release/macroquad-fun.wasm");

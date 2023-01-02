@@ -154,7 +154,7 @@ fn draw_pause_overlay(is_browser: bool) {
     );
     let font = &game_assets::game_assets().font;
     let text = if is_browser {
-        "Game paused"
+        "Game paused (press ESC to unpause)"
     } else {
         "Game paused (press Q to quit)"
     };
@@ -239,6 +239,11 @@ async fn main() {
 
         if is_key_released(KeyCode::Escape) {
             fixed_time.toggle_pause(now);
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        if js::is_blurred() && !fixed_time.is_paused() {
+            fixed_time.set_paused(true, now);
         }
 
         if is_key_pressed(KeyCode::G) {
