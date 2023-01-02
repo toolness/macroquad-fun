@@ -9,6 +9,8 @@ const DEBUG = false;
 
 const OFF = "off";
 
+const MIN_USEFUL_RECORDING_BYTES = 25;
+
 let trackingTag = getTrackingTag();
 
 let version = "0.0.0";
@@ -65,7 +67,7 @@ function areUsefulRecordingBytesAvailable() {
         // We don't want to spam our analytics with tons of
         // useless sessions, so let's wait until we have at least
         // enough data to be useful before we send anything.
-        minimumBytesToSend = 25;
+        minimumBytesToSend = MIN_USEFUL_RECORDING_BYTES;
     }
     return recordingBytes.toSend.length > minimumBytesToSend;
 }
