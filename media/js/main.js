@@ -5,7 +5,9 @@ const canvas = document.getElementById("glcanvas");
 
 canvas.style = `width: ${width}px; height: ${height}px`;
 
-let DEBUG = false;
+const DEBUG = false;
+
+const OFF = "off";
 
 let trackingTag = getTrackingTag();
 
@@ -47,8 +49,12 @@ function getTrackingTag() {
     return tag;
 }
 
+function isTrackingDisabled() {
+    return trackingTag === OFF;
+}
+
 function scheduleSendRecordingBytes(ms) {
-    if (recordingBytes.nextScheduledSend === null) {
+    if (recordingBytes.nextScheduledSend === null && !isTrackingDisabled()) {
         recordingBytes.nextScheduledSend = setTimeout(sendRecordingBytes, ms);
     }
 }
