@@ -20,6 +20,8 @@ pub struct Config {
     pub moving_platform_speed: f32,
     pub mushroom_speed: f32,
     pub mushroom_rez_ms_per_animation_frame: f64,
+    pub pickup_float_frequency: f32,
+    pub pickup_float_amplitude: f32,
     pub screen_width: f32,
     pub screen_height: f32,
     pub crate_pushable_coefficient: f32,
@@ -46,6 +48,7 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.vertical_collision_leeway *= config.sprite_scale;
     config.blocked_route_edge_thickness *= config.sprite_scale;
     config.player_left_facing_x_offset *= config.sprite_scale;
+    config.pickup_float_amplitude *= config.sprite_scale;
 
     Ok(config)
 }
