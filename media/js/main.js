@@ -1,3 +1,7 @@
+import * as analyticsDialog from "./analytics-dialog.js";
+
+await analyticsDialog.maybeShowDialog();
+
 const config = await (await fetch("media/config.json")).json();
 const width = config.screen_width * config.sprite_scale;
 const height = config.screen_height * config.sprite_scale;
@@ -7,11 +11,11 @@ canvas.style = `width: ${width}px; height: ${height}px`;
 
 const DEBUG = false;
 
-const OFF = "off";
-
 const MIN_USEFUL_RECORDING_BYTES = 25;
 
 const windowSearchParams = new URLSearchParams(window.location.search);
+
+const didUserConsentToAnalytics = analyticsDialog.hasUserGivenConsent();
 
 const trackingTag = getAndCacheTrackingTag();
 
@@ -53,12 +57,8 @@ function getAndCacheTrackingTag() {
     return tag;
 }
 
-function isTrackingDisabled() {
-    return trackingTag === OFF;
-}
-
 function scheduleSendRecordingBytes(ms) {
-    if (recordingBytes.nextScheduledSend === null && !isTrackingDisabled()) {
+    if (recordingBytes.nextScheduledSend === null) {
         recordingBytes.nextScheduledSend = setTimeout(sendRecordingBytes, ms);
     }
 }
@@ -138,6 +138,9 @@ async function sendRecordingBytes() {
 miniquad_add_plugin({
     register_plugin(importObject) {
         importObject.env.record_input = (ptr, len) => {
+            if (!didUserConsentToAnalytics) {
+                return;
+            }
             const u8Array = new Uint8Array(wasm_memory.buffer, ptr, len);
             recordingBytes.toSend.push(...Array.from(u8Array));
             scheduleSendRecordingBytes(100);

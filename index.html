@@ -29,6 +29,14 @@
 </head>
 <body>
     <canvas id="glcanvas" tabindex="1"></canvas>
+    <dialog id="analytics-dialog">
+        <p>Thanks for playtesting Atul's janky prototype!</p>
+        <p>Would you like to submit analytics data about your gameplay session so Atul can improve the game?</p>
+        <form method="dialog">
+            <button value="yes">Sure</button>
+            <button value="no">Nah</button>
+        </form>
+    </dialog>
     <script src="media/js/vendor/miniquad/gl.js"></script>
     <script type="module" src="media/js/main.js"></script>
 </body>
