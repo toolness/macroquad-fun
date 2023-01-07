@@ -148,6 +148,10 @@ miniquad_add_plugin({
 
         importObject.env.init_version = (ptr) => {
             version = UTF8ToString(ptr);
+            const throbber = document.getElementById("throbber");
+            if (throbber) {
+                throbber.parentNode.removeChild(throbber);
+            }
         };
     }
 })
