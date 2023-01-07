@@ -4,11 +4,11 @@ This is a prototype for a non-violent 2D platformer using the [macroquad][] Rust
 
 The goals for this project were:
 
-- I wanted more experience writing Rust.
+- I wanted more experience writing Rust for game development.
 
 - I wanted to try implementing some of the ideas described in Catherine West's RustConf 2018 closing keynote, [Using Rust For Game Development](https://kyren.github.io/2018/09/14/rustconf-talk.html). More details on this below.
 
-- I wanted to tinker with game and level design. I was particularly intrigued by [LDtk](https://ldtk.io/) and wanted to play with it.
+- I wanted to tinker with non-violent game and level design. I was particularly intrigued by [LDtk](https://ldtk.io/) and wanted to play with it.
 
 [macroquad]: https://macroquad.rs/
 
@@ -65,6 +65,23 @@ To deploy the `dist` directory to GitHub Pages, run:
 ```
 npm run deploy
 ```
+
+### Web analytics server
+
+When users start the web version, they're prompted to submit their gameplay data for analytics purposes. If they consent, the related data is sent to a server as they play.
+
+The `server` subdirectory contains a simple server that receives this data and writes it to disk.
+
+To build and run the server:
+
+```
+cd server
+cargo run
+```
+
+Accessing the web version at `localhost` will automatically use this server.
+
+Note that accessing the web version at any _other_ hostname (including an IP address, even `127.0.0.1`) will cause the game to submit any data to my personal analytics server hosted at `macroquad-fun.toolness.org`. Ideally, this should be made more configurable.
 
 ## Credits
 
