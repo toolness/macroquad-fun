@@ -1,3 +1,31 @@
+## Introduction
+
+This is a prototype for a non-violent 2D platformer using the [macroquad][] Rust library, with character art by [LuizMelo][].
+
+The goals for this project were:
+
+- I wanted more experience writing Rust.
+
+- I wanted to try implementing some of the ideas described in Catherine West's RustConf 2018 closing keynote, [Using Rust For Game Development](https://kyren.github.io/2018/09/14/rustconf-talk.html). More details on this below.
+
+- I wanted to tinker with game and level design. I was particularly intrigued by [LDtk](https://ldtk.io/) and wanted to play with it.
+
+[macroquad]: https://macroquad.rs/
+
+## Architectural notes
+
+As mentioned in the introduction, I started this project partly to explore implementing my own ECS.
+
+Actually, wait. Now that I think about it, I _didn't_ originally want to implement an ECS--I just wanted to make a game in Rust. But because Rust doesn't have many object oriented affordances, I quickly ran into problems when I initially wrote this in an object-oriented style.
+
+This led me to re-watching West's talk and reading her associated blog post, which fortunately described a journey much like the one I was taking: developing a game in OO and running into lots of issues.
+
+At this point, at of the end of 2022, the architecture has, with the immense help of West's materials, evolved into an architecture that is essentially an "array of structs" ECS--what West calls a "bare minimum" ECS system. It lacks the cache locality optimizations afforded by a "struct of arrays" style ECS.
+
+It also uses a HashMap for all the entities instead of a vector with generational indices, which is probably not great for performance, but the actual game isn't demanding enough for this to be an issue right now.
+
+[luizmelo]: https://luizmelo.itch.io/
+
 ## Quick start
 
 ### Desktop
@@ -40,5 +68,11 @@ npm run deploy
 
 ## Credits
 
+I, Atul Varma, wrote the code and designed the environment art.
+
+The rest of the graphics are by LuizMelo:
+
 - [Huntress](https://luizmelo.itch.io/huntress) by LuizMelo (CC0 license)
 - [Monsters Creatures Fantasy](https://luizmelo.itch.io/monsters-creatures-fantasy) by LuizMelo (CC0 license)
+
+Code from late December 2022 onward was created with the assistance of GitHub Copilot.
