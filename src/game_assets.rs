@@ -23,6 +23,7 @@ pub struct HuntressAssets {
     pub spear_point_bbox: Rect,
     pub no_spear_color_replacements: Image,
     pub spear_glow_color_replacements: Image,
+    pub jump_sound: Sound,
 }
 
 pub struct FlyingEyeAssets {
@@ -96,6 +97,7 @@ pub async fn load_game_assets() -> Result<()> {
                 "media/Huntress/spear_glow_color_replacements.png",
             )
             .await?,
+            jump_sound: load_sound("media/audio/Jump6.wav").await?,
         },
         flying_eye: FlyingEyeAssets {
             flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),

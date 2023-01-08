@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
-use macroquad::prelude::{Rect, Vec2};
+use macroquad::{
+    audio::{play_sound, PlaySoundParams},
+    prelude::{Rect, Vec2},
+};
 
 use crate::{
     collision::CollisionFlags,
@@ -221,7 +224,14 @@ fn unattached_player_process_input(
             let new_velocity = Vec2::new(run.run_speed(), -config.jump_velocity);
             physics.velocity.x = new_velocity.x;
             physics.velocity.y = new_velocity.y;
-            player.is_in_air = true
+            player.is_in_air = true;
+            play_sound(
+                game_assets().huntress.jump_sound,
+                PlaySoundParams {
+                    volume: 0.25,
+                    ..Default::default()
+                },
+            );
         } else {
             physics.x_impulse = run.run_speed();
         }
