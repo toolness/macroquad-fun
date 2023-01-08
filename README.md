@@ -104,3 +104,7 @@ The character art is by LuizMelo:
 - [Monsters Creatures Fantasy](https://luizmelo.itch.io/monsters-creatures-fantasy) by LuizMelo (CC0 license)
 
 Code from late December 2022 onward was created with the assistance of GitHub Copilot.
+
+## License
+
+Everything in this repository that isn't provided by a third party is licensed under [CC0 1.0 Universal](./LICENSE.md) (public domain).
