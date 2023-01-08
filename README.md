@@ -11,17 +11,6 @@ The goals for this project were:
 - I liked LuizMelo's art and wanted to make something with it.
 
 [macroquad]: https://macroquad.rs/
-
-## Architectural notes
-
-Originally, this game used a somewhat object oriented architecture. But because Rust doesn't have many object oriented affordances, I quickly ran into problems.
-
-This led me to re-watching Catherine West's RustConf 2018 closing keynote, [Using Rust For Game Development](https://kyren.github.io/2018/09/14/rustconf-talk.html), and reading her associated blog post, which fortunately described a journey much like the one I was taking: developing a Rust game in OO and running into lots of issues.
-
-At this point, at of the end of 2022, the architecture has, with the immense help of West's materials, evolved into an architecture that is essentially an "array of structs" ECS--what West calls a bare minimum ECS system. It lacks the cache locality optimizations afforded by a "struct of arrays" style ECS.
-
-It also uses a HashMap for all the entities instead of a vector with generational indices, which is probably not great for performance, but the actual game isn't demanding enough for this to be an issue right now.
-
 [luizmelo]: https://luizmelo.itch.io/
 
 ## Quick start
@@ -80,6 +69,16 @@ cargo run
 Accessing the web version at `localhost` will automatically use this server.
 
 Note that accessing the web version at any _other_ hostname (including an IP address, even `127.0.0.1`) will cause the game to submit any data to my personal analytics server hosted at `macroquad-fun.toolness.org`. Ideally, this should be made more configurable.
+
+## Architectural notes
+
+Originally, this game used a somewhat object oriented architecture. But because Rust doesn't have many object oriented affordances, I quickly ran into problems.
+
+This led me to re-watching Catherine West's RustConf 2018 closing keynote, [Using Rust For Game Development](https://kyren.github.io/2018/09/14/rustconf-talk.html), and reading her associated blog post, which fortunately described a journey much like the one I was taking: developing a Rust game in OO and running into lots of issues.
+
+At this point, at of the end of 2022, the architecture has, with the immense help of West's materials, evolved into an architecture that is essentially an "array of structs" ECS--what West calls a bare minimum ECS system. It lacks the cache locality optimizations afforded by a "struct of arrays" style ECS.
+
+It also uses a HashMap for all the entities instead of a vector with generational indices, which is probably not great for performance, but the actual game isn't demanding enough for this to be an issue right now.
 
 ## Credits
 
