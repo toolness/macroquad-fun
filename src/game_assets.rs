@@ -49,7 +49,7 @@ pub struct SpearAssets {
 
 pub struct GemAssets {
     pub gem: SpriteRenderer,
-    pub audio: Sound,
+    pub pickup_sound: Sound,
 }
 
 pub struct GameAssets {
@@ -129,7 +129,7 @@ pub async fn load_game_assets() -> Result<()> {
         },
         gem: GemAssets {
             gem: SpriteRenderer::new(load_texture("media/gem.png").await?, 1),
-            audio: load_sound("media/audio/Pickup_Coin6.wav").await?,
+            pickup_sound: load_sound("media/audio/Pickup_Coin6.wav").await?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {

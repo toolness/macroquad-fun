@@ -79,7 +79,7 @@ fn grab_pickup(player_entity: &mut Entity, pickup: PickupType) {
         }
         PickupType::Gem => {
             // TODO: Add a gem to the player's inventory.
-            play_sound_effect(game_assets().gem.audio);
+            play_sound_effect(game_assets().gem.pickup_sound);
         }
     }
 }
