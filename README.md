@@ -100,6 +100,20 @@ For more details on the implementation details of the recording format, see [`re
 
 [postcard]: https://docs.rs/postcard/latest/postcard/
 
+## Level design process
+
+I approached the design of the game's level with the following process:
+
+1. I wrote out a text document as per Steve Lee's [How I design levels in text first, and why](https://www.youtube.com/watch?v=0FSssDWEFLc). This outlined the main mechanics I wanted to showcase, as well as the narrative beats.
+
+2. Informed by the text document, I sketched out a general plan for the level on a sheet of graph paper.
+
+3. I went into LDtk and created a level based on the sketch, and further iterated on the design within LDtk.
+
+Designing the level and playing through it myself made me realize that some of the core mechanics needed tweaking. For example, the player jumped so far horizontally that it was very difficult for me to make parts of the level that couldn't simply be jumped to. This led me to reducing the run speed (which is what determines the horizontal jump distance).
+
+Further tweaks were then made to the level based on playtesting.
+
 ## Credits
 
 I, Atul Varma, wrote the code and designed the environment art and font.
