@@ -4,6 +4,8 @@ This is a prototype for a non-violent 2D platformer using the [macroquad][] Rust
 
 Presently the game consists of a single level which requires the player to collect gems. Once the player has collected all the gems, there is nothing left to do (they have effectively won the game).
 
+[The game can be played online here.](https://toolness.github.io/macroquad-fun/)
+
 ## Project goals
 
 The goals for this project were:
