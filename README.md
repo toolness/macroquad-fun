@@ -10,6 +10,8 @@ The goals for this project were:
 
 - I wanted to tinker with non-violent game and level design. I was particularly intrigued by [LDtk](https://ldtk.io/) and wanted to play with it.
 
+- I liked LuizMelo's art and wanted to make something with it.
+
 [macroquad]: https://macroquad.rs/
 
 ## Architectural notes
