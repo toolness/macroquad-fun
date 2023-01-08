@@ -84,11 +84,17 @@ Good entrypoints for understanding the architecture can be found in [`level_runt
 
 ## Analytics
 
+The web version of the game uses no third-party analytics services: instead, data is sent to a custom Rust server. The value of the `t` querystring argument, if any, is associated with a random UUID for each playthrough, along with the event data described below.
+
+### Event data
+
 Internally, game logic runs at a fixed 60 frames per second, and only has a few buttons: left, right, and jump.
 
 The game uses a compact [postcard][]-based recording format that logs button up/down events with the frame number they occurred at. This allows playthroughs to be recorded at the cost of a few hundred bytes, and played back with full fidelity.
 
-For more details on recording and playing back sessions, run the game's executable with the `--help` flag.
+### More details
+
+For more details on recording and playing back sessions on the desktop version, run the game's executable with the `--help` flag.
 
 For more details on the implementation details of the recording format, see [`recorder.rs`](./src/recorder.rs).
 
