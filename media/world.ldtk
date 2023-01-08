@@ -3182,7 +3182,7 @@
 							"__tile": null,
 							"__smartColor": "#A294D9",
 							"iid": "58d61710-7820-11ed-a8bc-d1b1260eb1f0",
-							"width": 48,
+							"width": 112,
 							"height": 64,
 							"defUid": 6,
 							"px": [336,304],
@@ -3353,7 +3353,7 @@
 								"entityIid": "8d173d70-7820-11ed-a8bc-6fcf9a79030f",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["8d173d70-7820-11ed-a8bc-6fcf9a79030f"]
@@ -3389,16 +3389,16 @@
 						},
 						{
 							"__identifier": "Text",
-							"__grid": [45,3],
+							"__grid": [38,3],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#A294D9",
 							"iid": "c217eba0-7820-11ed-a8bc-6dfaccce27a4",
-							"width": 48,
-							"height": 80,
+							"width": 160,
+							"height": 112,
 							"defUid": 6,
-							"px": [720,48],
+							"px": [608,48],
 							"fieldInstances": [{ "__identifier": "text", "__value": "The spear can bring the dead to life.", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["The spear can bring the dead to life."]
@@ -3465,7 +3465,7 @@
 								"entityIid": "2b82f5e0-7820-11ed-a8bc-c95c401b65ca",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["2b82f5e0-7820-11ed-a8bc-c95c401b65ca"]
@@ -3487,7 +3487,7 @@
 								"entityIid": "5d8fc400-7820-11ed-a8bc-dd7941e2198a",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["5d8fc400-7820-11ed-a8bc-dd7941e2198a"]
@@ -3509,7 +3509,7 @@
 								"entityIid": "2ff2b6a0-7820-11ed-a8bc-091034180399",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["2ff2b6a0-7820-11ed-a8bc-091034180399"]
@@ -3531,7 +3531,7 @@
 								"entityIid": "58d61710-7820-11ed-a8bc-d1b1260eb1f0",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["58d61710-7820-11ed-a8bc-d1b1260eb1f0"]
@@ -3553,7 +3553,7 @@
 								"entityIid": "6d848b20-7820-11ed-a8bc-0f7a29324733",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["6d848b20-7820-11ed-a8bc-0f7a29324733"]
@@ -3575,7 +3575,7 @@
 								"entityIid": "475159c0-7820-11ed-a8bc-9135740a5f95",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["475159c0-7820-11ed-a8bc-9135740a5f95"]
@@ -3597,7 +3597,7 @@
 								"entityIid": "abb7dd80-7820-11ed-a8bc-f3f12ed3807a",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["abb7dd80-7820-11ed-a8bc-f3f12ed3807a"]
@@ -3605,7 +3605,7 @@
 						},
 						{
 							"__identifier": "Trigger",
-							"__grid": [37,2],
+							"__grid": [36,2],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -3614,12 +3614,12 @@
 							"width": 16,
 							"height": 48,
 							"defUid": 33,
-							"px": [592,32],
+							"px": [576,32],
 							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
 								"entityIid": "c217eba0-7820-11ed-a8bc-6dfaccce27a4",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "40ac9ca0-7820-11ed-83b8-795e34da8e89"
+								"worldIid": "2a1af090-7820-11ed-a2b8-d5186a973a09"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["c217eba0-7820-11ed-a8bc-6dfaccce27a4"]
