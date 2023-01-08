@@ -6,8 +6,6 @@ The goals for this project were:
 
 - I wanted more experience writing Rust for game development.
 
-- I wanted to try implementing some of the ideas described in Catherine West's RustConf 2018 closing keynote, [Using Rust For Game Development](https://kyren.github.io/2018/09/14/rustconf-talk.html). More details on this below.
-
 - I wanted to tinker with non-violent game and level design. I was particularly intrigued by [LDtk](https://ldtk.io/) and wanted to play with it.
 
 - I liked LuizMelo's art and wanted to make something with it.
@@ -16,13 +14,11 @@ The goals for this project were:
 
 ## Architectural notes
 
-As mentioned in the introduction, I started this project partly to explore implementing my own ECS.
+Originally, this game used a somewhat object oriented architecture. But because Rust doesn't have many object oriented affordances, I quickly ran into problems.
 
-Actually, wait. Now that I think about it, I _didn't_ originally want to implement an ECS--I just wanted to make a game in Rust. But because Rust doesn't have many object oriented affordances, I quickly ran into problems when I initially wrote this in an object-oriented style.
+This led me to re-watching Catherine West's RustConf 2018 closing keynote, [Using Rust For Game Development](https://kyren.github.io/2018/09/14/rustconf-talk.html), and reading her associated blog post, which fortunately described a journey much like the one I was taking: developing a Rust game in OO and running into lots of issues.
 
-This led me to re-watching West's talk and reading her associated blog post, which fortunately described a journey much like the one I was taking: developing a game in OO and running into lots of issues.
-
-At this point, at of the end of 2022, the architecture has, with the immense help of West's materials, evolved into an architecture that is essentially an "array of structs" ECS--what West calls a "bare minimum" ECS system. It lacks the cache locality optimizations afforded by a "struct of arrays" style ECS.
+At this point, at of the end of 2022, the architecture has, with the immense help of West's materials, evolved into an architecture that is essentially an "array of structs" ECS--what West calls a bare minimum ECS system. It lacks the cache locality optimizations afforded by a "struct of arrays" style ECS.
 
 It also uses a HashMap for all the entities instead of a vector with generational indices, which is probably not great for performance, but the actual game isn't demanding enough for this to be an issue right now.
 
