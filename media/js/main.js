@@ -4,8 +4,28 @@ const config = await (await fetch("media/config.json")).json();
 const width = config.screen_width * config.sprite_scale;
 const height = config.screen_height * config.sprite_scale;
 const canvas = document.getElementById("glcanvas");
+const canvasWrapper = document.getElementById("glcanvas-wrapper");
 
 canvas.style = `width: ${width}px; height: ${height}px`;
+
+function maybeScaleCanvas() {
+    const { innerWidth, innerHeight } = window;
+    let scale = 1.0;
+
+    if (innerWidth < width || innerHeight < height) {
+        scale = Math.min(innerWidth / width, innerHeight / height);
+    }
+
+    if (scale !== 1.0) {
+        canvasWrapper.style = `transform-origin: top-left; transform: scale(${scale});`;
+    } else {
+        canvasWrapper.style = "";
+    }
+}
+
+window.addEventListener("resize", maybeScaleCanvas);
+
+maybeScaleCanvas();
 
 await analyticsDialog.maybeShowDialog();
 
