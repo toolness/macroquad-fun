@@ -1,4 +1,7 @@
-use macroquad::{audio::play_sound_once, prelude::Rect};
+use macroquad::{
+    audio::{play_sound, PlaySoundParams},
+    prelude::Rect,
+};
 
 use crate::{
     config::config,
@@ -78,7 +81,13 @@ fn grab_pickup(player_entity: &mut Entity, pickup: PickupType) {
         }
         PickupType::Gem => {
             // TODO: Add a gem to the player's inventory.
-            play_sound_once(game_assets().gem.audio);
+            play_sound(
+                game_assets().gem.audio,
+                PlaySoundParams {
+                    volume: 0.25,
+                    ..Default::default()
+                },
+            );
         }
     }
 }

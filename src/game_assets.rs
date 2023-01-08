@@ -127,7 +127,7 @@ pub async fn load_game_assets() -> Result<()> {
         },
         gem: GemAssets {
             gem: SpriteRenderer::new(load_texture("media/gem.png").await?, 1),
-            audio: load_sound("media/audio/Pickup_Coin2.wav").await?,
+            audio: load_sound("media/audio/Pickup_Coin6.wav").await?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {
