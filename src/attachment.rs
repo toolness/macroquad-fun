@@ -1,8 +1,10 @@
 use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
+    audio::play_sound_effect,
     config::config,
     entity::{filter_and_process_entities, Entity, EntityMap},
+    game_assets::game_assets,
     level::Level,
     physics::PhysicsComponent,
     sprite_component::SpriteComponent,
@@ -79,6 +81,7 @@ impl AttachmentComponent {
                 let projected_passenger_bbox = passenger_bbox.offset(delta);
 
                 if level.is_area_vacant(&projected_passenger_bbox) {
+                    play_sound_effect(game_assets().flying_eye.attach_sound);
                     self.attached_to_entity_id = Some(id);
                     self.num_frames_displaced = 0;
                     passenger_physics.velocity.x = 0.;

@@ -30,6 +30,7 @@ pub struct FlyingEyeAssets {
     pub flight: SpriteRenderer,
     pub flight_bbox: Rect,
     pub color_replacements: Image,
+    pub attach_sound: Sound,
 }
 
 pub struct MushroomAssets {
@@ -40,11 +41,13 @@ pub struct MushroomAssets {
     pub run: SpriteRenderer,
     pub color_replacements: Image,
     pub dead_color_replacements: Image,
+    pub rez_sound: Sound,
 }
 
 pub struct SpearAssets {
     pub spear_move: SpriteRenderer,
     pub spear_move_bbox: Rect,
+    pub pickup_sound: Sound,
 }
 
 pub struct GemAssets {
@@ -106,6 +109,7 @@ pub async fn load_game_assets() -> Result<()> {
                 "flight_bounding_box",
             )?,
             color_replacements: load_image("media/FlyingEye/color_replacements.png").await?,
+            attach_sound: load_sound("media/audio/FlyingEyeAttach.wav").await?,
         },
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
@@ -116,6 +120,7 @@ pub async fn load_game_assets() -> Result<()> {
             color_replacements: load_image("media/Mushroom/color_replacements.png").await?,
             dead_color_replacements: load_image("media/Mushroom/dead_color_replacements.png")
                 .await?,
+            rez_sound: load_sound("media/audio/MushroomRez.wav").await?,
         },
         spear: SpearAssets {
             spear_move: SpriteRenderer::new(
@@ -126,6 +131,7 @@ pub async fn load_game_assets() -> Result<()> {
                 &load_aseprite_slices("media/Huntress/Spear move.json").await?,
                 "spear_bounding_box",
             )?,
+            pickup_sound: load_sound("media/audio/SpearPickup.wav").await?,
         },
         gem: GemAssets {
             gem: SpriteRenderer::new(load_texture("media/gem.png").await?, 1),

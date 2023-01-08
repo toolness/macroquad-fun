@@ -76,6 +76,7 @@ fn grab_pickup(player_entity: &mut Entity, pickup: PickupType) {
     match pickup {
         PickupType::Spear => {
             player.has_spear = true;
+            play_sound_effect(game_assets().spear.pickup_sound);
         }
         PickupType::Gem => {
             // TODO: Add a gem to the player's inventory.
