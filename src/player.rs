@@ -1,11 +1,9 @@
 use std::rc::Rc;
 
-use macroquad::{
-    audio::{play_sound, PlaySoundParams},
-    prelude::{Rect, Vec2},
-};
+use macroquad::prelude::{Rect, Vec2};
 
 use crate::{
+    audio::play_sound_effect,
     collision::CollisionFlags,
     config::config,
     entity::{filter_and_process_entities, Entity, EntityMap},
@@ -225,13 +223,7 @@ fn unattached_player_process_input(
             physics.velocity.x = new_velocity.x;
             physics.velocity.y = new_velocity.y;
             player.is_in_air = true;
-            play_sound(
-                game_assets().huntress.jump_sound,
-                PlaySoundParams {
-                    volume: 0.25,
-                    ..Default::default()
-                },
-            );
+            play_sound_effect(game_assets().huntress.jump_sound);
         } else {
             physics.x_impulse = run.run_speed();
         }

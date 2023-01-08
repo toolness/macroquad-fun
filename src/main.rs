@@ -21,6 +21,7 @@ use world::World;
 mod animator;
 mod aseprite;
 mod attachment;
+mod audio;
 mod camera;
 mod cli;
 mod collision;
