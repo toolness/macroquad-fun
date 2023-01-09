@@ -1,5 +1,7 @@
 use crate::{
+    audio::play_sound_effect,
     entity::{filter_and_process_entities, EntityMap},
+    game_assets::game_assets,
     route::try_to_start_route,
 };
 
@@ -50,7 +52,9 @@ pub fn switch_system(entities: &mut EntityMap) {
                         entities.remove(id);
                     }
                     TriggerType::ToggleRoute => {
-                        try_to_start_route(triggered_entity, !switch.is_switched_on);
+                        if try_to_start_route(triggered_entity, !switch.is_switched_on) {
+                            play_sound_effect(game_assets().switch_sound);
+                        }
                     }
                 }
             }

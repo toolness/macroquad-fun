@@ -64,6 +64,7 @@ pub struct GameAssets {
     pub font: BitmapFont,
     pub materials: GameMaterials,
     pub attach_sound: SoundEffect,
+    pub switch_sound: SoundEffect,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -111,6 +112,7 @@ pub async fn load_game_assets() -> Result<()> {
             color_replacements: load_image("media/FlyingEye/color_replacements.png").await?,
         },
         attach_sound: load_sound_effect("media/audio/Attach.ogg").await?,
+        switch_sound: load_sound_effect("media/audio/Switch.ogg").await?,
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
