@@ -81,7 +81,7 @@ impl AttachmentComponent {
                 let projected_passenger_bbox = passenger_bbox.offset(delta);
 
                 if level.is_area_vacant(&projected_passenger_bbox) {
-                    play_sound_effect(game_assets().flying_eye.attach_sound);
+                    play_sound_effect(game_assets().attach_sound);
                     self.attached_to_entity_id = Some(id);
                     self.num_frames_displaced = 0;
                     passenger_physics.velocity.x = 0.;

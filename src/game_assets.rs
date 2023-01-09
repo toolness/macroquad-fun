@@ -30,7 +30,6 @@ pub struct FlyingEyeAssets {
     pub flight: SpriteRenderer,
     pub flight_bbox: Rect,
     pub color_replacements: Image,
-    pub attach_sound: Sound,
 }
 
 pub struct MushroomAssets {
@@ -64,6 +63,7 @@ pub struct GameAssets {
     pub tileset: Texture2D,
     pub font: BitmapFont,
     pub materials: GameMaterials,
+    pub attach_sound: Sound,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -109,8 +109,8 @@ pub async fn load_game_assets() -> Result<()> {
                 "flight_bounding_box",
             )?,
             color_replacements: load_image("media/FlyingEye/color_replacements.png").await?,
-            attach_sound: load_sound("media/audio/FlyingEyeAttach.wav").await?,
         },
+        attach_sound: load_sound("media/audio/Attach.wav").await?,
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
