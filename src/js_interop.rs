@@ -10,6 +10,7 @@ pub mod js_interop_wasm32 {
     extern "C" {
         fn init_version(version_str: *const u8);
         fn record_input(data: *const u8, len: usize);
+        fn does_browser_support_ogg() -> i32;
     }
 
     #[derive(Default)]
@@ -53,6 +54,10 @@ pub mod js_interop_wasm32 {
     pub fn init() {
         let version = format!("{}\0", env!("CARGO_PKG_VERSION"));
         unsafe { init_version(version.as_ptr()) }
+    }
+
+    pub fn is_ogg_supported() -> bool {
+        unsafe { does_browser_support_ogg() != 0 }
     }
 
     pub fn create_input_stream() -> InputStream {
