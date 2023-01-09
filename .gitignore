@@ -5,3 +5,4 @@
 /server/target
 /server/recordings
 /server/dist
+/media/audio/*.wav
