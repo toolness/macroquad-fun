@@ -100,7 +100,7 @@ pub async fn load_game_assets() -> Result<()> {
                 "media/Huntress/spear_glow_color_replacements.png",
             )
             .await?,
-            jump_sound: load_sound("media/audio/Jump6.wav").await?,
+            jump_sound: load_sound("media/audio/Jump.wav").await?,
         },
         flying_eye: FlyingEyeAssets {
             flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
@@ -135,7 +135,7 @@ pub async fn load_game_assets() -> Result<()> {
         },
         gem: GemAssets {
             gem: SpriteRenderer::new(load_texture("media/gem.png").await?, 1),
-            pickup_sound: load_sound("media/audio/Pickup_Coin6.wav").await?,
+            pickup_sound: load_sound("media/audio/GemPickup.wav").await?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {
