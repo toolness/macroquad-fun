@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use macroquad::{
+    audio::{load_sound, Sound},
     prelude::Rect,
     texture::{load_image, load_texture, FilterMode, Image, Texture2D},
 };
@@ -22,6 +23,7 @@ pub struct HuntressAssets {
     pub spear_point_bbox: Rect,
     pub no_spear_color_replacements: Image,
     pub spear_glow_color_replacements: Image,
+    pub jump_sound: Sound,
 }
 
 pub struct FlyingEyeAssets {
@@ -38,15 +40,18 @@ pub struct MushroomAssets {
     pub run: SpriteRenderer,
     pub color_replacements: Image,
     pub dead_color_replacements: Image,
+    pub rez_sound: Sound,
 }
 
 pub struct SpearAssets {
     pub spear_move: SpriteRenderer,
     pub spear_move_bbox: Rect,
+    pub pickup_sound: Sound,
 }
 
 pub struct GemAssets {
     pub gem: SpriteRenderer,
+    pub pickup_sound: Sound,
 }
 
 pub struct GameAssets {
@@ -58,6 +63,7 @@ pub struct GameAssets {
     pub tileset: Texture2D,
     pub font: BitmapFont,
     pub materials: GameMaterials,
+    pub attach_sound: Sound,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -94,6 +100,7 @@ pub async fn load_game_assets() -> Result<()> {
                 "media/Huntress/spear_glow_color_replacements.png",
             )
             .await?,
+            jump_sound: load_sound("media/audio/Jump.ogg").await?,
         },
         flying_eye: FlyingEyeAssets {
             flight: SpriteRenderer::new(load_texture("media/FlyingEye/Flight.png").await?, 8),
@@ -103,6 +110,7 @@ pub async fn load_game_assets() -> Result<()> {
             )?,
             color_replacements: load_image("media/FlyingEye/color_replacements.png").await?,
         },
+        attach_sound: load_sound("media/audio/Attach.ogg").await?,
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,
@@ -112,6 +120,7 @@ pub async fn load_game_assets() -> Result<()> {
             color_replacements: load_image("media/Mushroom/color_replacements.png").await?,
             dead_color_replacements: load_image("media/Mushroom/dead_color_replacements.png")
                 .await?,
+            rez_sound: load_sound("media/audio/MushroomRez.ogg").await?,
         },
         spear: SpearAssets {
             spear_move: SpriteRenderer::new(
@@ -122,9 +131,11 @@ pub async fn load_game_assets() -> Result<()> {
                 &load_aseprite_slices("media/Huntress/Spear move.json").await?,
                 "spear_bounding_box",
             )?,
+            pickup_sound: load_sound("media/audio/SpearPickup.ogg").await?,
         },
         gem: GemAssets {
             gem: SpriteRenderer::new(load_texture("media/gem.png").await?, 1),
+            pickup_sound: load_sound("media/audio/GemPickup.ogg").await?,
         },
         tileset: load_pixel_perfect_texture("media/bigbrick1.png").await?,
         font: BitmapFont {

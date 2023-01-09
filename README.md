@@ -12,7 +12,7 @@ The goals for this project were:
 
 - I wanted more experience writing Rust for game development (see the [architecture](#architecture) section for some learnings).
 
-- I wanted to tinker with non-violent game and level design. I was particularly intrigued by [LDtk](https://ldtk.io/) and wanted to play with it (see the [level design process](#level-design-process) section for some learnings).
+- I wanted to tinker with non-violent game and level design. I was particularly intrigued by [LDtk][] and wanted to play with it (see the [level design process](#level-design-process) section for some learnings).
 
 - I liked LuizMelo's art and wanted to make something with it.
 
@@ -120,11 +120,17 @@ Designing the level and playing through it myself made me realize that some of t
 
 Further tweaks were then made to the level based on playtesting.
 
+## Tools used
+
+- [LDtk][] was used to design the levels.
+- [Aseprite](https://www.aseprite.org/) was used to create art assets.
+- [Bfxr](https://www.bfxr.net/) was used to create sound effects.
+
 ## Credits
 
-I, Atul Varma, wrote the code and designed the environment art and font.
+I, Atul Varma, wrote the code, designed the environment art, font, and levels, and created the sound effects.
 
-The character art is by LuizMelo:
+The character art and spear is by LuizMelo:
 
 - [Huntress](https://luizmelo.itch.io/huntress) by LuizMelo (CC0 license)
 - [Monsters Creatures Fantasy](https://luizmelo.itch.io/monsters-creatures-fantasy) by LuizMelo (CC0 license)
@@ -134,3 +140,5 @@ Code from late December 2022 onward was created with the assistance of GitHub Co
 ## License
 
 Everything in this repository that isn't provided by a third party is licensed under [CC0 1.0 Universal](./LICENSE.md) (public domain).
+
+[ldtk]: https://ldtk.io/

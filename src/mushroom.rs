@@ -2,6 +2,7 @@ use macroquad::prelude::Rect;
 
 use crate::{
     animator::Animator,
+    audio::play_sound_effect,
     config::config,
     dynamic_collider::{DynamicColliderComponent, RelativeCollider},
     entity::{filter_and_process_entities, Entity, EntityMap},
@@ -81,6 +82,7 @@ fn update_mushroom(entity: &mut Entity, time: &GameTime) {
                 );
                 entity.life_transfer = None;
                 sprite.base_relative_bbox = assets.idle_bbox;
+                play_sound_effect(game_assets().mushroom.rez_sound);
             }
         }
         MushroomState::Rezzing(animator) => {
