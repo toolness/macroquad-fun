@@ -155,8 +155,26 @@ async function sendRecordingBytes() {
     }
 }
 
+const isOggSupported = detectOggSupport();
+
+function detectOggSupport() {
+    const audio  = document.createElement("audio");
+    if (typeof audio.canPlayType === "function") {
+        return audio.canPlayType("audio/ogg") !== "";
+    }
+    return false;
+}
+
+if (!isOggSupported) {
+    console.log("OGG is unsupported on this browser, disabling sound.");
+}
+
 miniquad_add_plugin({
     register_plugin(importObject) {
+        importObject.env.does_browser_support_ogg = () => {
+            return isOggSupported === true ? 1 : 0;
+        };
+
         importObject.env.record_input = (ptr, len) => {
             if (!didUserConsentToAnalytics) {
                 return;
