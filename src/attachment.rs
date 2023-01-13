@@ -92,6 +92,10 @@ impl AttachmentComponent {
         }
     }
 
+    pub fn attached_to_entity_id(&self) -> Option<u64> {
+        self.attached_to_entity_id
+    }
+
     pub fn is_attached(&self) -> bool {
         self.attached_to_entity_id.is_some()
     }

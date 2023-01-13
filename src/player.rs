@@ -69,11 +69,29 @@ pub fn teleport_entity(entity: &mut Entity, pos: Vec2) {
     }
 }
 
-pub fn process_player_input(player: &mut Entity, time: &GameTime, input: &InputState) {
+fn maybe_steer_attachment(attached_id: u64, entities: &mut EntityMap, input: &InputState) {
+    if let Some(entity) = entities.get_mut(attached_id) {
+        if let Some(mut steering) = entity.steering.as_mut() {
+            let x_direction = if input.is_pressed(Buttons::LEFT) {
+                -1
+            } else if input.is_pressed(Buttons::RIGHT) {
+                1
+            } else {
+                0
+            };
+            steering.x_direction = x_direction;
+        }
+    }
+}
+
+pub fn process_player_input(entities: &mut EntityMap, time: &GameTime, input: &InputState) {
+    let player = entities.main_player_mut();
     let attachment = player.attachment.as_mut().unwrap();
-    if attachment.is_attached() {
+    if let Some(attached_id) = attachment.attached_to_entity_id() {
         if input.is_pressed(Buttons::JUMP) {
             attachment.detach(&mut player.physics);
+        } else {
+            maybe_steer_attachment(attached_id, entities, input);
         }
     } else {
         unattached_player_process_input(player, time, input);

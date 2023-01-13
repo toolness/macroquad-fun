@@ -8,6 +8,7 @@ use crate::{
     materials::replace_colors_with_image,
     physics::{PhysicsCollisionBehavior, PhysicsComponent},
     sprite_component::{LeftFacingRendering, SpriteComponent},
+    steering::SteeringComponent,
     time::GameTime,
 };
 
@@ -32,6 +33,7 @@ pub fn create_flying_eye(start_rect: Rect, base_velocity: Vec2) -> Entity {
             ..Default::default()
         },
         flying_eye: Some(FlyingEyeComponent()),
+        steering: Some(SteeringComponent::default()),
         attachable: Some(AttachableComponent()),
         ..Default::default()
     }

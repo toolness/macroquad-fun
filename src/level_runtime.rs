@@ -24,6 +24,7 @@ use crate::player::{
 };
 use crate::push::push_system;
 use crate::route::{draw_route_debug_targets, route_system};
+use crate::steering::steering_system;
 use crate::switch::switch_system;
 use crate::text::{create_text_entity, draw_level_text};
 use crate::time::GameTime;
@@ -164,7 +165,8 @@ impl LevelRuntime {
             return FrameResult::MainPlayerDied;
         }
 
-        process_player_input(self.entities.main_player_mut(), time, input);
+        process_player_input(&mut self.entities, time, input);
+        steering_system(&mut self.entities);
         attachment_system(&mut self.entities, &self.level, time);
         route_system(&mut self.entities);
         physics_system_update_positions(&mut self.entities, time);

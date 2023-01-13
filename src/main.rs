@@ -58,6 +58,7 @@ mod route;
 mod running;
 mod sprite_component;
 mod sprite_renderer;
+mod steering;
 mod switch;
 mod text;
 mod time;
