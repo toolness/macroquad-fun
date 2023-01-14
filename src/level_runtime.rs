@@ -26,7 +26,7 @@ use crate::push::push_system;
 use crate::route::{draw_route_debug_targets, route_system};
 use crate::steering::steering_system;
 use crate::switch::switch_system;
-use crate::text::{create_text_entity, draw_level_text};
+use crate::text::{create_text_entity, draw_level_text, update_level_text};
 use crate::time::GameTime;
 use crate::trigger::create_trigger;
 use crate::world::World;
@@ -188,6 +188,7 @@ impl LevelRuntime {
 
         self.camera
             .update(&self.entities.main_player(), &self.level);
+        update_level_text(&mut self.entities, time);
 
         return FrameResult::Ok;
     }
