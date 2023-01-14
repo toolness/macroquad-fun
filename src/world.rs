@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use macroquad::prelude::{load_string, Rect, Vec2};
 use std::{collections::HashMap, rc::Rc};
 
@@ -8,7 +8,7 @@ use crate::{
 };
 
 /// The LDtk version we're using.
-const EXPECTED_JSON_VERSION: &str = "1.1.3";
+const EXPECTED_JSON_VERSION: &str = "1.2.5";
 
 pub struct World {
     levels: HashMap<String, Rc<Level>>,
@@ -19,11 +19,7 @@ impl World {
         let world_json = load_string(&path).await?;
         let world: ldtk::Coordinate = serde_json::from_str(world_json.as_str())?;
         if world.json_version != EXPECTED_JSON_VERSION {
-            return Err(anyhow!(
-                "Expected json_version {}, got {}",
-                EXPECTED_JSON_VERSION,
-                world.json_version
-            ));
+            eprintln!("WARNING: Expected LDtk json_version {}, got {}. Please update EXPECTED_JSON_VERSION if needed.", EXPECTED_JSON_VERSION, world.json_version);
         }
         let mut levels = HashMap::with_capacity(world.levels.len());
 
