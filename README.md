@@ -12,7 +12,7 @@ The goals for this project were:
 
 - I wanted more experience writing Rust for game development (see the [architecture](#architecture) section for some learnings).
 
-- I wanted to tinker with non-violent game and level design. I was particularly intrigued by [LDtk][] and wanted to play with it (see the [level design process](#level-design-process) section for some learnings).
+- I wanted to explore non-violent game and level design (see the [level design process](#level-design-process) section for some learnings).
 
 - I liked LuizMelo's art and wanted to make something with it.
 
