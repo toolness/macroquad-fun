@@ -6,12 +6,24 @@ const DEFAULT_MAX_TIME_BETWEEN_FRAMES: f64 = 1. / 30.;
 
 #[derive(Debug, PartialEq)]
 pub struct GameTime {
+    /// The current game time, in seconds. Note that this might be different than
+    /// the amount of real-world time that has passed--for example, if the user's
+    /// device was put to sleep for 5 hours, it won't include those 5 hours.
     pub now: f64,
+
+    /// This is for animating sprites: we currently animate sprites at a fixed
+    /// frame rate, defined by the `ms_per_animation_frame` config setting. Note that
+    /// this does *not* correspond to the number of frames that the game has rendered
+    /// so far!
     pub absolute_frame_number: u64,
+
+    /// How many seconds have passed since the last frame was rendered.
     pub time_since_last_frame: f64,
 }
 
 impl GameTime {
+    /// This is a convenience method for animating sprites in a loop (e.g. a running
+    /// animation).
     pub fn looping_frame_number(&self, sprite: &SpriteRenderer) -> u32 {
         (self.absolute_frame_number % sprite.num_frames() as u64) as u32
     }
