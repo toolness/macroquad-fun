@@ -29,9 +29,10 @@ impl DebugMode {
 
         writeln!(
             self.text,
-            "fixed fps: {}  render fps: {}",
+            "fixed fps: {}  render fps: {}  v{}",
             fixed_fps.value(),
-            render_fps.value()
+            render_fps.value(),
+            env!("CARGO_PKG_VERSION")
         )?;
 
         runtime.generate_debug_text(&mut self.text)?;
