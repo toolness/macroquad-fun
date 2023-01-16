@@ -65,6 +65,7 @@ pub struct GameAssets {
     pub materials: GameMaterials,
     pub attach_sound: SoundEffect,
     pub switch_sound: SoundEffect,
+    pub music: SoundEffect,
 }
 
 fn get_slice(slices: &HashMap<String, Rect>, name: &str) -> Result<Rect> {
@@ -113,6 +114,7 @@ pub async fn load_game_assets() -> Result<()> {
         },
         attach_sound: load_sound_effect("media/audio/Attach.ogg").await?,
         switch_sound: load_sound_effect("media/audio/Switch.ogg").await?,
+        music: load_sound_effect("media/audio/music/Ditty-2023-01-07.ogg").await?,
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
             idle_bbox: get_slice(&mushroom_idle_slices, "idle_bounding_box")?,

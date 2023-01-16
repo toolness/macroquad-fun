@@ -19,14 +19,18 @@ pub async fn load_sound_effect(path: &'static str) -> Result<SoundEffect, FileEr
     Ok(Some(load_sound(path).await?))
 }
 
-pub fn play_sound_effect(sound_effect: SoundEffect) {
+pub fn play_sound_effect_at_volume(sound_effect: SoundEffect, volume: f32) {
     if let Some(sound) = sound_effect {
         play_sound(
             sound,
             PlaySoundParams {
-                volume: 0.25,
+                volume,
                 ..Default::default()
             },
         );
     }
+}
+
+pub fn play_sound_effect(sound_effect: SoundEffect) {
+    play_sound_effect_at_volume(sound_effect, 0.25);
 }
