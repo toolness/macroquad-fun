@@ -11,7 +11,7 @@
 	"iid": "5edec2a0-7820-11ed-bf1d-674059f675b5",
 	"jsonVersion": "1.2.5",
 	"appBuildId": 464870,
-	"nextUid": 35,
+	"nextUid": 38,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -818,6 +818,70 @@
 					"allowedRefs": "Any",
 					"allowedRefTags": [],
 					"tilesetUid": null
+				},
+				{
+					"identifier": "play_sound_effect",
+					"doc": null,
+					"__type": "LocalEnum.SoundEffect",
+					"uid": 36,
+					"type": "F_Enum(35)",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "sound_effect_volume",
+					"doc": null,
+					"__type": "Float",
+					"uid": 37,
+					"type": "F_Float",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": { "id": "V_Float", "params": [0.5] },
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefTags": [],
+					"tilesetUid": null
 				}
 			]
 		}
@@ -863,7 +927,10 @@
 			"savedSelections": [],
 			"cachedPixelData": { "opaqueTiles": "11", "averageColors": "f878f333" }
 		}
-	], "enums": [{ "identifier": "Renderer", "uid": 27, "values": [ { "id": "EntityTiles", "tileId": null, "color": 0, "__tileSrcRect": null }, { "id": "SolidRectangle", "tileId": null, "color": 0, "__tileSrcRect": null } ], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }], "externalEnums": [], "levelFields": [] },
+	], "enums": [
+		{ "identifier": "Renderer", "uid": 27, "values": [ { "id": "EntityTiles", "tileId": null, "color": 0, "__tileSrcRect": null }, { "id": "SolidRectangle", "tileId": null, "color": 0, "__tileSrcRect": null } ], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] },
+		{ "identifier": "SoundEffect", "uid": 35, "values": [{ "id": "DittyMusic", "tileId": null, "color": 12470831, "__tileSrcRect": null }], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }
+	], "externalEnums": [], "levelFields": [] },
 	"levels": [
 		{
 			"identifier": "Dev_Level_0",
@@ -1033,7 +1100,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
+								"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -3396,7 +3463,7 @@
 								"entityIid": "8d173d70-7820-11ed-a8bc-6fcf9a79030f",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
+								"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["8d173d70-7820-11ed-a8bc-6fcf9a79030f"]
@@ -3504,15 +3571,19 @@
 							"height": 64,
 							"defUid": 33,
 							"px": [80,304],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "2b82f5e0-7820-11ed-a8bc-c95c401b65ca",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["2b82f5e0-7820-11ed-a8bc-c95c401b65ca"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "2b82f5e0-7820-11ed-a8bc-c95c401b65ca",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["2b82f5e0-7820-11ed-a8bc-c95c401b65ca"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3526,15 +3597,19 @@
 							"height": 64,
 							"defUid": 33,
 							"px": [160,288],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "5d8fc400-7820-11ed-a8bc-dd7941e2198a",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["5d8fc400-7820-11ed-a8bc-dd7941e2198a"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "5d8fc400-7820-11ed-a8bc-dd7941e2198a",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["5d8fc400-7820-11ed-a8bc-dd7941e2198a"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3548,15 +3623,19 @@
 							"height": 16,
 							"defUid": 33,
 							"px": [272,240],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "2ff2b6a0-7820-11ed-a8bc-091034180399",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["2ff2b6a0-7820-11ed-a8bc-091034180399"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "2ff2b6a0-7820-11ed-a8bc-091034180399",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["2ff2b6a0-7820-11ed-a8bc-091034180399"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3570,15 +3649,19 @@
 							"height": 48,
 							"defUid": 33,
 							"px": [304,320],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "58d61710-7820-11ed-a8bc-d1b1260eb1f0",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["58d61710-7820-11ed-a8bc-d1b1260eb1f0"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "58d61710-7820-11ed-a8bc-d1b1260eb1f0",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["58d61710-7820-11ed-a8bc-d1b1260eb1f0"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3592,15 +3675,19 @@
 							"height": 64,
 							"defUid": 33,
 							"px": [240,240],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "6d848b20-7820-11ed-a8bc-0f7a29324733",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["6d848b20-7820-11ed-a8bc-0f7a29324733"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "6d848b20-7820-11ed-a8bc-0f7a29324733",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["6d848b20-7820-11ed-a8bc-0f7a29324733"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3614,15 +3701,19 @@
 							"height": 16,
 							"defUid": 33,
 							"px": [864,288],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "475159c0-7820-11ed-a8bc-9135740a5f95",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["475159c0-7820-11ed-a8bc-9135740a5f95"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "475159c0-7820-11ed-a8bc-9135740a5f95",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["475159c0-7820-11ed-a8bc-9135740a5f95"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3636,15 +3727,19 @@
 							"height": 64,
 							"defUid": 33,
 							"px": [976,272],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "abb7dd80-7820-11ed-a8bc-f3f12ed3807a",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["abb7dd80-7820-11ed-a8bc-f3f12ed3807a"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "abb7dd80-7820-11ed-a8bc-f3f12ed3807a",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["abb7dd80-7820-11ed-a8bc-f3f12ed3807a"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Trigger",
@@ -3658,15 +3753,40 @@
 							"height": 48,
 							"defUid": 33,
 							"px": [576,32],
-							"fieldInstances": [{ "__identifier": "destroy_on_enter", "__value": {
-								"entityIid": "c217eba0-7820-11ed-a8bc-6dfaccce27a4",
-								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
-								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "5edf5ee0-7820-11ed-bf1d-8544b02c35be"
-							}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["c217eba0-7820-11ed-a8bc-6dfaccce27a4"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "c217eba0-7820-11ed-a8bc-6dfaccce27a4",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["c217eba0-7820-11ed-a8bc-6dfaccce27a4"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
+						},
+						{
+							"__identifier": "Trigger",
+							"__grid": [37,18],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#FF0000",
+							"iid": "9f9eec60-7820-11ed-ad40-4bc9fed11f2d",
+							"width": 32,
+							"height": 48,
+							"defUid": 33,
+							"px": [592,288],
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": null, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [] },
+								{ "__identifier": "play_sound_effect", "__value": "DittyMusic", "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["DittyMusic"]
+								}] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
 						}
 					]
 				},

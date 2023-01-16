@@ -172,7 +172,7 @@ impl LevelRuntime {
         physics_system_update_positions(&mut self.entities, time);
         self.dynamic_collider_system.run(&mut self.entities);
         push_system(&mut self.entities);
-        switch_system(&mut self.entities);
+        switch_system(&mut self.entities, &self.level);
         physics_system_resolve_collisions(
             &mut self.entities,
             &self.level,

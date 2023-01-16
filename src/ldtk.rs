@@ -251,6 +251,21 @@ impl TryFrom<FieldInstance> for Option<EntityRef> {
     fn try_from(value: FieldInstance) -> Result<Self> {
         match value.value {
             Some(serde_json::Value::Null) => Ok(None),
+            None => Ok(None),
+            _ => Ok(Some(serde_json::from_value(value.value_result()?)?)),
+        }
+    }
+}
+
+/// TODO: This is the exact same thing as for Option<EntityRef>, we should be able
+/// to make a more generic trait implementation here.
+impl TryFrom<FieldInstance> for Option<String> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FieldInstance) -> Result<Self> {
+        match value.value {
+            Some(serde_json::Value::Null) => Ok(None),
+            None => Ok(None),
             _ => Ok(Some(serde_json::from_value(value.value_result()?)?)),
         }
     }

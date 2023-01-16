@@ -5,7 +5,6 @@ extern crate serde_json;
 
 use std::rc::Rc;
 
-use audio::play_sound_effect_at_volume;
 use cli::Cli;
 use config::load_config;
 use debug_mode::DebugMode;
@@ -207,8 +206,6 @@ async fn main() {
     let mut time_stream = create_time_stream(&args);
     let mut frame_number: u64 = 0;
     let is_browser = cfg!(target_arch = "wasm32");
-
-    play_sound_effect_at_volume(game_assets::game_assets().music, 0.5);
 
     'outer: loop {
         let Some(now) = time_stream.next() else {

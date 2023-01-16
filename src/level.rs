@@ -5,6 +5,7 @@ use macroquad::prelude::*;
 use uuid::Uuid;
 
 use crate::{
+    audio::SoundEffect,
     collision::{Collider, CollisionFlags},
     config::config,
     game_assets::game_assets,
@@ -126,6 +127,7 @@ pub struct MovingPlatformArgs {
 #[derive(PartialEq)]
 pub struct TriggerArgs {
     pub destroy_on_enter: Option<EntityRef>,
+    pub play_sound_effect: Option<(SoundEffect, f32)>,
 }
 
 #[derive(PartialEq)]
@@ -208,6 +210,7 @@ impl Level {
                         }
                         "Trigger" => EntityKind::Trigger(TriggerArgs {
                             destroy_on_enter: field_into(&mut fields, "destroy_on_enter")?,
+                            play_sound_effect: get_sound_effect_info(&mut fields)?,
                         }),
                         _ => {
                             eprintln!("Unexpected entity found: {}", entity.identifier);
@@ -409,6 +412,21 @@ impl Level {
                 None
             }
         })
+    }
+}
+
+fn get_sound_effect_info(
+    fields: &mut HashMap<String, FieldInstance>,
+) -> Result<Option<(SoundEffect, f32)>> {
+    if let Some(play_sound_effect) = field_into::<Option<String>>(fields, "play_sound_effect")? {
+        let volume: f32 = field_into(fields, "sound_effect_volume")?;
+        let assets = game_assets();
+        match play_sound_effect.as_str() {
+            "DittyMusic" => Ok(Some((assets.music, volume))),
+            _ => Err(anyhow!("Unknown sound effect: {}", play_sound_effect)),
+        }
+    } else {
+        Ok(None)
     }
 }
 
