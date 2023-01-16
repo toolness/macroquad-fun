@@ -125,10 +125,11 @@ Further tweaks were then made to the level based on playtesting.
 - [LDtk][] was used to design the levels.
 - [Aseprite](https://www.aseprite.org/) was used to create art assets.
 - [Bfxr](https://www.bfxr.net/) was used to create sound effects.
+- [FL Studio](https://www.flstudio.com.au/) was used to create music.
 
 ## Credits
 
-I, Atul Varma, wrote the code, designed the environment art, font, and levels, and created the sound effects.
+I, Atul Varma, wrote the code, designed the environment art, font, and levels, and created the sound effects and music.
 
 The character art and spear is by LuizMelo:
 
