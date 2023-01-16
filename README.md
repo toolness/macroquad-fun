@@ -125,7 +125,7 @@ Further tweaks were then made to the level based on playtesting.
 - [LDtk][] was used to design the levels.
 - [Aseprite](https://www.aseprite.org/) was used to create art assets.
 - [Bfxr](https://www.bfxr.net/) was used to create sound effects.
-- [FL Studio](https://www.flstudio.com.au/) was used to create music.
+- [FL Studio](https://www.flstudio.com.au/) and the [NES VST](https://www.mattmontag.com/projects-page/nintendo-vst) were used to create music.
 
 ## Credits
 
