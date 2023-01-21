@@ -423,6 +423,7 @@ fn get_sound_effect_info(
         let assets = game_assets();
         match play_sound_effect.as_str() {
             "DittyMusic" => Ok(Some((assets.music, volume))),
+            "FoundSecret" => Ok(Some((assets.found_secret_sound, volume))),
             _ => Err(anyhow!("Unknown sound effect: {}", play_sound_effect)),
         }
     } else {

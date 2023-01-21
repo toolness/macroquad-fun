@@ -65,6 +65,7 @@ pub struct GameAssets {
     pub materials: GameMaterials,
     pub attach_sound: SoundEffect,
     pub switch_sound: SoundEffect,
+    pub found_secret_sound: SoundEffect,
     pub music: SoundEffect,
 }
 
@@ -114,6 +115,7 @@ pub async fn load_game_assets() -> Result<()> {
         },
         attach_sound: load_sound_effect("media/audio/Attach.ogg").await?,
         switch_sound: load_sound_effect("media/audio/Switch.ogg").await?,
+        found_secret_sound: load_sound_effect("media/audio/FoundSecret.ogg").await?,
         music: load_sound_effect("media/audio/music/Ditty-2023-01-07.ogg").await?,
         mushroom: MushroomAssets {
             death: SpriteRenderer::new(load_texture("media/Mushroom/Death.png").await?, 4),
