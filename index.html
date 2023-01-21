@@ -79,12 +79,19 @@
         <p>Thanks for playtesting Atul's prototype!</p>
         <p>Is it OK to submit analytics about your play sessions so Atul can improve the game?</p>
         <form method="dialog">
-            <button value="yes">Sure</button>
+            <button value="yes" autofocus>Sure</button>
             <button value="no">Nah</button>
         </form>
         <footer>
             Details about analytics can be found in the <a href="https://github.com/toolness/macroquad-fun#analytics" target="_blank">README</a>.
         </footer>
+    </dialog>
+    <dialog id="audio-dialog">
+        <p>Would you like to enable audio? Doing so will allow you to hear THE VERY FIRST SONG ATUL HAS EVER COMPOSED.</p>
+        <form method="dialog">
+            <button value="yes" autofocus>Sure, I like sound</button>
+            <button value="no">Nah music sucks</button>
+        </form>
     </dialog>
     <script src="media/js/vendor/miniquad/gl.js"></script>
     <script src="media/js/vendor/macroquad/audio.js"></script>

@@ -1,4 +1,5 @@
 import * as analyticsDialog from "./analytics-dialog.js";
+import * as audioDialog from "./audio-dialog.js";
 
 const config = await (await fetch("media/config.json")).json();
 const width = config.screen_width * config.sprite_scale;
@@ -28,6 +29,8 @@ window.addEventListener("resize", maybeScaleCanvas);
 maybeScaleCanvas();
 
 await analyticsDialog.maybeShowDialog();
+
+await audioDialog.maybeShowDialog();
 
 const DEBUG = false;
 
