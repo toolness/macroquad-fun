@@ -12,6 +12,10 @@ pub async fn load_sound_effect(path: &'static str) -> Result<SoundEffect, FileEr
     #[cfg(target_arch = "wasm32")]
     {
         if !js::is_ogg_supported() {
+            let mp3_path = path.replace(".ogg", ".mp3");
+            if let Ok(sound) = load_sound(&mp3_path).await {
+                return Ok(Some(sound));
+            }
             return Ok(None);
         }
     }
