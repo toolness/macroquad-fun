@@ -198,12 +198,13 @@ miniquad_add_plugin({
     }
 })
 
+// We're using optional chaining here because these event handlers can
+// be called before the wasm module is loaded.
 window.addEventListener("blur", () => {
-    wasm_exports.set_blurred(1);
+    wasm_exports?.set_blurred(1);
 });
-
 window.addEventListener("focus", () => {
-    wasm_exports.set_blurred(0);
+    wasm_exports?.set_blurred(0);
 });
 
 load("target/wasm32-unknown-unknown/release/macroquad-fun.wasm");
