@@ -170,7 +170,7 @@ function detectOggSupport() {
 }
 
 if (!isOggSupported) {
-    console.log("OGG is unsupported on this browser, disabling sound.");
+    console.log("OGG is unsupported on this browser, falling back to MP3.");
 }
 
 miniquad_add_plugin({
