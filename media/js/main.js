@@ -158,6 +158,10 @@ async function sendRecordingBytes() {
 const isOggSupported = detectOggSupport();
 
 function detectOggSupport() {
+    if (windowSearchParams.get("disable_ogg")) {
+        console.log("Disabling OGG support because 'disable_ogg' is set in URL.");
+        return false;
+    }
     const audio  = document.createElement("audio");
     if (typeof audio.canPlayType === "function") {
         return audio.canPlayType("audio/ogg") !== "";

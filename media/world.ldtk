@@ -874,7 +874,7 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [0.5] },
+					"defaultOverride": { "id": "V_Float", "params": [0.25] },
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": true,
@@ -929,7 +929,7 @@
 		}
 	], "enums": [
 		{ "identifier": "Renderer", "uid": 27, "values": [ { "id": "EntityTiles", "tileId": null, "color": 0, "__tileSrcRect": null }, { "id": "SolidRectangle", "tileId": null, "color": 0, "__tileSrcRect": null } ], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] },
-		{ "identifier": "SoundEffect", "uid": 35, "values": [{ "id": "DittyMusic", "tileId": null, "color": 12470831, "__tileSrcRect": null }], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }
+		{ "identifier": "SoundEffect", "uid": 35, "values": [ { "id": "DittyMusic", "tileId": null, "color": 12470831, "__tileSrcRect": null }, { "id": "FoundSecret", "tileId": null, "color": 14120515, "__tileSrcRect": null } ], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }
 	], "externalEnums": [], "levelFields": [] },
 	"levels": [
 		{
@@ -1100,7 +1100,7 @@
 								"entityIid": "4dfc5050-2a00-11ed-83b7-531bb8b7d5e6",
 								"layerIid": "c9615070-2a00-11ed-a23e-7d50545582fa",
 								"levelIid": "a35f3440-2a00-11ed-927c-178e5e51dd51",
-								"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["4dfc5050-2a00-11ed-83b7-531bb8b7d5e6"]
@@ -3463,7 +3463,7 @@
 								"entityIid": "8d173d70-7820-11ed-a8bc-6fcf9a79030f",
 								"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 								"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-								"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+								"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 							}, "__type": "EntityRef", "__tile": null, "defUid": 25, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["8d173d70-7820-11ed-a8bc-6fcf9a79030f"]
@@ -3576,13 +3576,13 @@
 									"entityIid": "2b82f5e0-7820-11ed-a8bc-c95c401b65ca",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["2b82f5e0-7820-11ed-a8bc-c95c401b65ca"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3602,13 +3602,13 @@
 									"entityIid": "5d8fc400-7820-11ed-a8bc-dd7941e2198a",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["5d8fc400-7820-11ed-a8bc-dd7941e2198a"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3628,13 +3628,13 @@
 									"entityIid": "2ff2b6a0-7820-11ed-a8bc-091034180399",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["2ff2b6a0-7820-11ed-a8bc-091034180399"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3654,13 +3654,13 @@
 									"entityIid": "58d61710-7820-11ed-a8bc-d1b1260eb1f0",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["58d61710-7820-11ed-a8bc-d1b1260eb1f0"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3680,13 +3680,13 @@
 									"entityIid": "6d848b20-7820-11ed-a8bc-0f7a29324733",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["6d848b20-7820-11ed-a8bc-0f7a29324733"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3706,13 +3706,13 @@
 									"entityIid": "475159c0-7820-11ed-a8bc-9135740a5f95",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["475159c0-7820-11ed-a8bc-9135740a5f95"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3732,13 +3732,13 @@
 									"entityIid": "abb7dd80-7820-11ed-a8bc-f3f12ed3807a",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["abb7dd80-7820-11ed-a8bc-f3f12ed3807a"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3758,13 +3758,13 @@
 									"entityIid": "c217eba0-7820-11ed-a8bc-6dfaccce27a4",
 									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
 									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
-									"worldIid": "26445580-7820-11ed-ad40-995c25e60b34"
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
 								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["c217eba0-7820-11ed-a8bc-6dfaccce27a4"]
 								}] },
 								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						},
 						{
@@ -3785,7 +3785,79 @@
 									"id": "V_String",
 									"params": ["DittyMusic"]
 								}] },
-								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+								{ "__identifier": "sound_effect_volume", "__value": 0.5, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [{ "id": "V_Float", "params": [0.5] }] }
+							]
+						},
+						{
+							"__identifier": "Text",
+							"__grid": [44,30],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#A294D9",
+							"iid": "2abb8cd0-7820-11ed-ac09-e352151968f0",
+							"width": 256,
+							"height": 48,
+							"defUid": 6,
+							"px": [704,480],
+							"fieldInstances": [{ "__identifier": "text", "__value": "You found a secret area!", "__type": "String", "__tile": null, "defUid": 7, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["You found a secret area!"]
+							}] }]
+						},
+						{
+							"__identifier": "Trigger",
+							"__grid": [41,30],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#FF0000",
+							"iid": "4726c9c0-7820-11ed-ac09-cd016b9c77d5",
+							"width": 32,
+							"height": 48,
+							"defUid": 33,
+							"px": [656,480],
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "2abb8cd0-7820-11ed-ac09-e352151968f0",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["2abb8cd0-7820-11ed-ac09-e352151968f0"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": null, "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
+							]
+						},
+						{
+							"__identifier": "Trigger",
+							"__grid": [57,27],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#FF0000",
+							"iid": "5ffd6e40-7820-11ed-ac09-a910d00fb099",
+							"width": 64,
+							"height": 16,
+							"defUid": 33,
+							"px": [912,432],
+							"fieldInstances": [
+								{ "__identifier": "destroy_on_enter", "__value": {
+									"entityIid": "5ffd6e40-7820-11ed-ac09-a910d00fb099",
+									"layerIid": "23dc7421-7820-11ed-a8bc-e985effac8b6",
+									"levelIid": "23dc7420-7820-11ed-a8bc-d77a4aa34a82",
+									"worldIid": "19798530-7820-11ed-ac09-1bfd95944d2c"
+								}, "__type": "EntityRef", "__tile": null, "defUid": 34, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["5ffd6e40-7820-11ed-ac09-a910d00fb099"]
+								}] },
+								{ "__identifier": "play_sound_effect", "__value": "FoundSecret", "__type": "LocalEnum.SoundEffect", "__tile": null, "defUid": 36, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["FoundSecret"]
+								}] },
+								{ "__identifier": "sound_effect_volume", "__value": 0.25, "__type": "Float", "__tile": null, "defUid": 37, "realEditorValues": [] }
 							]
 						}
 					]
