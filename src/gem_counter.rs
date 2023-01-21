@@ -41,7 +41,11 @@ pub fn draw_gem_counter(entities: &EntityMap, level: &Level) {
     let font = &game_assets().font;
 
     if remaining == 0 {
-        write!(string, "You have collected all the gems!").unwrap();
+        write!(
+            string,
+            "You collected all the gems! You can stop playing now."
+        )
+        .unwrap();
     } else if remaining == 1 {
         write!(string, "One gem remains.").unwrap();
     } else {
