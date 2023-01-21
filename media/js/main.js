@@ -1,4 +1,5 @@
 import * as analyticsDialog from "./analytics-dialog.js";
+import * as audioDialog from "./audio-dialog.js";
 
 const config = await (await fetch("media/config.json")).json();
 const width = config.screen_width * config.sprite_scale;
@@ -28,6 +29,8 @@ window.addEventListener("resize", maybeScaleCanvas);
 maybeScaleCanvas();
 
 await analyticsDialog.maybeShowDialog();
+
+await audioDialog.maybeShowDialog();
 
 const DEBUG = false;
 
@@ -170,7 +173,7 @@ function detectOggSupport() {
 }
 
 if (!isOggSupported) {
-    console.log("OGG is unsupported on this browser, disabling sound.");
+    console.log("OGG is unsupported on this browser, falling back to MP3.");
 }
 
 miniquad_add_plugin({
@@ -198,12 +201,13 @@ miniquad_add_plugin({
     }
 })
 
+// We're using optional chaining here because these event handlers can
+// be called before the wasm module is loaded.
 window.addEventListener("blur", () => {
-    wasm_exports.set_blurred(1);
+    wasm_exports?.set_blurred(1);
 });
-
 window.addEventListener("focus", () => {
-    wasm_exports.set_blurred(0);
+    wasm_exports?.set_blurred(0);
 });
 
 load("target/wasm32-unknown-unknown/release/macroquad-fun.wasm");
