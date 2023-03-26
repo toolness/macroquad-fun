@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -170,6 +172,8 @@ fn draw_pause_overlay(is_browser: bool) {
 #[macroquad::main(window_conf)]
 async fn main() {
     let args = Cli::get_for_platform();
+
+    println!("Starting macroquad-fun v{}.", env!("CARGO_PKG_VERSION"));
 
     load_config(CONFIG_PATH, &args)
         .await
