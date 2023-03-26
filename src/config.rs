@@ -1,6 +1,8 @@
 use anyhow::Result;
 use macroquad::prelude::*;
 
+use crate::cli::Cli;
+
 extern crate serde_derive;
 
 #[derive(Deserialize)]
@@ -33,7 +35,7 @@ pub struct Config {
     pub debug_text_size: f32,
 }
 
-pub fn parse_config(config: &str) -> Result<Config> {
+pub fn parse_config(config: &str, args: &Cli) -> Result<Config> {
     let mut config: Config = serde_json::from_str(config)?;
 
     config.run_speed *= config.sprite_scale;
@@ -51,11 +53,19 @@ pub fn parse_config(config: &str) -> Result<Config> {
     config.player_left_facing_x_offset *= config.sprite_scale;
     config.pickup_float_amplitude *= config.sprite_scale;
 
+    if let Some(width) = args.width {
+        config.screen_width = width as f32;
+    }
+
+    if let Some(height) = args.height {
+        config.screen_height = height as f32;
+    }
+
     Ok(config)
 }
 
-pub async fn load_config(path: &str) -> Result<()> {
-    let config = parse_config(&load_string(path).await?)?;
+pub async fn load_config(path: &str, args: &Cli) -> Result<()> {
+    let config = parse_config(&load_string(path).await?, args)?;
 
     unsafe {
         CONFIG = Some(config);

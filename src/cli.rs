@@ -24,6 +24,18 @@ pub struct Cli {
     #[argh(option)]
     /// base filename to export frame images to
     pub export_frames: Option<String>,
+
+    #[argh(option)]
+    /// override screen width
+    pub width: Option<u32>,
+
+    #[argh(option)]
+    /// override screen height
+    pub height: Option<u32>,
+
+    #[argh(switch)]
+    /// enable fullscreen mode
+    pub fullscreen: bool,
 }
 
 impl Cli {

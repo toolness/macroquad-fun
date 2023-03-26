@@ -81,19 +81,23 @@ fn window_conf() -> Conf {
 
     #[cfg(not(target_arch = "wasm32"))]
     {
+        let args = Cli::get_for_platform();
+
         // Unfortunately this function isn't async, so we can't use Macroquad's WASM-compatible
         // async filesystem functions here. So all this code is specific to native builds.
         //
         // MacOS in particular won't let us change window dimensions after launching, so we'll
         // need to parse the config synchronously here and pass the correct dimensions to it.
-        let config = config::parse_config(&std::fs::read_to_string(CONFIG_PATH).unwrap())
-            .expect("parse_config() must succeed");
+        let config_str =
+            std::fs::read_to_string(CONFIG_PATH).expect("read_to_string(CONFIG_PATH) must succeed");
+        let config = config::parse_config(&config_str, &args).expect("parse_config() must succeed");
 
         Conf {
             window_title: "Macroquad Fun".to_owned(),
             window_width: config.screen_width as i32,
             window_height: config.screen_height as i32,
             window_resizable: false,
+            fullscreen: args.fullscreen,
             ..Default::default()
         }
     }
@@ -167,7 +171,7 @@ fn draw_pause_overlay(is_browser: bool) {
 async fn main() {
     let args = Cli::get_for_platform();
 
-    load_config(CONFIG_PATH)
+    load_config(CONFIG_PATH, &args)
         .await
         .expect("load_config() must succeed");
     load_game_assets()
