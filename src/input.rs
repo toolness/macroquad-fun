@@ -1,4 +1,5 @@
 use bitflags::bitflags;
+use gilrs::Gilrs;
 use macroquad::prelude::{is_key_down, KeyCode};
 
 bitflags! {
@@ -31,6 +32,28 @@ impl Buttons {
             | key_to_button(KeyCode::Space, Buttons::JUMP)
     }
 
+    pub fn from_gilrs(gilrs: &Gilrs) -> Self {
+        let mut buttons = Buttons::empty();
+
+        for (_, gamepad) in gilrs.gamepads() {
+            if gamepad.is_connected() {
+                if gamepad.is_pressed(gilrs::Button::South) {
+                    buttons |= Buttons::JUMP;
+                }
+
+                if gamepad.is_pressed(gilrs::Button::DPadLeft) {
+                    buttons |= Buttons::LEFT;
+                }
+
+                if gamepad.is_pressed(gilrs::Button::DPadRight) {
+                    buttons |= Buttons::RIGHT;
+                }
+            }
+        }
+
+        buttons
+    }
+
     pub fn is_down(&self, button: Buttons) -> bool {
         !(*self & button).is_empty()
     }
@@ -59,16 +82,30 @@ impl InputState {
 
 pub type InputStream = Box<dyn Iterator<Item = Buttons>>;
 
-struct MacroquadInputStream;
+struct MacroquadInputStream {
+    gilrs: Gilrs,
+}
 
 impl Iterator for MacroquadInputStream {
     type Item = Buttons;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(Buttons::from_macroquad())
+        Some(Buttons::from_macroquad() | Buttons::from_gilrs(&self.gilrs))
     }
 }
 
 pub fn create_macroquad_input_stream() -> InputStream {
-    Box::new(MacroquadInputStream)
+    let gilrs = Gilrs::new().unwrap();
+
+    for (_id, gamepad) in gilrs.gamepads() {
+        println!(
+            "{} is {:?} {} {}",
+            gamepad.name(),
+            gamepad.power_info(),
+            gamepad.is_connected(),
+            gamepad.is_pressed(gilrs::Button::South),
+        );
+    }
+
+    Box::new(MacroquadInputStream { gilrs })
 }
